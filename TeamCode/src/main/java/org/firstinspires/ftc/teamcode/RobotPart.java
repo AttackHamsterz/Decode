@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.pedropathing.util.PIDFController;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public abstract class RobotPart extends Thread{
+import java.util.Observer;
+
+public abstract class RobotPart<T> extends Thread{
     // Opmode reference
     protected StandardSetupOpMode ssom;
 
@@ -14,56 +15,9 @@ public abstract class RobotPart extends Thread{
     protected boolean ignoreGamepad = false;
 
     // Motor overload protection
-    protected static final long MOTOR_CHECK_PERIOD_MS = 100;  // Check 10 times a second
-    protected static final int CLOSE_ENOUGH_TICKS = 20; // Turn off the other motor when we are close
+    protected static final long SAFE_CHECK_PERIOD_MS = 100;  // Check 10 times a second
+    protected static final long LOOP_PAUSE_MS = 100;
     protected Thread protectionThread = new Thread();
-
-    // Loop saturation protection
-    protected static final long LOOP_PAUSE_MS = 50;
-
-    private class TimeoutThread extends Thread{
-        private final int position;
-
-        public TimeoutThread(int position){
-            this.position = position;
-        }
-
-        @Override
-        public void run(){
-            try{
-                while(Math.abs(getCurrentPosition()-position) > CLOSE_ENOUGH_TICKS) {
-                    sleep(LOOP_PAUSE_MS);
-                }
-                safeHold(getCurrentPosition());
-            } catch (InterruptedException ignored) {
-            }
-        }
-    }
-
-    // Force implementing classes to implement the run class
-    // This implements the things this body part can do in parallel with
-    // other body parts
-    @Override
-    public abstract void run();
-
-    /**
-     * This method should put all motors in this body part into a safe hold mode that uses low
-     * power.  It's up to each body part to do that for itself.
-     * @param position Tasked position for use in the setHold method
-     */
-    public abstract void safeHold(int position);
-
-    /**
-     * Get the current body part position for use in safe-ing motors.
-     * @return the position in ticks
-     */
-    public abstract int getCurrentPosition();
-
-    /**
-     * Display relevant telemetry
-     * @param telemetry
-     */
-    public abstract void getTelemetry(Telemetry telemetry);
 
     /**
      * Allows a user to toggle using the gamepad
@@ -74,18 +28,84 @@ public abstract class RobotPart extends Thread{
         this.ignoreGamepad = ignoreGamepad;
     }
 
+    private class TimeoutThread extends Thread{
+        private final T metric;
+        private final Observer observer;
+
+        public TimeoutThread(T metric, Observer observer){
+            this.metric = metric;
+            this.observer = observer;
+        }
+
+        @Override
+        public void run(){
+            // Wait until our metric is met
+            try{
+                while(!closeEnough(metric)) {
+                    sleep(LOOP_PAUSE_MS);
+                    if(isInterrupted())
+                        break;
+                }
+                if(!isInterrupted())
+                    safeHold();
+            } catch (InterruptedException ignored) {
+            }
+
+            // Let the observer know we are done or interrupted
+            if(observer != null)
+                observer.notify();
+        }
+    }
+
     /**
-     * This sets up motor protection to avoid overloading motors.  It needs the expected position.
+     * Force implementing classes to implement the run class.
+     * This implements the things this body part can do in parallel with
+     * other body parts.
+     */
+    @Override
+    public abstract void run();
+
+    /**
+     * Forces the body part to set itself to the provided metric
+     * @param metric value to set our body part to
+     */
+    protected abstract void setTo(T metric);
+
+    /**
+     * This method should put all motors/servos in this body part into a safe mode that uses low
+     * power.  It's up to each body part to do that for itself.
+     */
+    public abstract void safeHold();
+
+    /**
+     * Force implementing classes to check if a metric is close to another metric.
+     * Metric could be (inches, ticks, time, a task, etc.)
+     * @return true if we're close enough to consider the task done, false if not
+     */
+    protected abstract boolean closeEnough(T metric);
+
+    /**
+     * This runs the body part to hit a metric.  We also setup a protection thread
+     * to avoid overloading motors and servos.
+     * @param targetMetric expected metric (position, power, time, etc.).
+     * @param observer optional observer to notify when we are done
      * Be careful, if we can never get to the target position this will never safe!
      */
-    protected void protectMotors(int targetPosition)
+    public void set(T targetMetric, Observer observer)
     {
         // Cancel old thread
         protectionThread.interrupt();
 
         // Start a thread that performs safe hold when the time is right
-        protectionThread = new TimeoutThread(targetPosition);
+        protectionThread = new TimeoutThread(targetMetric, observer);
+        setTo(targetMetric);
         protectionThread.start();
     }
+
+    /**
+     * Display relevant telemetry to the user for debugging
+     * @param telemetry place to put the info
+     */
+    public abstract void getTelemetry(Telemetry telemetry);
 }
 

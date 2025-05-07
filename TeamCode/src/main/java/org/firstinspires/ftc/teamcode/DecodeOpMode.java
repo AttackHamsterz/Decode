@@ -15,9 +15,8 @@ public class DecodeOpMode extends StandardSetupOpMode {
         while (opModeIsActive())
         {
             // Debugging
-            //telemetry.addData("Status", "Run Time: " + runtime);
-            //motion.debugTelemetry(telemetry);
-            //telemetry.update();
+            motion.getTelemetry(telemetry);
+            telemetry.update();
 
             // Short sleep to keep this loop from saturating
             sleep(RobotPart.LOOP_PAUSE_MS);
