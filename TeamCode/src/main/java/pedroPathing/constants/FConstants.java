@@ -18,7 +18,7 @@ public class FConstants {
         FollowerConstants.rightFrontMotorDirection = DcMotorSimple.Direction.REVERSE;
         FollowerConstants.rightRearMotorDirection = DcMotorSimple.Direction.REVERSE;
 
-        FollowerConstants.mass = 13; //kg
+        FollowerConstants.mass = 5.35; //kg
 
         FollowerConstants.xMovement = 57.8741;
         FollowerConstants.yMovement = 52.295;

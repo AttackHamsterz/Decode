@@ -7,8 +7,6 @@ import com.pedropathing.pathgen.BezierLine;
 import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -35,33 +33,36 @@ public class Motion extends RobotPart<MotionMetric>{
 
     @Override
     public void run() {
-        follower.startTeleopDrive();
-
         // Test to watch amperage protection
-        DcMotorEx leftFront = ssom.hardwareMap.get(DcMotorEx.class, FollowerConstants.leftFrontMotorName);
-        DcMotorEx leftRear = ssom.hardwareMap.get(DcMotorEx.class, FollowerConstants.leftRearMotorName);
-        DcMotorEx rightRear = ssom.hardwareMap.get(DcMotorEx.class, FollowerConstants.rightRearMotorName);
-        DcMotorEx rightFront = ssom.hardwareMap.get(DcMotorEx.class, FollowerConstants.rightFrontMotorName);
-        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //DcMotorEx leftFront = ssom.hardwareMap.get(DcMotorEx.class, FollowerConstants.leftFrontMotorName);
+        //DcMotorEx leftRear = ssom.hardwareMap.get(DcMotorEx.class, FollowerConstants.leftRearMotorName);
+        //DcMotorEx rightRear = ssom.hardwareMap.get(DcMotorEx.class, FollowerConstants.rightRearMotorName);
+        //DcMotorEx rightFront = ssom.hardwareMap.get(DcMotorEx.class, FollowerConstants.rightFrontMotorName);
+
+        // Precise control
+        //leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //double leftCurrent_ma = leftFront.getCurrent(CurrentUnit.MILLIAMPS);
 
-        while (!isInterrupted()) {
-            if (!ignoreGamepad) {
+        if (!ignoreGamepad) {
+            // Only start teleop drive if the gamepad is enabled
+            follower.startTeleopDrive();
+
+            while (!isInterrupted()) {
                 // Update Pedro to move the robot based on:
                 follower.setTeleOpMovementVectors(-gamepad.left_stick_y, -gamepad.left_stick_x, -gamepad.right_stick_x, true);
                 follower.update();
             }
 
             // Short sleep to keep this loop from saturating
-            try {
-                sleep(LOOP_PAUSE_MS);
-            } catch (InterruptedException e) {
-                interrupt();
-            }
+            //try {
+            //    sleep(LOOP_PAUSE_MS);
+            //} catch (InterruptedException e) {
+            //    interrupt();
+            //}
         }
     }
 
