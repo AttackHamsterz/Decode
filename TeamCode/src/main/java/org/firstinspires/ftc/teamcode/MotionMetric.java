@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.pedropathing.localization.Pose;
+import com.pedropathing.geometry.Pose;
 
 public class MotionMetric {
     public Pose pose;

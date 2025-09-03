@@ -1,10 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.pedropathing.localization.Pose;
-import com.pedropathing.pathgen.BezierCurve;
-import com.pedropathing.pathgen.BezierLine;
-import com.pedropathing.pathgen.Path;
-import com.pedropathing.pathgen.Point;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.geometry.BezierCurve;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -51,12 +50,12 @@ public class AutoOpMode extends StandardSetupOpMode {
          * Here is a explanation of the difference between Paths and PathChains <https://pedropathing.com/commonissues/pathtopathchain.html> */
 
         // Score first element
-        scorePath = new Path(new BezierLine(new Point(startPose), new Point(scorePose)));
+        scorePath = new Path(new BezierLine(startPose, scorePose));
         scorePath.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
         //scorePath.setConstantInterpolation(startPose.getHeading());
 
         // Park with a bezier curve
-        parkPath = new Path(new BezierCurve(new Point(scorePose), new Point(parkControlPose), new Point(parkPose)));
+        parkPath = new Path(new BezierCurve(scorePose, parkControlPose, parkPose));
         parkPath.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
     }
 

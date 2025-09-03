@@ -1,17 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.follower.FollowerConstants;
-import com.pedropathing.localization.Pose;
-import com.pedropathing.pathgen.BezierLine;
-import com.pedropathing.pathgen.Path;
-import com.pedropathing.pathgen.PathChain;
-import com.pedropathing.pathgen.Point;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import pedroPathing.constants.FConstants;
-import pedroPathing.constants.LConstants;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 /**
  * Class to provide robot motion.  Under the hood it's just using the pedro pathing follower
@@ -19,6 +16,9 @@ import pedroPathing.constants.LConstants;
 public class Motion extends RobotPart<MotionMetric>{
 
     protected final Follower follower;
+    protected static final double CLOSE_X_IN = 1.0;
+    protected static final double CLOSE_Y_IN = 1.0;
+    protected static final double CLOSE_ANG_RAD = Math.toRadians(5.0);
 
     /**
      * Setup the motion object
@@ -27,7 +27,7 @@ public class Motion extends RobotPart<MotionMetric>{
     public Motion(StandardSetupOpMode ssom){
         this.ssom = ssom;
         this.gamepad = ssom.gamepad1;
-        follower = new Follower(ssom.hardwareMap, FConstants.class, LConstants.class);
+        follower = Constants.createFollower(ssom.hardwareMap);
         follower.setStartingPose(new Pose(0, 0, 0));
     }
 
@@ -53,7 +53,7 @@ public class Motion extends RobotPart<MotionMetric>{
 
             while (!isInterrupted()) {
                 // Update Pedro to move the robot based on:
-                follower.setTeleOpMovementVectors(-gamepad.left_stick_y, -gamepad.left_stick_x, -gamepad.right_stick_x, true);
+                follower.setTeleOpDrive(-gamepad.left_stick_y, -gamepad.left_stick_x, -gamepad.right_stick_x, true);
                 follower.update();
             }
 
@@ -69,7 +69,7 @@ public class Motion extends RobotPart<MotionMetric>{
     @Override
     public void setTo(MotionMetric metric){
         Pose startPose = follower.getPose();
-        Path path = new Path(new BezierLine(new Point(startPose), new Point(metric.pose)));
+        Path path = new Path(new BezierLine(startPose, metric.pose));
         path.setLinearHeadingInterpolation(startPose.getHeading(), metric.pose.getHeading());
         PathChain pathChain = new PathChain(path);
         follower.followPath(pathChain, metric.power, true);
@@ -82,13 +82,7 @@ public class Motion extends RobotPart<MotionMetric>{
 
     @Override
     protected boolean closeEnough(MotionMetric metric){
-        Pose currentPose = follower.getPose();
-        double deltaHeading = Math.abs(currentPose.getHeading() - metric.pose.getHeading());
-        double deltaX = Math.abs(currentPose.getX() - metric.pose.getX());
-        double deltaY = Math.abs(currentPose.getY() - metric.pose.getY());
-        return deltaHeading < FollowerConstants.pathEndHeadingConstraint &&
-                deltaX < FollowerConstants.pathEndTranslationalConstraint &&
-                deltaY < FollowerConstants.pathEndTranslationalConstraint;
+        return follower.atPose(metric.pose, CLOSE_X_IN, CLOSE_Y_IN, CLOSE_ANG_RAD);
     }
 
     @Override
