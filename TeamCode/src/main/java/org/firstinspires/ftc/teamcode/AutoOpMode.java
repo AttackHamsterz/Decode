@@ -52,7 +52,6 @@ public class AutoOpMode extends StandardSetupOpMode {
         // Score first element
         scorePath = new Path(new BezierLine(startPose, scorePose));
         scorePath.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-        //scorePath.setConstantInterpolation(startPose.getHeading());
 
         // Park with a bezier curve
         parkPath = new Path(new BezierCurve(scorePose, parkControlPose, parkPose));
