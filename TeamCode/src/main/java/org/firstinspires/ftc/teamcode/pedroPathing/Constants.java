@@ -19,8 +19,8 @@ public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(5.35)
-            .forwardZeroPowerAcceleration(-41.278)
-            .lateralZeroPowerAcceleration(-59.7819)
+            .forwardZeroPowerAcceleration(-16.49359)
+            .lateralZeroPowerAcceleration(-58.88851)
             .useSecondaryTranslationalPIDF(false)
             .useSecondaryHeadingPIDF(false)
             .useSecondaryDrivePIDF(false)
@@ -38,8 +38,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .xVelocity(57.8741)
-            .yVelocity(52.295);
+            .xVelocity(86.647695)
+            .yVelocity(74.814924);
 
     public static OTOSConstants localizerConstants = new OTOSConstants()
             .hardwareMapName("sensor-otos")
