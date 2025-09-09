@@ -6,25 +6,16 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name="TeleOp: Decode", group="Robot")
 @Disabled
 public class DecodeOpMode extends StandardSetupOpMode {
-    @Override
-    public void runOpMode() throws InterruptedException {
-        // Call the parent runOpMode
-        super.runOpMode();
+    @Override public void loop() {
+        // Update telemetry
+        motion.getTelemetry(telemetry);
+        telemetry.update();
 
-        // run until the end of the match (driver presses STOP)
-        while (opModeIsActive())
-        {
-            // Debugging
-            motion.getTelemetry(telemetry);
-            telemetry.update();
-
-            // Short sleep to keep this loop from saturating
-            sleep(RobotPart.LOOP_PAUSE_MS);
+        // Short sleep to keep this loop from saturating
+        try {
+            Thread.sleep(RobotPart.LOOP_PAUSE_MS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
-
-        // Interrupt threads and wait for completion
-        waitForCompletion();
     }
 }
-
-

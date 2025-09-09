@@ -1,13 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.pedropathing.util.Timer;
 
 @Autonomous(name = "Robot Setup Super Class", group = "Robot")
 @Disabled
-public class StandardSetupOpMode extends LinearOpMode {
+public class StandardSetupOpMode extends OpMode {
     protected static final double AUTO_MOVE_POWER = 1.0;
 
     public enum COLOR {
@@ -17,6 +19,14 @@ public class StandardSetupOpMode extends LinearOpMode {
     public enum POSITION {
         BOARD,
         FIELD
+    }
+    public static String colorToString(COLOR color)
+    {
+        return (color == COLOR.RED) ? "Red" : "Blue";
+    }
+    public static String positionToString(POSITION pos)
+    {
+        return (pos == POSITION.BOARD) ? "Board" : "Field";
     }
 
     // Team objects
@@ -30,29 +40,46 @@ public class StandardSetupOpMode extends LinearOpMode {
     // Robot Objects
     public Motion motion;
 
-    // @Override
-    public void runOpMode() throws InterruptedException {
+    // Telemetry
+    static TelemetryManager telemetryM;
+
+    @Override public void init() {
+        // Setup telemetry
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         // Setup robot
-        motion = new Motion(this);
-        setIgnoreGamepad(ignoreGamepad);
+        motion = new Motion(this, ignoreGamepad);
 
         // Setup timing
         opmodeTimer = new Timer();
 
-        // Put any required init for autonomous, remember teleop can't move the robot!
-        if (ignoreGamepad) {
-
-        }
-
-        // Update status for the user
+        // Let them now we are initialized
         telemetry.addData("Status", "Initialized");
+        telemetry.addData("Color", colorToString(color));
+        if(ignoreGamepad)
+            telemetry.addData("Auto Position", positionToString(position));
+        else
+            telemetry.addLine("Teleop Ready!");
         telemetry.update();
-        waitForStart();
+    }
+    @Override public void init_loop() {
+        // If autonomous
+        if (ignoreGamepad) {
+            // Watch obolisk for april tag
+        }
+    }
+    @Override public void start() {
+        // Reset timer and launch Threads
         opmodeTimer.resetTimer();
-
-        // Launch Threads
         motion.start();
+    }
+    @Override public void loop() { }
+    @Override public void stop() {
+        try {
+            waitForCompletion();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /**

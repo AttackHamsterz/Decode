@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -101,19 +102,13 @@ public class AutoOpMode extends StandardSetupOpMode {
         pathTimer.resetTimer();
     }
 
-    // @Override
-    public void runOpMode() throws InterruptedException {
-
-        // Init
+    @Override public void init() {
         pathTimer = new Timer();
         buildPaths();
         setPathState(0);
-
-        // Complete setup and wait for play
-        super.runOpMode();
-
-        // Run until state machine completes
-        while (pathState>=0) {
+    }
+    @Override public void loop() {
+        if (pathState>=0) {
             // These loop the movements of the robot
             motion.follower.update();
             autonomousPathUpdate();
