@@ -7,7 +7,7 @@ public class DecodeBlueOpMode extends DecodeOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Call the parent runOpMode
-        setup(COLOR.BLUE, SIDE.LEFT, false);
+        setup(COLOR.BLUE, POSITION.BOARD, false);
         super.runOpMode();
     }
 }

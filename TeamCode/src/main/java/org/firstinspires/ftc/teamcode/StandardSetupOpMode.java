@@ -14,14 +14,14 @@ public class StandardSetupOpMode extends LinearOpMode {
         RED,
         BLUE
     }
-    public enum SIDE {
-        LEFT,
-        RIGHT
+    public enum POSITION {
+        BOARD,
+        FIELD
     }
 
     // Team objects
     public COLOR color = COLOR.BLUE;
-    public SIDE side = SIDE.RIGHT;
+    public POSITION position = POSITION.FIELD;
     public boolean ignoreGamepad = false;
 
     // Timing
@@ -58,13 +58,13 @@ public class StandardSetupOpMode extends LinearOpMode {
     /**
      * Method sets up this specific opmode
      * @param color color robot should use (and always yellow)
-     * @param side side robot is starting on
+     * @param position position robot is starting on
      * @param ignoreGamepad true to ignore gamepad input
      */
-    protected void setup(COLOR color, SIDE side, boolean ignoreGamepad) {
-        // Setup side and color for this opmode
+    protected void setup(COLOR color, POSITION position, boolean ignoreGamepad) {
+        // Setup position and color for this opmode
         this.color = color;
-        this.side = side;
+        this.position = position;
 
         // Should we ignore the gamepad or not?
         setIgnoreGamepad(ignoreGamepad);
