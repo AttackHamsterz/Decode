@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.net.EthernetNetworkSpecifier;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class FinalLift extends RobotPart<FinalLiftMetric>{
@@ -10,6 +12,13 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
 
     @Override
     public void run() {
+        if (!ignoreGamepad) {
+            while (!isInterrupted()) {
+                if (gamepad.start) {
+                    // code to lift robot
+                }
+            }
+        }
 
     }
 
