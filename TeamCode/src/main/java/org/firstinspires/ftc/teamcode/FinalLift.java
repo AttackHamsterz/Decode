@@ -6,7 +6,6 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     public FinalLift(StandardSetupOpMode ssom){
         this.ssom = ssom;
         this.gamepad = ssom.gamepad1;
-
     }
 
     @Override
