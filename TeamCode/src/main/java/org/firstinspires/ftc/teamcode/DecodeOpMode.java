@@ -9,6 +9,7 @@ public class DecodeOpMode extends StandardSetupOpMode {
     @Override public void loop() {
         // Update telemetry
         motion.getTelemetry(telemetry);
+        sorter.getTelemetry(telemetry);
         telemetry.update();
 
         // Short sleep to keep this loop from saturating

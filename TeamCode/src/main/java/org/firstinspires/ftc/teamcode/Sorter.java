@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -8,9 +9,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Sorter extends RobotPart<SorterMetric>{
     private final DcMotor sortMotor;
-    public Sorter(StandardSetupOpMode ssom){
+    public Sorter(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
-        this.gamepad = ssom.gamepad1;
+        this.gamepad = ssom.gamepad2;
+        this.ignoreGamepad = ignoreGamepad;
         sortMotor = ssom.hardwareMap.get(DcMotor.class, "sortMotor"); //need to define channel
         // Setup
         sortMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -24,11 +26,18 @@ public class Sorter extends RobotPart<SorterMetric>{
     public void run() {
         while (!isInterrupted()) {
             if (!ignoreGamepad) {
-                if (gamepad.a){
-                    sortMotor.setTargetPosition(1000);}
-                if (gamepad.b){
-                    sortMotor.setTargetPosition(0);}
+                if (gamepad.a) {
+                    sortMotor.setPower(1);
+                    sortMotor.setTargetPosition(670);
                 }
+                else if (gamepad.b) {
+                    sortMotor.setPower(1);
+                    sortMotor.setTargetPosition(0);
+                }
+                else{
+                    sortMotor.setPower(0);
+                }
+            }
         }
     }
 
@@ -49,7 +58,7 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     @Override
     public void getTelemetry(Telemetry telemetry) {
-
+            telemetry.addData("sorterticks", sortMotor.getCurrentPosition());
     }
 }
 
