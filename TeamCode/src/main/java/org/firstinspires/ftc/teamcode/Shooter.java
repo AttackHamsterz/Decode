@@ -2,11 +2,10 @@ package org.firstinspires.ftc.teamcode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class FinalLift extends RobotPart<FinalLiftMetric>{
-    public FinalLift(StandardSetupOpMode ssom){
+public class Shooter extends RobotPart<ShooterMetric>{
+    public Shooter(StandardSetupOpMode ssom){
         this.ssom = ssom;
         this.gamepad = ssom.gamepad1;
-
     }
 
     @Override
@@ -15,7 +14,7 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     }
 
     @Override
-    protected void setTo(FinalLiftMetric metric) {
+    protected void setTo(ShooterMetric metric) {
 
     }
 
@@ -25,7 +24,9 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     }
 
     @Override
-    protected boolean closeEnough(FinalLiftMetric metric) {
+    
+    
+    protected boolean closeEnough(ShooterMetric metric) {
         return false;
     }
 
@@ -34,5 +35,3 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
 
     }
 }
-
-
