@@ -28,13 +28,13 @@ public class Sorter extends RobotPart<SorterMetric>{
             if (!ignoreGamepad) {
                 if (gamepad.a) {
                     sortMotor.setPower(1);
-                    sortMotor.setTargetPosition(670);
+                    sortMotor.setTargetPosition(1440);
                 }
                 else if (gamepad.b) {
                     sortMotor.setPower(1);
                     sortMotor.setTargetPosition(0);
                 }
-                else{
+                else if (gamepad.start) {
                     sortMotor.setPower(0);
                 }
             }
