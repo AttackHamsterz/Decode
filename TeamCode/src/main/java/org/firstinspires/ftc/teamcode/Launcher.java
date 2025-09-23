@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class Shooter extends RobotPart<ShooterMetric>{
-    public Shooter(StandardSetupOpMode ssom){
+public class Launcher extends RobotPart<LauncherMetric>{
+    public Launcher(StandardSetupOpMode ssom){
         this.ssom = ssom;
         this.gamepad = ssom.gamepad1;
     }
@@ -14,7 +14,7 @@ public class Shooter extends RobotPart<ShooterMetric>{
     }
 
     @Override
-    protected void setTo(ShooterMetric metric) {
+    protected void setTo(LauncherMetric metric) {
 
     }
 
@@ -26,7 +26,7 @@ public class Shooter extends RobotPart<ShooterMetric>{
     @Override
     
     
-    protected boolean closeEnough(ShooterMetric metric) {
+    protected boolean closeEnough(LauncherMetric metric) {
         return false;
     }
 

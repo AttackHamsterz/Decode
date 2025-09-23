@@ -40,6 +40,7 @@ public class StandardSetupOpMode extends OpMode {
     // Robot Objects
     public Motion motion;
     public Sorter sorter;
+    public BallLifter ballLifter;
 
     // Telemetry
     static TelemetryManager telemetryM;
@@ -51,6 +52,7 @@ public class StandardSetupOpMode extends OpMode {
         // Setup robot
         motion = new Motion(this, ignoreGamepad);
         sorter = new Sorter(this, ignoreGamepad);
+        ballLifter = new BallLifter(this, ignoreGamepad);
 
         // Setup timing
         opmodeTimer = new Timer();
@@ -75,6 +77,7 @@ public class StandardSetupOpMode extends OpMode {
         opmodeTimer.resetTimer();
         motion.start();
         sorter.start();
+        ballLifter.start();
     }
     @Override public void loop() { }
     @Override public void stop() {
@@ -119,6 +122,7 @@ public class StandardSetupOpMode extends OpMode {
         // Interrupt all the running threads
         motion.interrupt();
         sorter.interrupt();
+        ballLifter.interrupt();
 
         // Wait for threads to complete
         motion.join();
