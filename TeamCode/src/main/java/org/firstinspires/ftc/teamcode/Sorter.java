@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Sorter extends RobotPart<SorterMetric>{
+    private static final double PPM = 1425.1;
     private final DcMotor sortMotor;
     public Sorter(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
@@ -28,7 +29,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             if (!ignoreGamepad) {
                 if (gamepad.a) {
                     sortMotor.setPower(1);
-                    sortMotor.setTargetPosition(1440);
+                    sortMotor.setTargetPosition(1425); //1425.1
                 }
                 else if (gamepad.b) {
                     sortMotor.setPower(1);

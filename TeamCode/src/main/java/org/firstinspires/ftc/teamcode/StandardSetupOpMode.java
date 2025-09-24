@@ -38,6 +38,7 @@ public class StandardSetupOpMode extends OpMode {
     private Timer opmodeTimer;
 
     // Robot Objects
+    public FinalLift finalLift;
     public Motion motion;
     public Sorter sorter;
     public BallLifter ballLifter;
@@ -53,6 +54,7 @@ public class StandardSetupOpMode extends OpMode {
         motion = new Motion(this, ignoreGamepad);
         sorter = new Sorter(this, ignoreGamepad);
         ballLifter = new BallLifter(this, ignoreGamepad);
+        finalLift = new FinalLift(this, ignoreGamepad);
 
         // Setup timing
         opmodeTimer = new Timer();
@@ -78,6 +80,7 @@ public class StandardSetupOpMode extends OpMode {
         motion.start();
         sorter.start();
         ballLifter.start();
+        finalLift.start();
     }
     @Override public void loop() { }
     @Override public void stop() {
@@ -123,6 +126,7 @@ public class StandardSetupOpMode extends OpMode {
         motion.interrupt();
         sorter.interrupt();
         ballLifter.interrupt();
+        finalLift.interrupt();
 
         // Wait for threads to complete
         motion.join();
