@@ -14,7 +14,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
         this.gamepad = ssom.gamepad2;
         launchMotor = ssom.hardwareMap.get(DcMotor.class, "launchMotor"); //need to define channel
         // Setup
-        launchMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        launchMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         //launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         launchMotor.setTargetPosition(0);
