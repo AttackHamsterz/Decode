@@ -43,6 +43,7 @@ public class StandardSetupOpMode extends OpMode {
     public Sorter sorter;
     public BallLifter ballLifter;
     public Launcher launcher;
+    public Intake intake;
 
     // Telemetry
     static TelemetryManager telemetryM;
@@ -57,6 +58,7 @@ public class StandardSetupOpMode extends OpMode {
         ballLifter = new BallLifter(this, ignoreGamepad);
         finalLift = new FinalLift(this, ignoreGamepad);
         launcher = new Launcher(this);
+        intake = new Intake(this);
 
         // Setup timing
         opmodeTimer = new Timer();
@@ -84,6 +86,7 @@ public class StandardSetupOpMode extends OpMode {
         ballLifter.start();
         finalLift.start();
         launcher.start();
+        intake.start();
     }
     @Override public void loop() { }
     @Override public void stop() {

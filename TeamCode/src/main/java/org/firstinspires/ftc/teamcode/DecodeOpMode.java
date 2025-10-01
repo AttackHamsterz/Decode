@@ -12,6 +12,7 @@ public class DecodeOpMode extends StandardSetupOpMode {
         sorter.getTelemetry(telemetry);
         finalLift.getTelemetry(telemetry);
         launcher.getTelemetry(telemetry);
+        intake.getTelemetry(telemetry);
         telemetry.update();
 
         // Short sleep to keep this loop from saturating

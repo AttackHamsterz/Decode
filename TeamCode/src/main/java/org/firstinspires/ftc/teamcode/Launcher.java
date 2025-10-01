@@ -21,7 +21,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
         launchMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         launchMotorPower = 0;
     }
-
+/*
     @Override
     public void run() {
         boolean dpadPress = false;
@@ -58,6 +58,11 @@ public class Launcher extends RobotPart<LauncherMetric>{
                 }
             }
         }
+    } */
+
+    @Override
+    public void run() {
+
     }
 
     @Override
