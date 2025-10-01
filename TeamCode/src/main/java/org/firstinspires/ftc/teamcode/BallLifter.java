@@ -14,7 +14,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     private final DigitalChannel ballLiftSwitch;
     private final CRServo ballLiftServo;
 
-    private final int INITIAL_WAIT_MS = 150;  // Delay so the magnet moves from the switch (ms)
+    private final int INITIAL_WAIT_MS = 250;  // Delay so the magnet moves from the switch (ms)
     private final int TOTAL_WAIT_MS = 1000;   // Max time to wait for reset (ms)
 
     public BallLifter(StandardSetupOpMode ssom, boolean ignoreGamepad){
