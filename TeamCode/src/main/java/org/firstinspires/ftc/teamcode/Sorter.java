@@ -11,18 +11,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Sorter extends RobotPart<SorterMetric>{
     private static final double PPM = 1425.1;
     private final DcMotor sortMotor;
-    //private final RevColorSensorV3 leftSensor;
-    //private final RevColorSensorV3 rightSensor;
-    //private final RevColorSensorV3 frontSensor;
+    private final RevColorSensorV3 leftSensor;
+    private final RevColorSensorV3 rightSensor;
+    private final RevColorSensorV3 frontSensor;
 
     public Sorter(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
         this.gamepad = ssom.gamepad2;
         this.ignoreGamepad = ignoreGamepad;
         sortMotor = ssom.hardwareMap.get(DcMotor.class, "sortMotor"); //need to define channel
-        //leftSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "leftSensor"); // ic2 bus
-        //rightSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "rightSensor"); // ic2 bus
-        //frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor"); // ic2 bus
+        leftSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "leftSensor"); // ic2 bus
+        rightSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "rightSensor"); // ic2 bus
+        frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor"); // ic2 bus
 
         // Setup motor
         sortMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -36,10 +36,10 @@ public class Sorter extends RobotPart<SorterMetric>{
     public void run() {
         while (!isInterrupted()) {
             // Sensor query
-            //leftSensor.getDistance(DistanceUnit.CM);
-            //leftSensor.green();
-            //leftSensor.red();
-            //leftSensor.blue();
+            leftSensor.getDistance(DistanceUnit.CM);
+            leftSensor.green();
+            leftSensor.red();
+            leftSensor.blue();
 
             // Listen for key presses
             if (!ignoreGamepad) {
@@ -76,10 +76,10 @@ public class Sorter extends RobotPart<SorterMetric>{
     @Override
     public void getTelemetry(Telemetry telemetry) {
         telemetry.addData("sorterticks", sortMotor.getCurrentPosition());
-        //telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
-        //telemetry.addData("leftRed", leftSensor.red());
-        //telemetry.addData("leftGreen", leftSensor.green());
-        //telemetry.addData("leftBlue", leftSensor.blue());
+        telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
+        telemetry.addData("leftRed", leftSensor.red());
+        telemetry.addData("leftGreen", leftSensor.green());
+        telemetry.addData("leftBlue", leftSensor.blue());
     }
 }
 
