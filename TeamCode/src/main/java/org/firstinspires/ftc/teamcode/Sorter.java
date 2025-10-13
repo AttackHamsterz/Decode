@@ -14,8 +14,11 @@ public class Sorter extends RobotPart<SorterMetric>{
     private final RevColorSensorV3 leftSensor;
     //private final RevColorSensorV3 rightSensor;
     //private final RevColorSensorV3 frontSensor;
-    private int leftColor; // 0 = none, 1 = green, 2 = purple
-    private int lastColor;
+    private int leftColor = 0; // 0 = none, 1 = green, 2 = purple
+    private int lastLeftColor;
+    private long lastLeftColorTime;
+    private boolean isSpinning;
+    private long stopTime;
 
     public static class Triplet {
         public int r, g, b;
@@ -52,6 +55,7 @@ public class Sorter extends RobotPart<SorterMetric>{
         sortMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sortMotor.setTargetPosition(0);
         sortMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sortMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
     @Override
@@ -70,16 +74,15 @@ public class Sorter extends RobotPart<SorterMetric>{
             Sorter.Triplet sensorColor = new Sorter.Triplet(redValue, greenValue, blueValue);
 
             if (Triplet.distance(sensorColor, none) <500){
-                leftColor = 0;
+                //letfColor = 0;
             }
             else if (Triplet.distance(sensorColor, green) < Triplet.distance(sensorColor, purple)){
-                leftColor = 1;
+                lastLeftColor = 1;
+                lastLeftColorTime = System.currentTimeMillis();
             }
             else if (Triplet.distance(sensorColor, green) > Triplet.distance(sensorColor, purple)){
-                leftColor = 2;
-            }
-            else {
-                leftColor = 0;
+                lastLeftColor = 2;
+                lastLeftColorTime = System.currentTimeMillis();
             }
 
             // Listen for key presses
@@ -96,6 +99,38 @@ public class Sorter extends RobotPart<SorterMetric>{
                     sortMotor.setPower(0);
                 }
             }
+
+            checkIfSidesHaveColors();
+        }
+    }
+
+    // It's 'supposed' to check to see if the motor is spinning and if stopped get
+    // the color of the balls... heh...
+    //To do getPower() is currently being stupid and not changing into decimals
+    //...what the heck... anyway
+    protected void checkIfSidesHaveColors(){
+        if (Math.abs(sortMotor.getPower()) <= 0.01) {
+            if (isSpinning) {
+                stopTime = System.currentTimeMillis();
+                leftColor = getColorForSide(lastLeftColorTime, lastLeftColor, stopTime);
+                //rightColor = getColorForSide(lastRightColorTime, lastRightColor, stopTime);
+                //frontColor = getColorForSide(lastFrontColorTime, lastFrontColor, stopTime);
+                //backColor = getColorForSide(lastBackColorTime, lastBackColor, stopTime);
+            }
+            isSpinning = false;
+        } else {
+            isSpinning = true;
+        }
+    }
+
+    //It checks if the last color time is a quarter of a second, and if not it assigns
+    //black.
+    protected int getColorForSide(long lastColorTime, int lastColor, long stopTime) {
+        long diff = stopTime - lastColorTime;
+        if (diff <= 0.25) {
+            return lastColor;
+        } else {
+            return 0;
         }
     }
 
@@ -122,6 +157,11 @@ public class Sorter extends RobotPart<SorterMetric>{
         telemetry.addData("sorterticks", sortMotor.getCurrentPosition());
         telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
         telemetry.addData("leftColor", (leftColor == 0) ? "None" : (leftColor == 1) ? "green" : "purple");
+        telemetry.addData("lastLeftColor", lastLeftColor);
+        telemetry.addData("lastLeftColorTime", lastLeftColorTime);
+        telemetry.addData("isSpinning", isSpinning);
+        telemetry.addData("stopTime", stopTime);
+        telemetry.addData("sortMotor Power",sortMotor.getPower());
     }
 }
 
