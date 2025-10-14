@@ -19,6 +19,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     private long lastLeftColorTime;
     private boolean isSpinning;
     private long stopTime;
+    private double currentPosition;
 
     public static class Triplet {
         public int r, g, b;
@@ -56,10 +57,14 @@ public class Sorter extends RobotPart<SorterMetric>{
         sortMotor.setTargetPosition(0);
         sortMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sortMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        // Setup variables
+        currentPosition = 0;
     }
 
     @Override
     public void run() {
+        boolean pressed = false;
         while (!isInterrupted()) {
             // Sensor query
             leftSensor.getDistance(DistanceUnit.CM);
@@ -87,16 +92,20 @@ public class Sorter extends RobotPart<SorterMetric>{
 
             // Listen for key presses
             if (!ignoreGamepad) {
-                if (gamepad.a) {
+                if (!pressed && gamepad.a) {
+                    pressed = true;
+                    currentPosition += 1425.1/4.0;
+                    sortMotor.setTargetPosition((int)Math.round(currentPosition));
                     sortMotor.setPower(1);
-                    sortMotor.setTargetPosition(1425); //1425.1
                 }
-                else if (gamepad.b) {
+                else if (!pressed && gamepad.b) {
+                    pressed = true;
+                    currentPosition -= 1425.1/4.0;
+                    sortMotor.setTargetPosition((int)Math.round(currentPosition));
                     sortMotor.setPower(1);
-                    sortMotor.setTargetPosition(0);
                 }
-                else if (gamepad.start) {
-                    sortMotor.setPower(0);
+                if (!gamepad.a && !gamepad.b) {
+                   pressed = false;
                 }
             }
 
