@@ -14,13 +14,17 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     private final DigitalChannel ballLiftSwitch;
     private final CRServo ballLiftServo;
 
-    private final int INITIAL_WAIT_MS = 250;  // Delay so the magnet moves from the switch (ms)
+    private final int INITIAL_WAIT_MS = 150;  // Delay so the magnet moves from the switch (ms)
+    private final int LIFT_COMPLETE_MS = 400; // Lift completes and snaps back (ms)
     private final int TOTAL_WAIT_MS = 1000;   // Max time to wait for reset (ms)
+
+    private boolean lifting;
 
     public BallLifter(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
         this.gamepad = ssom.gamepad2;
         this.setIgnoreGamepad(ignoreGamepad);
+        this.lifting = false;
 
         ballLiftSwitch = ssom.hardwareMap.get(DigitalChannel.class, "ballLiftSwitch");
         ballLiftSwitch.setMode(DigitalChannel.Mode.INPUT);
@@ -33,24 +37,28 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
      * away so be careful!
      */
     public void lift(){
-        // Start servo
-        ballLiftServo.setPower(1.0);
-
-        // Start thread for stop
+        // Lifting thread
         Thread thread = new Thread(() -> {
+            // TODO - Make sure sorter isn't moving
+
+            // Start the lift
+            lifting = true;
+            ballLiftServo.setPower(1.0);
             long startTimeMs = System.currentTimeMillis();
             boolean done = false;
             while(!done){
                 long nowMs = System.currentTimeMillis();
                 long deltaT = nowMs - startTimeMs;
-                if(deltaT > TOTAL_WAIT_MS){
+                if(deltaT > LIFT_COMPLETE_MS)
+                    lifting = false;
+                if(deltaT > INITIAL_WAIT_MS && !ballLiftSwitch.getState()){
                     done = true;
-                }
-                else if(deltaT > INITIAL_WAIT_MS && !ballLiftSwitch.getState()){
+                }else if(deltaT > TOTAL_WAIT_MS){
                     done = true;
                 }
             }
             ballLiftServo.setPower(0.0);
+            lifting = false;
         });
         thread.start();
 
@@ -90,5 +98,10 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     @Override
     public void getTelemetry(Telemetry telemetry) {
 
+    }
+
+    public boolean isLifting()
+    {
+        return lifting;
     }
 }

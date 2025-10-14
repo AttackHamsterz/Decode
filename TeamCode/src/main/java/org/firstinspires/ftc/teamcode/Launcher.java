@@ -14,55 +14,50 @@ public class Launcher extends RobotPart<LauncherMetric>{
         this.gamepad = ssom.gamepad2;
         launchMotor = ssom.hardwareMap.get(DcMotor.class, "launchMotor"); //need to define channel
         // Setup
-        launchMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        launchMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         //launchMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         launchMotor.setTargetPosition(0);
         launchMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         launchMotorPower = 0;
     }
-/*
+
     @Override
     public void run() {
-        boolean dpadPress = false;
+        boolean press = false;
         while (!isInterrupted()) {
             if (!ignoreGamepad) {
-                if (!dpadPress) {
-                    if (gamepad.dpad_down) {
-                        dpadPress = true;
+                if (!press) {
+                    if (gamepad.back) {
+                        press = true;
                         launchMotor.setPower(0);
                         launchMotorPower = 0;
                         //launchMotor.setTargetPosition(1425); //1425.1
-                    } else if (gamepad.dpad_up) {
-                        dpadPress = true;
-                        launchMotor.setPower(1);
+                    } else if (gamepad.start) {
+                        press = true;
+                        launchMotor.setPower(0.5);
                         launchMotorPower = 1;
                         //launchMotor.setTargetPosition(0);
-                    } else if (gamepad.dpad_left) {
-                        dpadPress = true;
+                    } else if (gamepad.left_bumper) {
+                        press = true;
                         if (launchMotorPower > 0.05) {
                             launchMotorPower = launchMotorPower - 0.05;
                             launchMotor.setPower(launchMotorPower);
                         } else {
                             launchMotorPower = 0;
                         }
-                    } else if (gamepad.dpad_right) {
-                        dpadPress = true;
+                    } else if (gamepad.right_bumper) {
+                        press = true;
                         if (launchMotorPower < 1) {
                             launchMotorPower = launchMotorPower + 0.05;
                             launchMotor.setPower(launchMotorPower);
                         }
                     }
-                } else if (!gamepad.dpad_up && !gamepad.dpad_right && !gamepad.dpad_down && !gamepad.dpad_left) {
-                    dpadPress = false;
+                } else if (!gamepad.back && !gamepad.start && !gamepad.left_bumper && !gamepad.right_bumper) {
+                    press = false;
                 }
             }
         }
-    } */
-
-    @Override
-    public void run() {
-
     }
 
     @Override
