@@ -10,8 +10,6 @@ public abstract class RobotPart<T> extends Thread{
     protected StandardSetupOpMode ssom;
 
     // Gamepad variables
-    protected Gamepad gamepad;
-    protected Gamepad extraGamepad;
     protected boolean ignoreGamepad = false;
 
     // Motor overload protection
@@ -107,5 +105,15 @@ public abstract class RobotPart<T> extends Thread{
      * @param telemetry place to put the info
      */
     public abstract void getTelemetry(Telemetry telemetry);
+
+    /**
+     * Traditional sleep for a robot part (to avoid saturating threads)
+     */
+    public void sleep(){
+        try{
+            sleep(LOOP_PAUSE_MS);
+        } catch (InterruptedException ignored) {
+        }
+    }
 }
 

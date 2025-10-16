@@ -7,19 +7,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @Disabled
 public class DecodeOpMode extends StandardSetupOpMode {
     @Override public void loop() {
-        // Update telemetry
-        motion.getTelemetry(telemetry);
-        sorter.getTelemetry(telemetry);
-        finalLift.getTelemetry(telemetry);
-        launcher.getTelemetry(telemetry);
-        intake.getTelemetry(telemetry);
-        telemetry.update();
+        // Update gamepad for multiple thread use (loop is called at the optimal timing)
+        if(!ignoreGamepad)
+            gamepadBuffer.update(gamepad1, gamepad2);
 
-        // Short sleep to keep this loop from saturating
-        try {
-            Thread.sleep(RobotPart.LOOP_PAUSE_MS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        // Update telemetry
+        super.partList.forEach(part -> part.getTelemetry(telemetry));
+        if(super.partList.size()>0) telemetry.update();
     }
 }

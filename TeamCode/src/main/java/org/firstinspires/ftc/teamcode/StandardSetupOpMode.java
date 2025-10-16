@@ -7,10 +7,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.pedropathing.util.Timer;
 
+import java.util.ArrayList;
+
 @Autonomous(name = "Robot Setup Super Class", group = "Robot")
 @Disabled
 public class StandardSetupOpMode extends OpMode {
     protected static final double AUTO_MOVE_POWER = 1.0;
+    protected static final long GAMEPAD_POLLING_INTERVAL_MS = 10;
 
     public enum COLOR {
         RED,
@@ -37,13 +40,18 @@ public class StandardSetupOpMode extends OpMode {
     // Timing
     private Timer opmodeTimer;
 
+    // Gamepad buffers
+    public GamepadBuffer gamepadBuffer;
+
     // Robot Objects
+    public ArrayList<RobotPart> partList = new ArrayList<>();
     public FinalLift finalLift;
     public Motion motion;
     public Sorter sorter;
     public BallLifter ballLifter;
     public Launcher launcher;
     public Intake intake;
+    public Eye eye;
 
     // Telemetry
     static TelemetryManager telemetryM;
@@ -52,6 +60,9 @@ public class StandardSetupOpMode extends OpMode {
         // Setup telemetry
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
+        // Setup gamepad buffer
+        gamepadBuffer = new GamepadBuffer();
+
         // Setup robot
         motion = new Motion(this, ignoreGamepad);
         sorter = new Sorter(this, ignoreGamepad);
@@ -59,6 +70,16 @@ public class StandardSetupOpMode extends OpMode {
         finalLift = new FinalLift(this, ignoreGamepad);
         launcher = new Launcher(this);
         intake = new Intake(this);
+        //eye = new Eye(this);
+
+        // Place parts into parts list
+        partList.add(motion);
+        partList.add(sorter);
+        partList.add(ballLifter);
+        partList.add(finalLift);
+        partList.add(launcher);
+        partList.add(intake);
+        //partList.add(eye);
 
         // Setup timing
         opmodeTimer = new Timer();
@@ -73,6 +94,10 @@ public class StandardSetupOpMode extends OpMode {
         telemetry.update();
     }
     @Override public void init_loop() {
+        // Init gamepad
+        if(!ignoreGamepad)
+            gamepadBuffer.update(gamepad1, gamepad2);
+
         // If autonomous
         if (ignoreGamepad) {
             // Watch obolisk for april tag
@@ -81,19 +106,18 @@ public class StandardSetupOpMode extends OpMode {
     @Override public void start() {
         // Reset timer and launch Threads
         opmodeTimer.resetTimer();
-        motion.start();
-        sorter.start();
-        ballLifter.start();
-        finalLift.start();
-        launcher.start();
-        intake.start();
+
+        // Start each part
+        for( Thread part : partList)
+            part.start();
     }
-    @Override public void loop() { }
+    @Override public void loop() {
+    }
     @Override public void stop() {
         try {
             waitForCompletion();
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            //Thread.currentThread().interrupt();
         }
     }
 
@@ -129,13 +153,13 @@ public class StandardSetupOpMode extends OpMode {
     public void waitForCompletion() throws InterruptedException
     {
         // Interrupt all the running threads
-        motion.interrupt();
-        sorter.interrupt();
-        ballLifter.interrupt();
-        finalLift.interrupt();
-        launcher.interrupt();
+        for( Thread part : partList) {
+            if(part.isAlive() && !part.isInterrupted())
+                part.interrupt();
+        }
 
         // Wait for threads to complete
-        motion.join();
+        //for( Thread part : partList)
+        //    part.join();
     }
 }

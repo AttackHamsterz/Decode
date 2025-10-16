@@ -28,7 +28,6 @@ public class Motion extends RobotPart<MotionMetric>{
     public Motion(StandardSetupOpMode ssom, boolean ignoreGamepad){
         setIgnoreGamepad(ignoreGamepad);
         this.ssom = ssom;
-        this.gamepad = ssom.gamepad1;
         if(follower == null)
             PanelsConfigurables.INSTANCE.refreshClass(this);
         follower = Constants.createFollower(ssom.hardwareMap);
@@ -45,7 +44,7 @@ public class Motion extends RobotPart<MotionMetric>{
 
             while (!isInterrupted()) {
                 // Update Pedro to move the robot based on:
-                follower.setTeleOpDrive(-gamepad.left_stick_y, -gamepad.left_stick_x, -gamepad.right_stick_x, true);
+                follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY, -ssom.gamepadBuffer.g1LeftStickX, -ssom.gamepadBuffer.g1RightStickX, true);
                 follower.update();
 
                 // Short sleep to keep this loop from saturating

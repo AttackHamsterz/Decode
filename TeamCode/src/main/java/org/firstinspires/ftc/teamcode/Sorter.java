@@ -1,25 +1,30 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Sorter extends RobotPart<SorterMetric>{
     private static final double PPM = 1425.1;
+    private static final double HALF_TURN = PPM / 2.0;
+    private static final double QUARTER_TURN = PPM / 4.0;
+    private static final int CLOSE_ENOUGH_TICKS = 14;
+    private static final double HOLD_POWER = 0.1;
+    private static final double TAIL_ROTATE_TIME_MS = 100;
+
     private final DcMotor sortMotor;
     private final RevColorSensorV3 leftSensor;
     //private final RevColorSensorV3 rightSensor;
     //private final RevColorSensorV3 frontSensor;
+    //private final RevColorSensorV3 backSensor;
     private int leftColor = 0; // 0 = none, 1 = green, 2 = purple
     private int lastLeftColor;
     private long lastLeftColorTime;
     private boolean isSpinning;
     private long stopTime;
-    private double currentPosition;
+    private double targetPosition;
 
     public static class Triplet {
         public int r, g, b;
@@ -43,12 +48,12 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     public Sorter(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
-        this.gamepad = ssom.gamepad2;
         this.ignoreGamepad = ignoreGamepad;
         sortMotor = ssom.hardwareMap.get(DcMotor.class, "sortMotor"); //need to define channel
         leftSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "leftSensor"); // ic2 bus
         //rightSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "rightSensor"); // ic2 bus
         //frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor"); // ic2 bus
+        //backSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "backSensor"); // ic2 bus
 
         // Setup motor
         sortMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -56,10 +61,20 @@ public class Sorter extends RobotPart<SorterMetric>{
         sortMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sortMotor.setTargetPosition(0);
         sortMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        sortMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         // Setup variables
-        currentPosition = 0;
+        targetPosition = 0;
+
+        // Debug
+        boolean error = false;
+        if(!leftSensor.isLightOn()) {
+            ssom.telemetry.addLine("Error: Left color sensor light is not on!");
+            error= true;
+        }
+        if(error)
+        {
+            ssom.telemetry.update();
+        }
     }
 
     @Override
@@ -67,11 +82,6 @@ public class Sorter extends RobotPart<SorterMetric>{
         boolean pressed = false;
         while (!isInterrupted()) {
             // Sensor query
-            leftSensor.getDistance(DistanceUnit.CM);
-            leftSensor.green();
-            leftSensor.red();
-            leftSensor.blue();
-
             int redValue = leftSensor.red();
             int greenValue = leftSensor.green();
             int blueValue = leftSensor.blue();
@@ -92,22 +102,32 @@ public class Sorter extends RobotPart<SorterMetric>{
 
             // Listen for key presses
             if (!ignoreGamepad) {
-                if (!pressed && gamepad.a) {
+                if (!pressed && ssom.gamepadBuffer.g2DpadLeft) {
                     pressed = true;
-                    currentPosition += 1425.1/4.0;
-                    sortMotor.setTargetPosition((int)Math.round(currentPosition));
+                    targetPosition -= QUARTER_TURN;
+                    sortMotor.setTargetPosition((int)Math.round(targetPosition));
                     sortMotor.setPower(1);
                 }
-                else if (!pressed && gamepad.b) {
+                else if (!pressed && ssom.gamepadBuffer.g2DpadRight) {
                     pressed = true;
-                    currentPosition -= 1425.1/4.0;
-                    sortMotor.setTargetPosition((int)Math.round(currentPosition));
+                    targetPosition += QUARTER_TURN;
+                    sortMotor.setTargetPosition((int)Math.round(targetPosition));
                     sortMotor.setPower(1);
                 }
-                if (!gamepad.a && !gamepad.b) {
+                else if (!pressed && ssom.gamepadBuffer.g2DpadUp) {
+                    pressed = true;
+                    targetPosition += HALF_TURN;
+                    sortMotor.setTargetPosition((int)Math.round(targetPosition));
+                    sortMotor.setPower(1);
+                }
+                if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight) {
                    pressed = false;
                 }
             }
+
+            // Are we close enough
+            if(Math.abs(sortMotor.getCurrentPosition() - (int)Math.round(targetPosition)) < CLOSE_ENOUGH_TICKS)
+                sortMotor.setPower(HOLD_POWER);
 
             checkIfSidesHaveColors();
         }
@@ -118,7 +138,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     //To do getPower() is currently being stupid and not changing into decimals
     //...what the heck... anyway
     protected void checkIfSidesHaveColors(){
-        if (Math.abs(sortMotor.getPower()) <= 0.01) {
+        if (sortMotor.getPower() <= HOLD_POWER) {
             if (isSpinning) {
                 stopTime = System.currentTimeMillis();
                 leftColor = getColorForSide(lastLeftColorTime, lastLeftColor, stopTime);
@@ -136,7 +156,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     //black.
     protected int getColorForSide(long lastColorTime, int lastColor, long stopTime) {
         long diff = stopTime - lastColorTime;
-        if (diff <= 0.25) {
+        if (diff <= TAIL_ROTATE_TIME_MS) {
             return lastColor;
         } else {
             return 0;
@@ -160,17 +180,18 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     @Override
     public void getTelemetry(Telemetry telemetry) {
-        telemetry.addData("leftRed", leftSensor.red());
-        telemetry.addData("leftGreen", leftSensor.green());
-        telemetry.addData("leftBlue", leftSensor.blue());
-        telemetry.addData("sorterticks", sortMotor.getCurrentPosition());
-        telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
+        // I2C calls in telemetry can be very slow (only for debugging)
+        //telemetry.addData("leftRed", leftSensor.red());
+        //telemetry.addData("leftGreen", leftSensor.green());
+        //telemetry.addData("leftBlue", leftSensor.blue());
+        //telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
         telemetry.addData("leftColor", (leftColor == 0) ? "None" : (leftColor == 1) ? "green" : "purple");
         telemetry.addData("lastLeftColor", lastLeftColor);
         telemetry.addData("lastLeftColorTime", lastLeftColorTime);
+        telemetry.addData("sortMotor Ticks", sortMotor.getCurrentPosition());
+        telemetry.addData("sortMotor Power",sortMotor.getPower());
         telemetry.addData("isSpinning", isSpinning);
         telemetry.addData("stopTime", stopTime);
-        telemetry.addData("sortMotor Power",sortMotor.getPower());
     }
 }
 

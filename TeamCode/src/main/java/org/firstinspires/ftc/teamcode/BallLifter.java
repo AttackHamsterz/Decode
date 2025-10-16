@@ -22,7 +22,6 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
 
     public BallLifter(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
-        this.gamepad = ssom.gamepad2;
         this.setIgnoreGamepad(ignoreGamepad);
         this.lifting = false;
 
@@ -66,16 +65,19 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
 
     @Override
     public void run() {
-        boolean xPressed = false;
-        while (!isInterrupted()) {
-            if (!ignoreGamepad) {
-                if (!xPressed && gamepad.x) {
-                    xPressed = true;
+        boolean pressed = false;
+        if (!ignoreGamepad) {
+            while (!isInterrupted()) {
+                if (!pressed && ssom.gamepadBuffer.g2RightTrigger > 0.1) {
+                    pressed = true;
                     lift();
                 }
 
-                if(!gamepad.x)
-                    xPressed = false;
+                if (ssom.gamepadBuffer.g2RightTrigger <= 0.1)
+                    pressed = false;
+
+                // Short sleep to keep this loop from saturating
+                sleep();
             }
         }
     }

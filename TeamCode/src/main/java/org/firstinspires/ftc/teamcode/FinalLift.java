@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -12,11 +11,10 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     private final DcMotor finalLiftMotorRight;
     private static final double PPM = 1993.6;
     private static final double PPM_IN = 4.75;
-    private static final double LIFTHEIGHT_IN = 18.5;
+    private static final double LIFT_HEIGHT_IN = 18.5;
 
     public FinalLift(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
-        this.gamepad = ssom.gamepad1;
         finalLiftMotorLeft = ssom.hardwareMap.get(DcMotor.class, "finalLiftMotorLeft");
         finalLiftMotorRight = ssom.hardwareMap.get(DcMotor.class, "finalLiftMotorRight");
         finalLiftMotorRight.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -31,7 +29,7 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     }
 
     public void lift() {
-        int pos = (int)Math.round(LIFTHEIGHT_IN/PPM_IN*PPM);
+        int pos = (int)Math.round(LIFT_HEIGHT_IN/PPM_IN*PPM);
         finalLiftMotorLeft.setTargetPosition(pos);
         finalLiftMotorRight.setTargetPosition(pos);
         finalLiftMotorLeft.setPower(1);
@@ -48,16 +46,19 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
 
     @Override
     public void run() {
-        while (!isInterrupted()){
-                if (!ignoreGamepad) {
-                    if (gamepad.start) {
+        if (!ignoreGamepad) {
+            while (!isInterrupted()){
+                if (ssom.gamepadBuffer.g1Start){
+                    if(ssom.gamepadBuffer.g1DpadUp) {
                         lift();
-                    } else if (gamepad.back) {
+                    } else if (ssom.gamepadBuffer.g1DpadDown) {
                         drop();
-
                     }
                 }
 
+                // Short sleep to keep this loop from saturating
+                sleep();
+            }
         }
     }
 
@@ -80,6 +81,8 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     public void getTelemetry(Telemetry telemetry) {
         telemetry.addData("liftLeftTicks", finalLiftMotorLeft.getCurrentPosition());
         telemetry.addData("liftRightTicks", finalLiftMotorRight.getCurrentPosition());
+        telemetry.addData("liftLeftPower", finalLiftMotorLeft.getPower());
+        telemetry.addData("liftRightPower", finalLiftMotorRight.getPower());
     }
 }
 

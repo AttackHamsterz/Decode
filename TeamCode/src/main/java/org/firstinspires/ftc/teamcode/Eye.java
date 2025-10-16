@@ -54,7 +54,6 @@ public class Eye extends RobotPart<EyeMetric>{
 
     public Eye(StandardSetupOpMode ssom){
         this.ssom = ssom;
-        this.gamepad = ssom.gamepad2;
         this.mode = Mode.AUTO_START;
 
         // Setup limelight
@@ -79,11 +78,7 @@ public class Eye extends RobotPart<EyeMetric>{
             }
 
             // Short sleep to keep this loop from saturating
-            try {
-                sleep(LOOP_PAUSE_MS);
-            } catch (InterruptedException e) {
-                interrupt();
-            }
+            sleep();
         }
         limelight.pipelineSwitch(0); // Switch to pipeline number 0
     }

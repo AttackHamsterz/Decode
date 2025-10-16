@@ -11,7 +11,6 @@ public class Launcher extends RobotPart<LauncherMetric>{
 
     public Launcher(StandardSetupOpMode ssom){
         this.ssom = ssom;
-        this.gamepad = ssom.gamepad2;
         launchMotor = ssom.hardwareMap.get(DcMotor.class, "launchMotor"); //need to define channel
         // Setup
         launchMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -24,38 +23,12 @@ public class Launcher extends RobotPart<LauncherMetric>{
 
     @Override
     public void run() {
-        boolean press = false;
-        while (!isInterrupted()) {
-            if (!ignoreGamepad) {
-                if (!press) {
-                    if (gamepad.back) {
-                        press = true;
-                        launchMotor.setPower(0);
-                        launchMotorPower = 0;
-                        //launchMotor.setTargetPosition(1425); //1425.1
-                    } else if (gamepad.start) {
-                        press = true;
-                        launchMotor.setPower(0.5);
-                        launchMotorPower = 1;
-                        //launchMotor.setTargetPosition(0);
-                    } else if (gamepad.left_bumper) {
-                        press = true;
-                        if (launchMotorPower > 0.05) {
-                            launchMotorPower = launchMotorPower - 0.05;
-                            launchMotor.setPower(launchMotorPower);
-                        } else {
-                            launchMotorPower = 0;
-                        }
-                    } else if (gamepad.right_bumper) {
-                        press = true;
-                        if (launchMotorPower < 1) {
-                            launchMotorPower = launchMotorPower + 0.05;
-                            launchMotor.setPower(launchMotorPower);
-                        }
-                    }
-                } else if (!gamepad.back && !gamepad.start && !gamepad.left_bumper && !gamepad.right_bumper) {
-                    press = false;
-                }
+        if (!ignoreGamepad) {
+            while (!isInterrupted()) {
+                launchMotor.setPower(ssom.gamepadBuffer.g2LeftTrigger);
+                launchMotorPower = ssom.gamepadBuffer.g2LeftTrigger;
+
+                sleep();
             }
         }
     }
