@@ -1,8 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -13,8 +12,10 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final int CLOSE_ENOUGH_TICKS = 14;
     private static final double HOLD_POWER = 0.1;
     private static final double TAIL_ROTATE_TIME_MS = 100;
+    private static final double QUARTER_TURN_POWER = 1.0;
+    private static final double HALF_TURN_POWER = 1.0;
 
-    private final DcMotor sortMotor;
+    private final DcMotorEx sortMotor;
     private final RevColorSensorV3 leftSensor;
     //private final RevColorSensorV3 rightSensor;
     //private final RevColorSensorV3 frontSensor;
@@ -49,18 +50,19 @@ public class Sorter extends RobotPart<SorterMetric>{
     public Sorter(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
         this.ignoreGamepad = ignoreGamepad;
-        sortMotor = ssom.hardwareMap.get(DcMotor.class, "sortMotor"); //need to define channel
+        sortMotor = ssom.hardwareMap.get(DcMotorEx.class, "sortMotor"); //need to define channel
         leftSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "leftSensor"); // ic2 bus
         //rightSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "rightSensor"); // ic2 bus
         //frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor"); // ic2 bus
         //backSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "backSensor"); // ic2 bus
 
         // Setup motor
-        sortMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        sortMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        sortMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        sortMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        //sortMotor.setPositionPIDFCoefficients(5.0);
+        sortMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        sortMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         sortMotor.setTargetPosition(0);
-        sortMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sortMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
         // Setup variables
         targetPosition = 0;
@@ -106,21 +108,21 @@ public class Sorter extends RobotPart<SorterMetric>{
                     pressed = true;
                     targetPosition -= QUARTER_TURN;
                     sortMotor.setTargetPosition((int)Math.round(targetPosition));
-                    sortMotor.setPower(1);
+                    sortMotor.setPower(QUARTER_TURN_POWER);
                 }
                 else if (!pressed && ssom.gamepadBuffer.g2DpadRight) {
                     pressed = true;
                     targetPosition += QUARTER_TURN;
                     sortMotor.setTargetPosition((int)Math.round(targetPosition));
-                    sortMotor.setPower(1);
+                    sortMotor.setPower(QUARTER_TURN_POWER);
                 }
                 else if (!pressed && ssom.gamepadBuffer.g2DpadUp) {
                     pressed = true;
                     targetPosition += HALF_TURN;
                     sortMotor.setTargetPosition((int)Math.round(targetPosition));
-                    sortMotor.setPower(1);
+                    sortMotor.setPower(HALF_TURN_POWER);
                 }
-                if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight) {
+                if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight && !ssom.gamepadBuffer.g2DpadUp) {
                    pressed = false;
                 }
             }
