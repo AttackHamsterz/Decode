@@ -70,7 +70,7 @@ public class StandardSetupOpMode extends OpMode {
         finalLift = new FinalLift(this, ignoreGamepad);
         launcher = new Launcher(this);
         intake = new Intake(this);
-        //eye = new Eye(this);
+        eye = new Eye(this);
 
         // Place parts into parts list
         partList.add(motion);
@@ -79,7 +79,7 @@ public class StandardSetupOpMode extends OpMode {
         partList.add(finalLift);
         partList.add(launcher);
         partList.add(intake);
-        //partList.add(eye);
+        partList.add(eye);
 
         // Setup timing
         opmodeTimer = new Timer();
