@@ -81,11 +81,9 @@ public class Eye extends RobotPart<EyeMetric>{
             if (mode == Mode.AIM_POINT) {
                 resultInUse = limelight.getLatestResult();
                 double tx = resultInUse.getTx();
-                double xrange = Range.clip(Math.toRadians(tx), -1.0, 1.0);
+                double xrange = Range.clip(tx/25.0, -1.0, 1.0);
                 double Kp = xrange * 0.1;
                 ssom.motion.spin(Kp);
-
-
             }
             if (ssom.gamepadBuffer.g1LeftBumper) {
                 setMode(Mode.AIM_POINT);
