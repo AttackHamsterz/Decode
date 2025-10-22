@@ -105,7 +105,7 @@ public class StandardSetupOpMode extends OpMode {
     }
     @Override public void start() {
         // Reset timer and launch Threads
-        opmodeTimer.resetTimer();
+        //opmodeTimer.resetTimer();
 
         // Start each part
         for( Thread part : partList)

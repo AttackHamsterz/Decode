@@ -18,26 +18,25 @@ public class BoardAutoOpMode extends AutoOpMode{
 
     @Override
     public void buildPaths() {
+        Motion.follower.setStartingPose(startPose);
         scorePath = new Path(new BezierLine(startPose, initialScorePose));
         scorePath.setLinearHeadingInterpolation(startPose.getHeading(), initialScorePose.getHeading());
+        setPathState(0);
     }
 
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
                 // Begin the autonomous
-                motion.follower.followPath(scorePath);
+                Motion.follower.followPath(scorePath);
                 setPathState(1);
                 break;
             case 1:
-
-                if(!motion.follower.isBusy()) {
-
+                // Are we done moving
+                if(!Motion.follower.isBusy()) {
                     setPathState(-1);
                 }
                 break;
-
         }
-
     }
-    }
+}

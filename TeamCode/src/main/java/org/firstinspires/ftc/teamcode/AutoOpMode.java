@@ -21,17 +21,6 @@ public class AutoOpMode extends StandardSetupOpMode {
     // Finite state machine state
     protected int pathState;
 
-    // Poses used in the super auto: x, y, and heading (in Radians).
-    // Pedro uses 0 - 144 for x and y, with 0, 0 being the bottom left of the field.
-    // This visualizer is very easy to use to find and create paths/pathchains/poses: <https://pedro-path-generator.vercel.app/>
-    private final Pose startPose = new Pose(0, 72, Math.toRadians(0));
-    private final Pose scorePose = new Pose(23, 72, Math.toRadians(0));
-    private final Pose parkControlPose = new Pose(10, 97, Math.toRadians(0));
-    private final Pose parkPose = new Pose(5, 122, Math.toRadians(0));
-
-    // Path and path-chain objects
-    private Path scorePath, parkPath;
-
     // Build paths for the auto before auto starts
     public void buildPaths() {
 
@@ -49,50 +38,12 @@ public class AutoOpMode extends StandardSetupOpMode {
          *    - Pedro will follows the angle of the path such that the robot is always driving forward when it follows the path.
          * PathChains hold Path(s) within it and are able to hold their end point, meaning that they will holdPoint until another path is followed.
          * Here is a explanation of the difference between Paths and PathChains <https://pedropathing.com/commonissues/pathtopathchain.html> */
-
-        // Score first element
-        scorePath = new Path(new BezierLine(startPose, scorePose));
-        scorePath.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
-
-        // Park with a bezier curve
-        parkPath = new Path(new BezierCurve(scorePose, parkControlPose, parkPose));
-        parkPath.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
     }
 
     /** This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
      * Everytime the switch changes case, it will reset the timer. (This is because of the setPathState() method)
      * The followPath() function sets the follower to run the specific path, but does NOT wait for it to finish before moving on. */
     public void autonomousPathUpdate() {
-        switch (pathState) {
-            case 0:
-                // Begin the autonomous
-                motion.follower.followPath(scorePath);
-                setPathState(1);
-                break;
-            case 1:
-
-                // You could check for
-                //  Follower State: "if(!follower.isBusy() {}"
-                //  Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
-                //  Robot Position: "if(follower.getPose().getX() > 36) {}"
-
-                // Wait until the robot position is close (1 inch away) from the scorePose position
-                if(!motion.follower.isBusy()) {
-                    // Code to score here
-
-                    // Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    motion.follower.followPath(parkPath,true);
-                    setPathState(2);
-                }
-                break;
-            case 2:
-                // Case waits for parking
-                if(!motion.follower.isBusy()) {
-                    // Parked, we're done
-                    setPathState(-1);
-                }
-                break;
-        }
     }
 
     /** These change the states of the paths and actions
@@ -103,6 +54,7 @@ public class AutoOpMode extends StandardSetupOpMode {
     }
 
     @Override public void init() {
+        super.init();
         pathTimer = new Timer();
         buildPaths();
         setPathState(0);
@@ -110,7 +62,7 @@ public class AutoOpMode extends StandardSetupOpMode {
     @Override public void loop() {
         if (pathState>=0) {
             // These loop the movements of the robot
-            motion.follower.update();
+            Motion.follower.update();
             autonomousPathUpdate();
         }
     }
