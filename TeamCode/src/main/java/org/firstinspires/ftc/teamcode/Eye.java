@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  * Each mode will use a specific pipeline.
  */
 public class Eye extends RobotPart<EyeMetric>{
+
     public enum Mode{
         AUTO_START(0),      // Locate the autonomous decision token
         AIM_POINT(1),       // Locate the aim point for placing or throwing
@@ -76,7 +78,18 @@ public class Eye extends RobotPart<EyeMetric>{
                 resultInUse = limelight.getLatestResult();
                 int pi = resultInUse.getPipelineIndex();
             }
+            if (mode == Mode.AIM_POINT) {
+                resultInUse = limelight.getLatestResult();
+                double tx = resultInUse.getTx();
+                double xrange = Range.clip(Math.toRadians(tx), -1.0, 1.0);
+                double Kp = xrange * 0.1;
+                ssom.motion.spin(Kp);
 
+
+            }
+            if (ssom.gamepadBuffer.g1LeftBumper) {
+                setMode(Mode.AIM_POINT);
+            }
             // Short sleep to keep this loop from saturating
             sleep();
         }
