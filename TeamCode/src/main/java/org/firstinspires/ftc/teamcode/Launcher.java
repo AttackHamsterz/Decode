@@ -1,13 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Launcher extends RobotPart<LauncherMetric>{
     private static final double TPR = 28.0;
+    private static final double MIN_RPM = 0.0;
     private static final double IDLE_RPM = 1000.0;
     private static final double MAX_RPM = 6000.0;
+    private static final double CLOSE_ENOUGH_RPM = 50.0;
     private static final double TRIGGER_MAX_RPM = 6000.0;
     private static final double TPS_TO_RPM = 60.0 / TPR;
     private static final double RPM_TO_TPS = TPR / 60.0;
@@ -27,26 +30,39 @@ public class Launcher extends RobotPart<LauncherMetric>{
     public Launcher(StandardSetupOpMode ssom){
         this.ssom = ssom;
         launchMotor = ssom.hardwareMap.get(DcMotorEx.class, "launchMotor"); //need to define channel
-        // Setup
+
+        // Setup PID and motor
         launchMotor.setVelocityPIDFCoefficients(kP, kI, kD, kF);
         launchMotor.setDirection(DcMotorEx.Direction.FORWARD);
         launchMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         launchMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        // Initial Motor speeds
+        targetVelocityRPM = 0;
+        currentVelocityRPM = 0;
+    }
+
+    public void setVelocityRPM(double velocityRPM) {
+        targetVelocityRPM = Range.clip(velocityRPM, MIN_RPM, MAX_RPM);
+    }
+
+    public boolean launchReady(){
+        return Math.abs(currentVelocityRPM - targetVelocityRPM) < CLOSE_ENOUGH_RPM;
     }
 
     @Override
     public void run() {
-        if (!ignoreGamepad) {
-            while (!isInterrupted()) {
-                // Task a target velocity
+        while (!isInterrupted()) {
+            // Task a target velocity
+            if (!ignoreGamepad)
                 targetVelocityRPM = ssom.gamepadBuffer.g2LeftTrigger * TRIGGER_MAX_RPM;
-                launchMotor.setVelocity(targetVelocityRPM * RPM_TO_TPS);
 
-                // Launch motor rpm
-                currentVelocityRPM = launchMotor.getVelocity() * TPS_TO_RPM;
+            // Launch motor rpm
+            launchMotor.setVelocity(targetVelocityRPM * RPM_TO_TPS);
+            currentVelocityRPM = launchMotor.getVelocity() * TPS_TO_RPM;
 
-                sleep();
-            }
+            // Don't saturate the thread
+            sleep();
         }
     }
 

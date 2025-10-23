@@ -97,11 +97,6 @@ public class StandardSetupOpMode extends OpMode {
         // Init gamepad
         if(!ignoreGamepad)
             gamepadBuffer.update(gamepad1, gamepad2);
-
-        // If autonomous
-        if (ignoreGamepad) {
-            // Watch obolisk for april tag
-        }
     }
     @Override public void start() {
         // Reset timer and launch Threads

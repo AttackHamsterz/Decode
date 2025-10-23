@@ -165,6 +165,47 @@ public class Sorter extends RobotPart<SorterMetric>{
         }
     }
 
+    public boolean isSpinning(){
+        return isSpinning;
+    }
+
+    /**
+     * Rotate the left spot to the launcher
+     */
+    public void rotateLeftToLaunch(){
+        targetPosition -= QUARTER_TURN;
+    }
+
+    /**
+     * Rotate the right spot to the launcher
+     */
+    public void rotateRightToLaunch(){
+        targetPosition += QUARTER_TURN;
+    }
+
+    /**
+     * Rotate the front to the launcher
+     */
+    public void rotateFrontToLaunch(){
+        targetPosition += HALF_TURN;
+    }
+
+    /**
+     * Find the closest green and rotate it to the launcher
+     * @return true if a green is in the hopper
+     */
+    public boolean rotateGreenToLaunch(){
+        return true;
+    }
+
+    /**
+     * Find the closest purple and rotate it to the launcher
+     * @return true if a purple is in the hopper
+     */
+    public boolean rotatePurpleToLaunch(){
+        return true;
+    }
+
     @Override
     protected void setTo(SorterMetric metric) {
 

@@ -14,9 +14,10 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     private final DigitalChannel ballLiftSwitch;
     private final CRServo ballLiftServo;
 
-    private final int INITIAL_WAIT_MS = 150;  // Delay so the magnet moves from the switch (ms)
-    private final int LIFT_COMPLETE_MS = 400; // Lift completes and snaps back (ms)
-    private final int TOTAL_WAIT_MS = 1000;   // Max time to wait for reset (ms)
+    private static final int INITIAL_WAIT_MS = 150;    // Delay so the magnet moves from the switch (ms)
+    private static final int LIFT_COMPLETE_MS = 400;   // Lift completes and snaps back (ms)
+    private static final int TOTAL_WAIT_MS = 1000;     // Max time to wait for reset (ms)
+    private static final double TRIGGER_THRESH = 0.02; // How much trigger triggers action
 
     private boolean lifting;
 
@@ -68,12 +69,12 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
         boolean pressed = false;
         if (!ignoreGamepad) {
             while (!isInterrupted()) {
-                if (!pressed && ssom.gamepadBuffer.g2RightTrigger > 0.1) {
+                if (!pressed && ssom.gamepadBuffer.g2RightTrigger > TRIGGER_THRESH) {
                     pressed = true;
                     lift();
                 }
 
-                if (ssom.gamepadBuffer.g2RightTrigger <= 0.1)
+                if (ssom.gamepadBuffer.g2RightTrigger <= TRIGGER_THRESH)
                     pressed = false;
 
                 // Short sleep to keep this loop from saturating
