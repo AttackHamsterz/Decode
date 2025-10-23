@@ -31,7 +31,6 @@ public class Motion extends RobotPart<MotionMetric>{
         if(follower == null)
             PanelsConfigurables.INSTANCE.refreshClass(this);
         follower = Constants.createFollower(ssom.hardwareMap);
-        follower.setStartingPose(new Pose());
     }
 
     @Override

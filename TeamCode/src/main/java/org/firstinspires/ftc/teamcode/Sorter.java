@@ -107,20 +107,14 @@ public class Sorter extends RobotPart<SorterMetric>{
                 if (!pressed && ssom.gamepadBuffer.g2DpadLeft) {
                     pressed = true;
                     targetPosition -= QUARTER_TURN;
-                    sortMotor.setTargetPosition((int)Math.round(targetPosition));
-                    sortMotor.setPower(QUARTER_TURN_POWER);
                 }
                 else if (!pressed && ssom.gamepadBuffer.g2DpadRight) {
                     pressed = true;
                     targetPosition += QUARTER_TURN;
-                    sortMotor.setTargetPosition((int)Math.round(targetPosition));
-                    sortMotor.setPower(QUARTER_TURN_POWER);
                 }
                 else if (!pressed && ssom.gamepadBuffer.g2DpadUp) {
                     pressed = true;
                     targetPosition += HALF_TURN;
-                    sortMotor.setTargetPosition((int)Math.round(targetPosition));
-                    sortMotor.setPower(HALF_TURN_POWER);
                 }
                 if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight && !ssom.gamepadBuffer.g2DpadUp) {
                    pressed = false;
@@ -130,6 +124,10 @@ public class Sorter extends RobotPart<SorterMetric>{
             // Are we close enough
             if(Math.abs(sortMotor.getCurrentPosition() - (int)Math.round(targetPosition)) < CLOSE_ENOUGH_TICKS)
                 sortMotor.setPower(HOLD_POWER);
+            else{
+                sortMotor.setTargetPosition((int)Math.round(targetPosition));
+                sortMotor.setPower(HALF_TURN_POWER);
+            }
 
             checkIfSidesHaveColors();
         }

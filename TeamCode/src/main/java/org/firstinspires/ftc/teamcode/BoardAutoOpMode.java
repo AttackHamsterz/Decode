@@ -25,6 +25,9 @@ public class BoardAutoOpMode extends AutoOpMode{
     @Override public void init() {
         super.init();
         Motion.follower.setStartingPose(startPose);
+        telemetry.addData("Auto Pose", startPose);
+        telemetry.update();
+        ballLifter.lift();
     }
 
     public void autonomousPathUpdate() {
@@ -43,8 +46,8 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 1:
             case 3:
             case 5:
-                // Are we done driving, sorter is ready and the launcher is ready?
-                if(!Motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady()) {
+                // Done driving, sorter ready, launcher ready, lifter reset?
+                if(!Motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady() && ballLifter.isReset()) {
                     // Launch
                     ballLifter.lift();
                     incrementPathState();
@@ -62,18 +65,36 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 6:
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
+                    // Slow down the launcher
+                    launcher.setVelocityRPM(0);
+
+                    // Start front intake
+
                     // Drive to pick up first line of balls
                     //Motion.follower.followPath(ballLine1Path);
                     incrementPathState();
                 }
                 break;
-            // Pick up balls
-            // Drive to launch again
-            // Drive to pick up second line of balls
-            // Pick up balls
-            // Drive to launch again
-            // Park
+            case 7:
+            case 10:
+                // Pick up balls
+                incrementPathState();
+                break;
+            case 8:
+            case 11:
+                // Drive to launch again
+                incrementPathState();
+                break;
+            case 9:
+                // Drive to pick up second line of balls
+                incrementPathState();
+                break;
+            case 12:
+                // Park
+                incrementPathState();
+                break;
             default:
+                launcher.setVelocityRPM(0);
                 setPathState(-1);
         }
     }

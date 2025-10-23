@@ -15,16 +15,20 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     private final CRServo ballLiftServo;
 
     private static final int INITIAL_WAIT_MS = 150;    // Delay so the magnet moves from the switch (ms)
-    private static final int LIFT_COMPLETE_MS = 400;   // Lift completes and snaps back (ms)
-    private static final int TOTAL_WAIT_MS = 1000;     // Max time to wait for reset (ms)
+    private static final int LIFT_COMPLETE_MS = 750;   // Lift completes and snaps back (ms)
+    private static final int TOTAL_WAIT_MS = 1500;     // Max time to wait for reset (ms)
     private static final double TRIGGER_THRESH = 0.02; // How much trigger triggers action
+    private static final double LIFT_POWER = 1.0;
+    private static final double STALL_POWER = 0.0;
 
     private boolean lifting;
+    private boolean reset;
 
     public BallLifter(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
         this.setIgnoreGamepad(ignoreGamepad);
         this.lifting = false;
+        this.reset = true;
 
         ballLiftSwitch = ssom.hardwareMap.get(DigitalChannel.class, "ballLiftSwitch");
         ballLiftSwitch.setMode(DigitalChannel.Mode.INPUT);
@@ -43,21 +47,21 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
 
             // Start the lift
             lifting = true;
-            ballLiftServo.setPower(1.0);
+            ballLiftServo.setPower(LIFT_POWER);
             long startTimeMs = System.currentTimeMillis();
-            boolean done = false;
-            while(!done){
+            reset = false;
+            while(!reset){
                 long nowMs = System.currentTimeMillis();
                 long deltaT = nowMs - startTimeMs;
                 if(deltaT > LIFT_COMPLETE_MS)
                     lifting = false;
                 if(deltaT > INITIAL_WAIT_MS && !ballLiftSwitch.getState()){
-                    done = true;
+                    reset = true;
                 }else if(deltaT > TOTAL_WAIT_MS){
-                    done = true;
+                    reset = true;
                 }
             }
-            ballLiftServo.setPower(0.0);
+            ballLiftServo.setPower(STALL_POWER);
             lifting = false;
         });
         thread.start();
@@ -103,8 +107,11 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
 
     }
 
-    public boolean isLifting()
-    {
+    public boolean isLifting(){
         return lifting;
+    }
+
+    public boolean isReset(){
+        return reset;
     }
 }

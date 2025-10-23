@@ -6,11 +6,12 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Launcher extends RobotPart<LauncherMetric>{
+    public static final double IDLE_RPM = 2000.0;
+
     private static final double TPR = 28.0;
     private static final double MIN_RPM = 0.0;
-    private static final double IDLE_RPM = 1000.0;
     private static final double MAX_RPM = 6000.0;
-    private static final double CLOSE_ENOUGH_RPM = 50.0;
+    private static final double CLOSE_ENOUGH_RPM = 150.0;
     private static final double TRIGGER_MAX_RPM = 6000.0;
     private static final double TPS_TO_RPM = 60.0 / TPR;
     private static final double RPM_TO_TPS = TPR / 60.0;
@@ -23,12 +24,14 @@ public class Launcher extends RobotPart<LauncherMetric>{
     private final DcMotorEx launchMotor;
     private double targetVelocityRPM;
     private double currentVelocityRPM;
+    private double deltaRPM;
 
     // RPM calculations
     private double currentRPM;
 
-    public Launcher(StandardSetupOpMode ssom){
+    public Launcher(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
+        setIgnoreGamepad(ignoreGamepad);
         launchMotor = ssom.hardwareMap.get(DcMotorEx.class, "launchMotor"); //need to define channel
 
         // Setup PID and motor
@@ -40,6 +43,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
         // Initial Motor speeds
         targetVelocityRPM = 0;
         currentVelocityRPM = 0;
+        deltaRPM = 0;
     }
 
     public void setVelocityRPM(double velocityRPM) {
@@ -47,7 +51,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
     }
 
     public boolean launchReady(){
-        return Math.abs(currentVelocityRPM - targetVelocityRPM) < CLOSE_ENOUGH_RPM;
+        return Math.abs(deltaRPM) < CLOSE_ENOUGH_RPM;
     }
 
     @Override
@@ -60,6 +64,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
             // Launch motor rpm
             launchMotor.setVelocity(targetVelocityRPM * RPM_TO_TPS);
             currentVelocityRPM = launchMotor.getVelocity() * TPS_TO_RPM;
+            deltaRPM = targetVelocityRPM - currentVelocityRPM;
 
             // Don't saturate the thread
             sleep();
