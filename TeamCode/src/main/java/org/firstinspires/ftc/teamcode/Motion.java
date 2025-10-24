@@ -31,7 +31,6 @@ public class Motion extends RobotPart<MotionMetric>{
         if(follower == null)
             PanelsConfigurables.INSTANCE.refreshClass(this);
         follower = Constants.createFollower(ssom.hardwareMap);
-        follower.setStartingPose(new Pose());
     }
 
     @Override
@@ -45,6 +44,7 @@ public class Motion extends RobotPart<MotionMetric>{
             while (!isInterrupted()) {
                 // Update Pedro to move the robot based on:
                 follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY, -ssom.gamepadBuffer.g1LeftStickX, -ssom.gamepadBuffer.g1RightStickX, true);
+
                 follower.update();
 
                 // Short sleep to keep this loop from saturating
@@ -79,7 +79,9 @@ public class Motion extends RobotPart<MotionMetric>{
     protected boolean closeEnough(MotionMetric metric){
         return follower.atPose(metric.pose, CLOSE_X_IN, CLOSE_Y_IN, CLOSE_ANG_RAD);
     }
-
+    public void spin(double Kp) {
+        follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY, -ssom.gamepadBuffer.g1LeftStickX, Kp, true);
+    }
     @Override
     public void getTelemetry(Telemetry telemetry) {
         Pose pose = follower.getPose();

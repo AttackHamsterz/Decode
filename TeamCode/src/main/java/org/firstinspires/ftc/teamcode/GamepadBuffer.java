@@ -18,6 +18,7 @@ public class GamepadBuffer {
     public boolean g1DpadDown;     // Holding start and pressing dpad down will lower robot
     public float g1RightTrigger;   // Holding the right trigger will slow the robot by the amount pressed
     public boolean g1RightBumper;  // Holding the right bumper will keep the robot facing the target
+    public boolean g1LeftBumper; //Holding the right bumper will aim the robot at the scoring april tag
 
     // Tool gamepad values
     public float g2LeftStickX;     // Intake left/right
@@ -67,6 +68,7 @@ public class GamepadBuffer {
         g1DpadDown = gamepad1.dpad_down;
         g1RightTrigger = gamepad1.right_trigger;
         g1RightBumper = gamepad1.right_bumper;
+        g1LeftBumper = gamepad1.left_bumper;
 
         // Tool gamepad (only record buttons we use)
         g2LeftStickX = gamepad2.left_stick_x;
