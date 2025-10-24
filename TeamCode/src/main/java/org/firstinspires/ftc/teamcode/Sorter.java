@@ -23,6 +23,9 @@ public class Sorter extends RobotPart<SorterMetric>{
     private int lastLeftColor;
     private long lastLeftColorTime;
     private boolean isSpinning;
+    private int redSensorValue;
+    private int greenSensorValue;
+    private int blueSensorValue;
     private long stopTime;
     private double targetPosition;
 
@@ -38,12 +41,12 @@ public class Sorter extends RobotPart<SorterMetric>{
             int distanceR = color1.r - color2.r;
             int distanceG = color1.g - color2.g;
             int distanceB = color1.b - color2.b;
-            return Math.sqrt(distanceR^2 + distanceG^2 + distanceB^2);
+            return Math.sqrt(Math.pow(distanceR,2) + Math.pow(distanceG,2) + Math.pow(distanceB,2));
         }
     };
 
-    Sorter.Triplet green = new Sorter.Triplet(862,3226,2385);
-    Sorter.Triplet purple = new Sorter.Triplet(1594,1767,3050);
+    Sorter.Triplet green = new Sorter.Triplet(286,1050,775);
+    Sorter.Triplet purple = new Sorter.Triplet(506,563,934);
     Sorter.Triplet none = new Sorter.Triplet(0,0,0);
 
     public Sorter(StandardSetupOpMode ssom, boolean ignoreGamepad){
@@ -55,6 +58,8 @@ public class Sorter extends RobotPart<SorterMetric>{
         //frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor"); // ic2 bus
         //backSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "backSensor"); // ic2 bus
 
+        //isSpinning has to be false
+        isSpinning = false;
         // Setup motor
         sortMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         sortMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -85,19 +90,23 @@ public class Sorter extends RobotPart<SorterMetric>{
             int redValue = leftSensor.red();
             int greenValue = leftSensor.green();
             int blueValue = leftSensor.blue();
+            redSensorValue = redValue;
+            greenSensorValue = greenValue;
+            blueSensorValue = blueValue;
 
             Sorter.Triplet sensorColor = new Sorter.Triplet(redValue, greenValue, blueValue);
 
             if (Triplet.distance(sensorColor, none) <500){
-                //letfColor = 0;
+                leftColor = 0;
             }
             else if (Triplet.distance(sensorColor, green) < Triplet.distance(sensorColor, purple)){
-                lastLeftColor = 1;
-                lastLeftColorTime = System.currentTimeMillis();
+                leftColor = 1;
             }
             else if (Triplet.distance(sensorColor, green) > Triplet.distance(sensorColor, purple)){
-                lastLeftColor = 2;
-                lastLeftColorTime = System.currentTimeMillis();
+                leftColor = 2;
+            }
+            else {
+                leftColor = 0;
             }
 
             // Listen for key presses
@@ -107,21 +116,26 @@ public class Sorter extends RobotPart<SorterMetric>{
                     targetPosition -= QUARTER_TURN;
                     sortMotor.setTargetPosition((int)Math.round(targetPosition));
                     sortMotor.setPower(1);
+                    isSpinning = true;
                 }
                 else if (!pressed && ssom.gamepadBuffer.g2DpadRight) {
                     pressed = true;
                     targetPosition += QUARTER_TURN;
                     sortMotor.setTargetPosition((int)Math.round(targetPosition));
                     sortMotor.setPower(1);
+                    isSpinning = true;
                 }
                 else if (!pressed && ssom.gamepadBuffer.g2DpadUp) {
                     pressed = true;
                     targetPosition += HALF_TURN;
                     sortMotor.setTargetPosition((int)Math.round(targetPosition));
                     sortMotor.setPower(1);
+                    isSpinning = true;
                 }
-                if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight) {
+                if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight && !ssom.gamepadBuffer.g2DpadUp) {
                    pressed = false;
+                   isSpinning = false;
+                   stopTime = System.currentTimeMillis();
                 }
             }
 
@@ -134,21 +148,17 @@ public class Sorter extends RobotPart<SorterMetric>{
     }
 
     // It's 'supposed' to check to see if the motor is spinning and if stopped get
-    // the color of the balls... heh...
-    //To do getPower() is currently being stupid and not changing into decimals
-    //...what the heck... anyway
+    // the color of the balls
     protected void checkIfSidesHaveColors(){
-        if (sortMotor.getPower() <= HOLD_POWER) {
-            if (isSpinning) {
-                stopTime = System.currentTimeMillis();
-                leftColor = getColorForSide(lastLeftColorTime, lastLeftColor, stopTime);
-                //rightColor = getColorForSide(lastRightColorTime, lastRightColor, stopTime);
-                //frontColor = getColorForSide(lastFrontColorTime, lastFrontColor, stopTime);
-                //backColor = getColorForSide(lastBackColorTime, lastBackColor, stopTime);
-            }
-            isSpinning = false;
-        } else {
-            isSpinning = true;
+        if (sortMotor.getPower() <= HOLD_POWER || !isSpinning) {
+
+
+            lastLeftColor = 1;
+            lastLeftColorTime = System.currentTimeMillis();
+            lastLeftColor = getColorForSide(lastLeftColorTime, lastLeftColor, stopTime);
+            //rightColor = getColorForSide(lastRightColorTime, lastRightColor, stopTime);
+            //frontColor = getColorForSide(lastFrontColorTime, lastFrontColor, stopTime);
+            //backColor = getColorForSide(lastBackColorTime, lastBackColor, stopTime);
         }
     }
 
@@ -192,6 +202,9 @@ public class Sorter extends RobotPart<SorterMetric>{
         telemetry.addData("sortMotor Power",sortMotor.getPower());
         telemetry.addData("isSpinning", isSpinning);
         telemetry.addData("stopTime", stopTime);
+        telemetry.addData("greenValue", greenSensorValue);
+        telemetry.addData("blueValue", blueSensorValue);
+        telemetry.addData("redValue", redSensorValue);
     }
 }
 
