@@ -3,24 +3,42 @@ package org.firstinspires.ftc.teamcode;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Autonomous(name = "Auto: Board", group = "Robot")
 @Disabled
 public class BoardAutoOpMode extends AutoOpMode{
-    private static final double FIRST_LAUNCH_RPM = 2700.0;
+    private static final double FIRST_LAUNCH_RPM = 2500.00;
     private final Pose startPose = new Pose(16.08, 110.62, Math.toRadians(0));
     private final Pose initialScorePose = new Pose(27.78, 112.52, Math.toRadians(135));
+    private final Pose firstLineStart = new Pose(42.0,90.0, Math.toRadians(180));
+    private final Pose firstLineEnd = new Pose(23.08,90.0, Math.toRadians(180));
 
-    private Path scorePath;
+    private Path boardToScorePath;
+    private PathChain scoreToFirstLinePath;
+    private PathChain firstLineEndPath;
+    private PathChain firstLineEndToScore;
 
     @Override
     public void buildPaths() {
-        scorePath = new Path(new BezierLine(startPose, initialScorePose));
-        scorePath.setLinearHeadingInterpolation(startPose.getHeading(), initialScorePose.getHeading());
+        boardToScorePath = new Path(new BezierLine(startPose, initialScorePose));
+        boardToScorePath.setLinearHeadingInterpolation(startPose.getHeading(), initialScorePose.getHeading());
+        scoreToFirstLinePath = Motion.follower.pathBuilder()
+                .addPath(new BezierLine(initialScorePose, firstLineStart))
+                .setLinearHeadingInterpolation(initialScorePose.getHeading(), firstLineStart.getHeading())
+                .build();
+        firstLineEndPath = Motion.follower.pathBuilder()
+                .addPath(new BezierLine(firstLineStart, firstLineEnd))
+                .setLinearHeadingInterpolation(firstLineStart.getHeading(), firstLineEnd.getHeading())
+                .build();
+        firstLineEndToScore = Motion.follower.pathBuilder()
+                 .addPath(new BezierLine(firstLineEnd, initialScorePose))
+                 .setLinearHeadingInterpolation(firstLineEnd.getHeading(), initialScorePose.getHeading())
+                 .build();
         setPathState(0);
-    }
+   }
 
     @Override public void init() {
         super.init();
@@ -34,7 +52,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         switch (pathState) {
             case 0:
                 // Follow first path for initial shots
-                Motion.follower.followPath(scorePath);
+                Motion.follower.followPath(boardToScorePath, true);
 
                 // Adjust sorter to correct color - TODO
                 sorter.rotateLeftToLaunch();
@@ -49,6 +67,10 @@ public class BoardAutoOpMode extends AutoOpMode{
                 // Done driving, sorter ready, launcher ready, lifter reset?
                 if(!Motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady() && ballLifter.isReset()) {
                     // Launch
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                    }
                     ballLifter.lift();
                     incrementPathState();
                 }
@@ -71,19 +93,28 @@ public class BoardAutoOpMode extends AutoOpMode{
                     // Start front intake
 
                     // Drive to pick up first line of balls
-                    //Motion.follower.followPath(ballLine1Path);
+                    Motion.follower.followPath(scoreToFirstLinePath);
                     incrementPathState();
                 }
                 break;
             case 7:
             case 10:
                 // Pick up balls
-                incrementPathState();
+                if(!Motion.follower.isBusy())
+                {
+                    Motion.follower.followPath(firstLineEndPath);
+                    incrementPathState();
+                }
                 break;
+
             case 8:
             case 11:
                 // Drive to launch again
-                incrementPathState();
+                if(!Motion.follower.isBusy())
+                {
+                    Motion.follower.followPath(firstLineEndToScore, true);
+                    incrementPathState();
+                }
                 break;
             case 9:
                 // Drive to pick up second line of balls
