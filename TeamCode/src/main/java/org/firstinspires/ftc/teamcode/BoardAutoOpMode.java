@@ -15,11 +15,13 @@ public class BoardAutoOpMode extends AutoOpMode{
     private final Pose initialScorePose = new Pose(27.78, 112.52, Math.toRadians(135));
     private final Pose firstLineStart = new Pose(42.0,90.0, Math.toRadians(180));
     private final Pose firstLineEnd = new Pose(23.08,90.0, Math.toRadians(180));
+    private final Pose parkPose = new Pose( 38.0, 90.0, Math.toRadians(270.0));
 
     private Path boardToScorePath;
     private PathChain scoreToFirstLinePath;
     private PathChain firstLineEndPath;
     private PathChain firstLineEndToScore;
+    private PathChain scoreToPark;
 
     @Override
     public void buildPaths() {
@@ -34,9 +36,13 @@ public class BoardAutoOpMode extends AutoOpMode{
                 .setLinearHeadingInterpolation(firstLineStart.getHeading(), firstLineEnd.getHeading())
                 .build();
         firstLineEndToScore = Motion.follower.pathBuilder()
-                 .addPath(new BezierLine(firstLineEnd, initialScorePose))
-                 .setLinearHeadingInterpolation(firstLineEnd.getHeading(), initialScorePose.getHeading())
-                 .build();
+                .addPath(new BezierLine(firstLineEnd, initialScorePose))
+                .setLinearHeadingInterpolation(firstLineEnd.getHeading(), initialScorePose.getHeading())
+                .build();
+        scoreToPark = Motion.follower.pathBuilder()
+                .addPath(new BezierLine(initialScorePose, parkPose))
+                .setLinearHeadingInterpolation(initialScorePose.getHeading(), parkPose.getHeading())
+                .build();
         setPathState(0);
    }
 
@@ -68,7 +74,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 if(!Motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady() && ballLifter.isReset()) {
                     // Launch
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(200);
                     } catch (InterruptedException e) {
                     }
                     ballLifter.lift();
@@ -98,20 +104,16 @@ public class BoardAutoOpMode extends AutoOpMode{
                 }
                 break;
             case 7:
-            case 10:
                 // Pick up balls
-                if(!Motion.follower.isBusy())
-                {
+                if(!Motion.follower.isBusy()){
                     Motion.follower.followPath(firstLineEndPath);
                     incrementPathState();
                 }
                 break;
 
             case 8:
-            case 11:
                 // Drive to launch again
-                if(!Motion.follower.isBusy())
-                {
+                if(!Motion.follower.isBusy()){
                     Motion.follower.followPath(firstLineEndToScore, true);
                     incrementPathState();
                 }
@@ -120,13 +122,18 @@ public class BoardAutoOpMode extends AutoOpMode{
                 // Drive to pick up second line of balls
                 incrementPathState();
                 break;
-            case 12:
+            case 10:
                 // Park
-                incrementPathState();
+                if(!Motion.follower.isBusy()){
+                    Motion.follower.followPath(scoreToPark);
+                    incrementPathState();
+                }
                 break;
             default:
-                launcher.setVelocityRPM(0);
-                setPathState(-1);
+                if(!Motion.follower.isBusy()) {
+                    launcher.setVelocityRPM(0);
+                    setPathState(-1);
+                }
         }
     }
 }
