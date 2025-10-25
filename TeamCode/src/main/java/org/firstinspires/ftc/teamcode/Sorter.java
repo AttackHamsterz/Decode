@@ -43,12 +43,12 @@ public class Sorter extends RobotPart<SorterMetric>{
             int distanceR = color1.r - color2.r;
             int distanceG = color1.g - color2.g;
             int distanceB = color1.b - color2.b;
-            return Math.sqrt(distanceR^2 + distanceG^2 + distanceB^2);
+            return Math.sqrt(Math.pow(distanceR, 2) + Math.pow(distanceG, 2) + Math.pow(distanceB, 2));
         }
-    };
+    }
 
-    Sorter.Triplet green = new Sorter.Triplet(862,3226,2385);
-    Sorter.Triplet purple = new Sorter.Triplet(1594,1767,3050);
+    Sorter.Triplet green = new Sorter.Triplet(393,1445,1060);
+    Sorter.Triplet purple = new Sorter.Triplet(712,799,1300);
     Sorter.Triplet none = new Sorter.Triplet(0,0,0);
 
     public Sorter(StandardSetupOpMode ssom, boolean ignoreGamepad){
@@ -89,23 +89,22 @@ public class Sorter extends RobotPart<SorterMetric>{
         boolean pressed = false;
         while (!isInterrupted()) {
             // Sensor query
-            int redValue = leftSensor.red();
-            int greenValue = leftSensor.green();
-            int blueValue = leftSensor.blue();
-            redSensorValue = redValue;
-            greenSensorValue = greenValue;
-            blueSensorValue = blueValue;
+            redSensorValue = leftSensor.red();
+            greenSensorValue = leftSensor.green();
+            blueSensorValue = leftSensor.blue();
 
-            Sorter.Triplet sensorColor = new Sorter.Triplet(redValue, greenValue, blueValue);
+            Sorter.Triplet sensorColor = new Sorter.Triplet(redSensorValue, greenSensorValue, blueSensorValue);
 
             if (Triplet.distance(sensorColor, none) <500){
-                //letfColor = 0;
+                leftColor = 0;
             }
             else if (Triplet.distance(sensorColor, green) < Triplet.distance(sensorColor, purple)){
+                leftColor = 1;
                 lastLeftColor = 1;
                 lastLeftColorTime = System.currentTimeMillis();
             }
             else if (Triplet.distance(sensorColor, green) > Triplet.distance(sensorColor, purple)){
+                leftColor = 2;
                 lastLeftColor = 2;
                 lastLeftColorTime = System.currentTimeMillis();
             }
@@ -115,22 +114,16 @@ public class Sorter extends RobotPart<SorterMetric>{
                 if (!pressed && ssom.gamepadBuffer.g2DpadLeft) {
                     pressed = true;
                     targetPosition -= QUARTER_TURN;
-                    sortMotor.setTargetPosition((int)Math.round(targetPosition));
-                    sortMotor.setPower(1);
                     isSpinning = true;
                 }
                 else if (!pressed && ssom.gamepadBuffer.g2DpadRight) {
                     pressed = true;
                     targetPosition += QUARTER_TURN;
-                    sortMotor.setTargetPosition((int)Math.round(targetPosition));
-                    sortMotor.setPower(1);
                     isSpinning = true;
                 }
                 else if (!pressed && ssom.gamepadBuffer.g2DpadUp) {
                     pressed = true;
                     targetPosition += HALF_TURN;
-                    sortMotor.setTargetPosition((int)Math.round(targetPosition));
-                    sortMotor.setPower(1);
                     isSpinning = true;
                 }
                 if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight) {
@@ -147,27 +140,6 @@ public class Sorter extends RobotPart<SorterMetric>{
                 sortMotor.setTargetPosition((int)Math.round(targetPosition));
                 sortMotor.setPower(HALF_TURN_POWER);
             }
-
-            checkIfSidesHaveColors();
-        }
-    }
-
-    // It's 'supposed' to check to see if the motor is spinning and if stopped get
-    // the color of the balls... heh...
-    //To do getPower() is currently being stupid and not changing into decimals
-    //...what the heck... anyway
-    protected void checkIfSidesHaveColors(){
-        if (sortMotor.getPower() <= HOLD_POWER) {
-            if (isSpinning) {
-                stopTime = System.currentTimeMillis();
-                leftColor = getColorForSide(lastLeftColorTime, lastLeftColor, stopTime);
-                //rightColor = getColorForSide(lastRightColorTime, lastRightColor, stopTime);
-                //frontColor = getColorForSide(lastFrontColorTime, lastFrontColor, stopTime);
-                //backColor = getColorForSide(lastBackColorTime, lastBackColor, stopTime);
-            }
-            isSpinning = false;
-        } else {
-            isSpinning = true;
         }
     }
 
