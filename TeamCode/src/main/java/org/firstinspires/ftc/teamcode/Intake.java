@@ -35,51 +35,40 @@ public class Intake extends RobotPart<IntakeMetric> {
         if (!ignoreGamepad) {
             while (!isInterrupted()) {
                 // Left intake (outtake wins)
-                if(ssom.gamepadBuffer.g2RightStickX < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1){
-                    leftIntakeServo.setPower(-1);
+                if (ssom.gamepadBuffer.g2RightStickX < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
                     leftIntakeServoPower = -1;
-                }
-                else if(ssom.gamepadBuffer.g2LeftStickX < -0.1 || ssom.gamepadBuffer.g2LeftStickY > 0.1){
-                    leftIntakeServo.setPower(1);
+                } else if (ssom.gamepadBuffer.g2LeftStickX < -0.1 || ssom.gamepadBuffer.g2LeftStickY > 0.1) {
                     leftIntakeServoPower = 1;
-                }
-                else{
-                    leftIntakeServo.setPower(0);
+                } else {
                     leftIntakeServoPower = 0;
                 }
 
                 // Right intake (outtake wins)
-                if(ssom.gamepadBuffer.g2RightStickX > 0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1){
-                    rightIntakeServo.setPower(-1);
+                if (ssom.gamepadBuffer.g2RightStickX > 0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
                     rightIntakeServoPower = -1;
-                }
-                else if(ssom.gamepadBuffer.g2LeftStickX > 0.1 || ssom.gamepadBuffer.g2LeftStickY > 0.1){
-                    rightIntakeServo.setPower(1);
+                } else if (ssom.gamepadBuffer.g2LeftStickX > 0.1 || ssom.gamepadBuffer.g2LeftStickY > 0.1) {
                     rightIntakeServoPower = 1;
-                }
-                else{
-                    rightIntakeServo.setPower(0);
+                } else {
                     rightIntakeServoPower = 0;
                 }
 
                 // Forward intake (outtake wins)
-                if(ssom.gamepadBuffer.g2RightStickY < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1){
-                    frontIntakeServo.setPower(-1);
+                if (ssom.gamepadBuffer.g2RightStickY < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
                     frontIntakeServoPower = -1;
-                }
-                else if(ssom.gamepadBuffer.g2LeftStickY < -0.1 || ssom.gamepadBuffer.g2LeftStickY > 0.1){
-                    frontIntakeServo.setPower(1);
+                } else if (ssom.gamepadBuffer.g2LeftStickY < -0.1 || ssom.gamepadBuffer.g2LeftStickY > 0.1) {
                     frontIntakeServoPower = 1;
-                }
-                else{
-                    frontIntakeServo.setPower(0);
+                } else {
                     frontIntakeServoPower = 0;
                 }
-
-                // Use traditional sleep to not saturate with this thread
-                sleep();
             }
         }
+
+        frontIntakeServo.setPower(frontIntakeServoPower);
+        rightIntakeServo.setPower(rightIntakeServoPower);
+        leftIntakeServo.setPower(leftIntakeServoPower);
+
+        // Use traditional sleep to not saturate with this thread
+        sleep();
     }
 
     @Override
@@ -102,5 +91,52 @@ public class Intake extends RobotPart<IntakeMetric> {
         telemetry.addData("RightServoPower", rightIntakeServoPower);
         telemetry.addData("LeftServoPower", leftIntakeServoPower);
         telemetry.addData("FrontServoPower", frontIntakeServoPower);
+    }
+
+    /**
+     * Turns left intake on
+     */
+
+    public void leftIntakeOn() {
+        leftIntakeServoPower = 1;
+    }
+
+    /**
+     * Turns right intake on
+     */
+    public void rightIntakeOn() {
+        rightIntakeServoPower = 1;
+    }
+
+    /**
+     * Turns on front intake
+     */
+    public void frontIntakeOn() {
+        frontIntakeServoPower = 1;
+    }
+
+    /**
+     * Reverses the intakes
+     */
+    public void leftIntakeReverse(){
+        leftIntakeServoPower = -1;
+    }
+    public void rightIntakeReverse(){
+        rightIntakeServoPower = -1;
+    }
+    public void frontIntakeReverse(){
+        frontIntakeServoPower = -1;
+    }
+    /**
+     * Makes intakes stop
+     */
+    public void leftIntakeStop(){
+        leftIntakeServoPower = 0;
+    }
+    public void rightIntakeStop(){
+        rightIntakeServoPower = 0;
+    }
+    public void frontIntakeStop(){
+        frontIntakeServoPower = 0;
     }
 }

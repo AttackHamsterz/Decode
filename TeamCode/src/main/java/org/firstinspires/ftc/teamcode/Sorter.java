@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -25,31 +26,34 @@ public class Sorter extends RobotPart<SorterMetric>{
     private int lastLeftColor;
     private long lastLeftColorTime;
     private boolean isSpinning;
-    private int redSensorValue;
-    private int greenSensorValue;
-    private int blueSensorValue;
+    private float redSensorValue;
+    private float greenSensorValue;
+    private float blueSensorValue;
     private long stopTime;
     private double targetPosition;
+    private double greenDistance;
+    private double purpleDistance;
+    private double noneDistance;
 
     public static class Triplet {
-        public int r, g, b;
+        public float r, g, b;
 
-        public Triplet(int r, int g, int b) {
+        public Triplet(float r, float g, float b) {
             this.r = r;
             this.g = g;
             this.b = b;
         }
         public static double distance(Triplet color1, Triplet color2) {
-            int distanceR = color1.r - color2.r;
-            int distanceG = color1.g - color2.g;
-            int distanceB = color1.b - color2.b;
+            float distanceR = color1.r - color2.r;
+            float distanceG = color1.g - color2.g;
+            float distanceB = color1.b - color2.b;
             return Math.sqrt(Math.pow(distanceR, 2) + Math.pow(distanceG, 2) + Math.pow(distanceB, 2));
         }
     }
 
-    Sorter.Triplet green = new Sorter.Triplet(393,1445,1060);
-    Sorter.Triplet purple = new Sorter.Triplet(712,799,1300);
-    Sorter.Triplet none = new Sorter.Triplet(0,0,0);
+    Sorter.Triplet green = new Sorter.Triplet(0.05f,0.372f,0.0139f);
+    Sorter.Triplet purple = new Sorter.Triplet(0.0296f,0.048f,0.0258f);
+    Sorter.Triplet none = new Sorter.Triplet(0.0011f,0.0009f,0.0007f);
 
     public Sorter(StandardSetupOpMode ssom, boolean ignoreGamepad){
         this.ssom = ssom;
@@ -89,21 +93,25 @@ public class Sorter extends RobotPart<SorterMetric>{
         boolean pressed = false;
         while (!isInterrupted()) {
             // Sensor query
-            redSensorValue = leftSensor.red();
-            greenSensorValue = leftSensor.green();
-            blueSensorValue = leftSensor.blue();
+            NormalizedRGBA temp = leftSensor.getNormalizedColors();
+            redSensorValue = temp.red;
+            greenSensorValue = temp.green;
+            blueSensorValue = temp.blue;
 
             Sorter.Triplet sensorColor = new Sorter.Triplet(redSensorValue, greenSensorValue, blueSensorValue);
+            noneDistance = Triplet.distance(sensorColor, none);
+            greenDistance = Triplet.distance(sensorColor, green);
+            purpleDistance = Triplet.distance(sensorColor, purple);
 
-            if (Triplet.distance(sensorColor, none) <500){
+            if (noneDistance < 0.01){
                 leftColor = 0;
             }
-            else if (Triplet.distance(sensorColor, green) < Triplet.distance(sensorColor, purple)){
+            else if (greenSensorValue > blueSensorValue){
                 leftColor = 1;
                 lastLeftColor = 1;
                 lastLeftColorTime = System.currentTimeMillis();
             }
-            else if (Triplet.distance(sensorColor, green) > Triplet.distance(sensorColor, purple)){
+            else {
                 leftColor = 2;
                 lastLeftColor = 2;
                 lastLeftColorTime = System.currentTimeMillis();
@@ -213,10 +221,10 @@ public class Sorter extends RobotPart<SorterMetric>{
     @Override
     public void getTelemetry(Telemetry telemetry) {
         // I2C calls in telemetry can be very slow (only for debugging)
-        //telemetry.addData("leftRed", leftSensor.red());
-        //telemetry.addData("leftGreen", leftSensor.green());
-        //telemetry.addData("leftBlue", leftSensor.blue());
-        //telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
+        telemetry.addData("leftRed", redSensorValue);
+        telemetry.addData("leftGreen", greenSensorValue);
+        telemetry.addData("leftBlue", blueSensorValue);
+        //stelemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
         telemetry.addData("leftColor", (leftColor == 0) ? "None" : (leftColor == 1) ? "green" : "purple");
         telemetry.addData("lastLeftColor", lastLeftColor);
         telemetry.addData("lastLeftColorTime", lastLeftColorTime);
@@ -227,6 +235,9 @@ public class Sorter extends RobotPart<SorterMetric>{
         telemetry.addData("greenValue", greenSensorValue);
         telemetry.addData("blueValue", blueSensorValue);
         telemetry.addData("redValue", redSensorValue);
+        telemetry.addData("greenDistance", greenDistance);
+        telemetry.addData("purpleDistance", purpleDistance);
+        telemetry.addData("noneDistance", noneDistance);
     }
 }
 
