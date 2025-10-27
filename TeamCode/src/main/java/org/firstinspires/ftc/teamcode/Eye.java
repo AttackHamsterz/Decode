@@ -18,8 +18,7 @@ public class Eye extends RobotPart<EyeMetric>{
         AUTO_START(0),      // Locate the autonomous decision token
         AIM_POINT(1),       // Locate the aim point for placing or throwing
         FIELD_LOCALIZE(2),  // Locate fiducials markers for field localization
-        TARGET_LOCALIZE(3), // Locate fiducials for scoring target
-        NONE(4);            // No mode, do nothing
+        NONE(3);            // No mode, do nothing
 
         private final int value;
         Mode(int value){
@@ -40,9 +39,6 @@ public class Eye extends RobotPart<EyeMetric>{
                     output = "Field Mode";
                     break;
                 case 3:
-                    output = "Target Mode";
-                    break;
-                case 4:
                 default:
                     output = "No Mode";
                     break;

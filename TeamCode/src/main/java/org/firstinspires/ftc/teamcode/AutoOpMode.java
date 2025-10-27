@@ -62,11 +62,24 @@ public class AutoOpMode extends StandardSetupOpMode {
         super.init();
         pathTimer = new Timer();
         buildPaths();
+
+        // Start the eye to look for the obelisk
+        eye.start();
+    }
+
+    @Override public void start() {
+        // Set the starting path state
         setPathState(0);
+
+        // Start all body parts (except the eye, which has already started)
+        for( Thread part : partList)
+            if(!part.equals(eye))
+                part.start();
     }
 
     @Override public void init_loop() {
-        // Watch obolisk for april tag
+        // Watch obelisk for april tag
+
     }
 
     @Override public void loop() {
