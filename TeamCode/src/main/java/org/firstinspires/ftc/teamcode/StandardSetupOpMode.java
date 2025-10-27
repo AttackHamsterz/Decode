@@ -68,7 +68,7 @@ public class StandardSetupOpMode extends OpMode {
         sorter = new Sorter(this, ignoreGamepad);
         ballLifter = new BallLifter(this, ignoreGamepad);
         finalLift = new FinalLift(this, ignoreGamepad);
-        launcher = new Launcher(this);
+        launcher = new Launcher(this, ignoreGamepad);
         intake = new Intake(this);
         eye = new Eye(this);
 
@@ -97,15 +97,10 @@ public class StandardSetupOpMode extends OpMode {
         // Init gamepad
         if(!ignoreGamepad)
             gamepadBuffer.update(gamepad1, gamepad2);
-
-        // If autonomous
-        if (ignoreGamepad) {
-            // Watch obolisk for april tag
-        }
     }
     @Override public void start() {
         // Reset timer and launch Threads
-        opmodeTimer.resetTimer();
+        //opmodeTimer.resetTimer();
 
         // Start each part
         for( Thread part : partList)
@@ -114,6 +109,10 @@ public class StandardSetupOpMode extends OpMode {
     @Override public void loop() {
     }
     @Override public void stop() {
+        // Start each part
+        for( Thread part : partList)
+            part.interrupt();
+
         try {
             waitForCompletion();
         } catch (InterruptedException e) {

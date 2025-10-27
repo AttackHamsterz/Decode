@@ -3,13 +3,10 @@ package org.firstinspires.ftc.teamcode;
 import androidx.annotation.NonNull;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-import java.util.List;
 
 /**
  * An eye class that uses a Limelight for various modes of play.
@@ -56,7 +53,6 @@ public class Eye extends RobotPart<EyeMetric>{
     private final Limelight3A limelight;
     private Eye.Mode mode;
     private LLResult resultInUse;
-    private int id;
 
     public Eye(StandardSetupOpMode ssom){
         this.ssom = ssom;
@@ -85,7 +81,7 @@ public class Eye extends RobotPart<EyeMetric>{
             if (mode == Mode.AIM_POINT) {
                 resultInUse = limelight.getLatestResult();
                 double tx = resultInUse.getTx();
-                double xrange = Range.clip(Math.toRadians(tx), -1.0, 1.0);
+                double xrange = Range.clip(tx/25.0, -1.0, 1.0);
                 double Kp = xrange * 0.1;
                 ssom.motion.spin(Kp);
 
@@ -105,7 +101,6 @@ public class Eye extends RobotPart<EyeMetric>{
             }
             if (ssom.gamepadBuffer.g1LeftBumper) {
                 setMode(Mode.AIM_POINT);
-
             }
             // Short sleep to keep this loop from saturating
             sleep();
@@ -145,8 +140,6 @@ public class Eye extends RobotPart<EyeMetric>{
             telemetry.addData("Target X", tx);
             telemetry.addData("Target Y", ty);
             telemetry.addData("Target Area", ta);
-            telemetry.addData("Fiducial", id );
-
         } else {
             telemetry.addData("Limelight", "No Targets");
         }
