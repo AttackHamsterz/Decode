@@ -16,12 +16,16 @@ public class BoardAutoOpMode extends AutoOpMode{
     private final Pose firstLineStart = new Pose(42.0,90.0, Math.toRadians(180));
     private final Pose firstLineEnd = new Pose(23.08,90.0, Math.toRadians(180));
     private final Pose parkPose = new Pose( 38.0, 90.0, Math.toRadians(270.0));
+    private final Pose secondLineStart = new Pose(42.0, 66.5, Math.toRadians(180.0));
+    private final Pose secondLineEnd = new Pose(23.08, 66.5, Math.toRadians(180));
 
     private Path boardToScorePath;
     private PathChain scoreToFirstLinePath;
     private PathChain firstLineEndPath;
     private PathChain firstLineEndToScore;
     private PathChain scoreToPark;
+    private PathChain scoreToSecondLine;
+    private PathChain secondLineEndPath;
 
     @Override
     public void buildPaths() {
@@ -42,6 +46,14 @@ public class BoardAutoOpMode extends AutoOpMode{
         scoreToPark = Motion.follower.pathBuilder()
                 .addPath(new BezierLine(initialScorePose, parkPose))
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), parkPose.getHeading())
+                .build();
+        scoreToSecondLine = Motion.follower.pathBuilder()
+                .addPath(new BezierLine(initialScorePose, secondLineStart))
+                .setLinearHeadingInterpolation(initialScorePose.getHeading(), secondLineStart.getHeading())
+                .build();
+        secondLineEndPath = Motion.follower.pathBuilder()
+                .addPath(new BezierLine(secondLineStart, secondLineEnd))
+                .setLinearHeadingInterpolation(secondLineStart.getHeading(), secondLineEnd.getHeading())
                 .build();
         setPathState(0);
    }
@@ -119,10 +131,22 @@ public class BoardAutoOpMode extends AutoOpMode{
                 }
                 break;
             case 9:
-                // Drive to pick up second line of balls
+                // Score balls
                 incrementPathState();
                 break;
             case 10:
+                //Drive from score pose to second line start
+                if(!ballLifter.isLifting()){
+                    Motion.follower.followPath(scoreToSecondLine);
+                    incrementPathState();
+                }
+            case 11:
+                //Pick up balls
+                if(!Motion.follower.isBusy()) {
+                    Motion.follower.followPath(secondLineEndPath);
+                    incrementPathState();
+                }
+            case 12:
                 // Park
                 if(!Motion.follower.isBusy()){
                     Motion.follower.followPath(scoreToPark);
