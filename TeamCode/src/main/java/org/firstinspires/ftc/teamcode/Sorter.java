@@ -1,11 +1,16 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
+import androidx.annotation.NonNull;
+
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Sorter extends RobotPart<SorterMetric>{
     private static final double PPM = 1425.1;
@@ -17,6 +22,116 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double QUARTER_TURN_POWER = 1.0;
     private static final double HALF_TURN_POWER = 1.0;
 
+    public enum BallColor{
+        None(0),
+        Green(1),
+        Purple(2);
+
+        private final String color;
+        private final int id;
+        private double distance;
+        private float[] hsv;
+        private long time;
+
+        private static final double MIN_DIST_CM = 3.0;
+        private static final float PURPLE_HUE_MIN = 165;
+        private static final float PURPLE_HUE_MAX = 240;
+        private static final float GREEN_HUE_MIN = 150;
+        private static final float GREEN_HUE_MAX = 165;
+        private static final float SATURATION_MIN = 0.45f;
+        private static final float VALUE_MIN = 0.18f;
+
+        BallColor(int id) {
+            if(id < 1 || id > 2) id = 0;
+            this.id = id;
+            this.color = (id == 1) ? "Green" : (id == 2) ? "Purple" : "None";
+            this.hsv = new float[3];
+            this.distance = 0;
+            this.time = 0;
+        }
+
+        public void setHSV(float[] hsv){
+            if(hsv.length > 2) {
+                this.hsv[0] = hsv[0];
+                this.hsv[1] = hsv[1];
+                this.hsv[2] = hsv[2];
+            }
+        }
+
+        public void setDistance(double distance){
+            this.distance = distance;
+        }
+
+        public void setTime(long time){
+            this.time = time;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public long getTime(){
+            return time;
+        }
+
+        public double getDistance(){
+            return distance;
+        }
+
+        @NonNull
+        public String toString() {
+            return color;
+        }
+
+        public static BallColor fromSensor(RevColorSensorV3 sensor) {
+            BallColor ballColor = BallColor.None;
+            float[] hsv = new float[3];
+            long time = System.currentTimeMillis();
+            double distance = 0;
+
+            // Sanity
+            if(sensor != null){
+                // Get distance (if too far, then no color)
+                distance = sensor.getDistance(DistanceUnit.CM);
+                if(distance <= MIN_DIST_CM) {
+                    // Get normalized RGB (adjust gain at each competition)
+                    NormalizedRGBA colors = sensor.getNormalizedColors();
+
+                    // Convert to HSV
+                    Color.RGBToHSV(
+                            (int) (colors.red * 255),
+                            (int) (colors.green * 255),
+                            (int) (colors.blue * 255),
+                            hsv
+                    );
+
+                    // Compare to thresholds to generate correct Ball Color
+                    if (hsv[1] >= SATURATION_MIN && hsv[2] >= VALUE_MIN) {
+                        if (hsv[0] >= PURPLE_HUE_MIN && hsv[0] <= PURPLE_HUE_MAX)
+                            ballColor = BallColor.Purple;
+                        else if (hsv[0] >= GREEN_HUE_MIN && hsv[0] < GREEN_HUE_MAX)
+                            ballColor = BallColor.Green;
+                    }
+                }
+            }
+
+            // Set hsv and time and return
+            ballColor.setDistance(distance);
+            ballColor.setHSV(hsv);
+            ballColor.setTime(time);
+            return ballColor;
+        }
+
+        public void telemetry(Telemetry telemetry, String label){
+            if(telemetry==null || label == null)
+                return;
+
+            telemetry.addData(label + " color:", toString());
+            telemetry.addData(label + " distance (cm):", distance);
+            telemetry.addData(label + " hue:", hsv[0]);
+            telemetry.addData(label + " saturation:", hsv[1]);
+            telemetry.addData(label + " value:", hsv[2]);        }
+    }
     private final DcMotor sortMotor;
     private final RevColorSensorV3 leftSensor;
     //private final RevColorSensorV3 rightSensor;
@@ -26,6 +141,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     private int lastLeftColor;
     private long lastLeftColorTime;
     private boolean isSpinning;
+
     private float redSensorValue;
     private float greenSensorValue;
     private float blueSensorValue;
@@ -34,6 +150,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     private double greenDistance;
     private double purpleDistance;
     private double noneDistance;
+
 
     public static class Triplet {
         public float r, g, b;
