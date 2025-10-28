@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
  */
 public class Motion extends RobotPart<MotionMetric>{
 
-    public static Follower follower;
+    public Follower follower;
     protected static final double CLOSE_X_IN = 1.0;
     protected static final double CLOSE_Y_IN = 1.0;
     protected static final double CLOSE_ANG_RAD = Math.toRadians(5.0);
@@ -40,8 +40,8 @@ public class Motion extends RobotPart<MotionMetric>{
             // Only start teleop drive if the gamepad is enabled
             follower.startTeleopDrive( );
             follower.update();
-
-            while (!isInterrupted()) {
+            setRunning();
+            while (running) {
                 // Update Pedro to move the robot based on:
                 follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY, -ssom.gamepadBuffer.g1LeftStickX, -ssom.gamepadBuffer.g1RightStickX, true);
 
@@ -63,24 +63,25 @@ public class Motion extends RobotPart<MotionMetric>{
 
     @Override
     public void setTo(MotionMetric metric){
-        Pose startPose = follower.getPose();
-        Path path = new Path(new BezierLine(startPose, metric.pose));
-        path.setLinearHeadingInterpolation(startPose.getHeading(), metric.pose.getHeading());
-        PathChain pathChain = new PathChain(path);
-        follower.followPath(pathChain, metric.power, true);
+        //Pose startPose = follower.getPose();
+        //Path path = new Path(new BezierLine(startPose, metric.pose));
+        //path.setLinearHeadingInterpolation(startPose.getHeading(), metric.pose.getHeading());
+        //PathChain pathChain = new PathChain(path);
+        //follower.followPath(pathChain, metric.power, true);
     }
 
     @Override
     public void safeHold() {
-        follower.holdPoint(follower.getPose());
+        //follower.holdPoint(follower.getPose());
     }
 
     @Override
     protected boolean closeEnough(MotionMetric metric){
-        return follower.atPose(metric.pose, CLOSE_X_IN, CLOSE_Y_IN, CLOSE_ANG_RAD);
+        //return follower.atPose(metric.pose, CLOSE_X_IN, CLOSE_Y_IN, CLOSE_ANG_RAD);
+        return false;
     }
     public void spin(double Kp) {
-        follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY, -ssom.gamepadBuffer.g1LeftStickX, Kp, true);
+        //follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY, -ssom.gamepadBuffer.g1LeftStickX, Kp, true);
     }
     @Override
     public void getTelemetry(Telemetry telemetry) {

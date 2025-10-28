@@ -47,7 +47,8 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     @Override
     public void run() {
         if (!ignoreGamepad) {
-            while (!isInterrupted()){
+            setRunning();
+            while (running){
                 if (ssom.gamepadBuffer.g1Start){
                     if(ssom.gamepadBuffer.g1DpadUp) {
                         lift();

@@ -56,7 +56,8 @@ public class Launcher extends RobotPart<LauncherMetric>{
 
     @Override
     public void run() {
-        while (!isInterrupted()) {
+        setRunning();
+        while (running) {
             // Task a target velocity
             if (!ignoreGamepad)
                 targetVelocityRPM = ssom.gamepadBuffer.g2LeftTrigger * TRIGGER_MAX_RPM;
@@ -69,6 +70,12 @@ public class Launcher extends RobotPart<LauncherMetric>{
             // Don't saturate the thread
             sleep();
         }
+
+        // Stop everything
+        launchMotor.setVelocity(0);
+        targetVelocityRPM = 0;
+        currentVelocityRPM = 0;
+        deltaRPM = 0;
     }
 
     @Override

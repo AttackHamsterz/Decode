@@ -32,8 +32,9 @@ public class Intake extends RobotPart<IntakeMetric> {
 
     @Override
     public void run() {
-        if (!ignoreGamepad) {
-            while (!isInterrupted()) {
+        setRunning();
+        while (running) {
+            if (!ignoreGamepad) {
                 // Left intake (outtake wins)
                 if (ssom.gamepadBuffer.g2RightStickX < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
                     leftIntakeServoPower = -1;
@@ -61,14 +62,19 @@ public class Intake extends RobotPart<IntakeMetric> {
                     frontIntakeServoPower = 0;
                 }
             }
+
+            frontIntakeServo.setPower(frontIntakeServoPower);
+            rightIntakeServo.setPower(rightIntakeServoPower);
+            leftIntakeServo.setPower(leftIntakeServoPower);
+
+            // Use traditional sleep to not saturate with this thread
+            sleep();
         }
 
-        frontIntakeServo.setPower(frontIntakeServoPower);
-        rightIntakeServo.setPower(rightIntakeServoPower);
-        leftIntakeServo.setPower(leftIntakeServoPower);
-
-        // Use traditional sleep to not saturate with this thread
-        sleep();
+        // Cleanup
+        frontIntakeStop();
+        leftIntakeStop();
+        rightIntakeStop();
     }
 
     @Override

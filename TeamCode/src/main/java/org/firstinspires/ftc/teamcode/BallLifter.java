@@ -72,7 +72,8 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     public void run() {
         boolean pressed = false;
         if (!ignoreGamepad) {
-            while (!isInterrupted()) {
+            setRunning();
+            while (running) {
                 if (!pressed && ssom.gamepadBuffer.g2RightTrigger > TRIGGER_THRESH) {
                     pressed = true;
                     lift();

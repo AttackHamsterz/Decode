@@ -72,25 +72,18 @@ public class Eye extends RobotPart<EyeMetric>{
         limelight.start();
 
         // This loop will continue until game end
-        while (!isInterrupted()) {
+        setRunning();
+        while (running) {
             // Get a result if we're in a mode that needs one
-            if(mode != Mode.NONE){
-                resultInUse = limelight.getLatestResult();
-                int pi = resultInUse.getPipelineIndex();
-            }
             if (mode == Mode.AIM_POINT) {
                 resultInUse = limelight.getLatestResult();
                 double tx = resultInUse.getTx();
                 double xrange = Range.clip(tx/25.0, -1.0, 1.0);
                 double Kp = xrange * 0.1;
                 ssom.motion.spin(Kp);
-
-
-
             }
             if (mode == Mode.AUTO_START) {
                 resultInUse = limelight.getLatestResult();
-                LLResult result = limelight.getLatestResult();
                 List<LLResultTypes.FiducialResult> fiducials = resultInUse.getFiducialResults();
                 for (LLResultTypes.FiducialResult fiducial : fiducials) {
                     obeliskColorId = fiducial.getFiducialId();
@@ -102,10 +95,13 @@ public class Eye extends RobotPart<EyeMetric>{
             if (ssom.gamepadBuffer.g1LeftBumper) {
                 setMode(Mode.AIM_POINT);
             }
+
             // Short sleep to keep this loop from saturating
             sleep();
         }
-        limelight.pipelineSwitch(0); // Switch to pipeline number 0
+
+        // Cleanup
+        limelight.stop();
     }
 
 
@@ -137,9 +133,6 @@ public class Eye extends RobotPart<EyeMetric>{
             }
             throw new IllegalArgumentException("Invalid obeliskColorId" + obeliskColorId);
         }
-
-        colorOrder order = colorOrder.fromId(obeliskColorId);
-
     }
 
     public void setMode(Mode newMode) {

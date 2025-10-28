@@ -1,10 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.geometry.BezierCurve;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -83,10 +78,11 @@ public class AutoOpMode extends StandardSetupOpMode {
     }
 
     @Override public void loop() {
-        if (pathState>=0) {
-            // These loop the movements of the robot
-            Motion.follower.update();
-            autonomousPathUpdate();
-        }
+        // These loop the movements of the robot
+        motion.follower.update();
+        autonomousPathUpdate();
+
+        telemetry.addData("PathState", pathState);
+        telemetry.addData("Pose", motion.follower.getPose().toString());
     }
 }

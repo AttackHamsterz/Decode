@@ -64,6 +64,8 @@ public class Sorter extends RobotPart<SorterMetric>{
         //frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor"); // ic2 bus
         //backSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "backSensor"); // ic2 bus
 
+        leftSensor.setGain(10.0f);
+
         //isSpinning has to be false
         isSpinning = false;
         // Setup motor
@@ -91,7 +93,8 @@ public class Sorter extends RobotPart<SorterMetric>{
     @Override
     public void run() {
         boolean pressed = false;
-        while (!isInterrupted()) {
+        setRunning();
+        while (running) {
             // Sensor query
             NormalizedRGBA temp = leftSensor.getNormalizedColors();
             redSensorValue = temp.red;
@@ -149,6 +152,9 @@ public class Sorter extends RobotPart<SorterMetric>{
                 sortMotor.setPower(HALF_TURN_POWER);
             }
         }
+
+        // Cleanup
+        sortMotor.setPower(0);
     }
 
     //It checks if the last color time is a quarter of a second, and if not it assigns

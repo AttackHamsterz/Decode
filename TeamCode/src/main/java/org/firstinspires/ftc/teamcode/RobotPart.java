@@ -8,6 +8,7 @@ import java.util.Observer;
 public abstract class RobotPart<T> extends Thread{
     // Opmode reference
     protected StandardSetupOpMode ssom;
+    protected boolean running;
 
     // Gamepad variables
     protected boolean ignoreGamepad = false;
@@ -105,6 +106,20 @@ public abstract class RobotPart<T> extends Thread{
      * @param telemetry place to put the info
      */
     public abstract void getTelemetry(Telemetry telemetry);
+
+    /**
+     * Tell the robot part we are running threads
+     */
+    public void setRunning(){
+        running = true;
+    }
+
+    /**
+     * Signal any robot part threads to stop and cleanup
+     */
+    public void safeStop(){
+        running = false;
+    }
 
     /**
      * Traditional sleep for a robot part (to avoid saturating threads)

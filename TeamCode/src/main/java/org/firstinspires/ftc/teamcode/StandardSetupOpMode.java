@@ -100,7 +100,7 @@ public class StandardSetupOpMode extends OpMode {
     }
     @Override public void start() {
         // Reset timer and launch Threads
-        //opmodeTimer.resetTimer();
+        opmodeTimer.resetTimer();
 
         // Start each part
         for( Thread part : partList)
@@ -110,13 +110,15 @@ public class StandardSetupOpMode extends OpMode {
     }
     @Override public void stop() {
         // Start each part
-        for( Thread part : partList)
-            part.interrupt();
+        for( RobotPart part : partList)
+            part.safeStop();
 
-        try {
-            waitForCompletion();
-        } catch (InterruptedException e) {
-            //Thread.currentThread().interrupt();
+        // Wait for threads to complete
+        for( Thread part : partList) {
+            try {
+                part.join();
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 
@@ -143,22 +145,5 @@ public class StandardSetupOpMode extends OpMode {
     {
         this.ignoreGamepad = ignoreGamepad;
         if(motion != null) motion.setIgnoreGamepad(ignoreGamepad);
-    }
-
-    /**
-     * Interrupt all the active threads and wait for them to complete
-     * @throws InterruptedException failed to wait for completion
-     */
-    public void waitForCompletion() throws InterruptedException
-    {
-        // Interrupt all the running threads
-        for( Thread part : partList) {
-            if(part.isAlive() && !part.isInterrupted())
-                part.interrupt();
-        }
-
-        // Wait for threads to complete
-        //for( Thread part : partList)
-        //    part.join();
     }
 }
