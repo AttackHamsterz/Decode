@@ -86,6 +86,7 @@ public class AutoOpMode extends StandardSetupOpMode {
 
     @Override public void loop() {
         // These loop the movements of the robot
+        eye.setMode(Eye.Mode.NONE);
         motion.follower.update();
         autonomousPathUpdate();
 
