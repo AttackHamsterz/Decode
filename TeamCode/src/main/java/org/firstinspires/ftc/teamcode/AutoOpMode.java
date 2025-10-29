@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import androidx.annotation.NonNull;
+
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -10,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 @Autonomous(name = "Auto", group = "Robot")
 @Disabled
 public class AutoOpMode extends StandardSetupOpMode {
+
 
     protected Timer pathTimer;
 
@@ -74,6 +77,10 @@ public class AutoOpMode extends StandardSetupOpMode {
 
     @Override public void init_loop() {
         // Watch obelisk for april tag
+        telemetry.addData("ID", eye.getFiducialID());
+        telemetry.addData("Color Order", eye.getColorOrder());
+        telemetry.update();
+
 
     }
 

@@ -52,7 +52,9 @@ public class Eye extends RobotPart<EyeMetric>{
     private final Limelight3A limelight;
     private Eye.Mode mode;
     private LLResult resultInUse;
-    public static int obeliskColorId;
+    private ColorOrder colorOrder;
+
+
 
     public Eye(StandardSetupOpMode ssom){
         this.ssom = ssom;
@@ -83,14 +85,19 @@ public class Eye extends RobotPart<EyeMetric>{
                 ssom.motion.spin(Kp);
             }
             if (mode == Mode.AUTO_START) {
+                /*
                 resultInUse = limelight.getLatestResult();
                 List<LLResultTypes.FiducialResult> fiducials = resultInUse.getFiducialResults();
                 for (LLResultTypes.FiducialResult fiducial : fiducials) {
-                    obeliskColorId = fiducial.getFiducialId();
+                    int obeliskColorId = fiducial.getFiducialId();
+
                     if ( obeliskColorId >= 21 && obeliskColorId <= 23 ){
+                        colorOrder = Eye.ColorOrder.fromId(obeliskColorId);
                         break;
                     }
                 }
+
+                 */
             }
             if (ssom.gamepadBuffer.g1LeftBumper) {
                 setMode(Mode.AIM_POINT);
@@ -105,7 +112,7 @@ public class Eye extends RobotPart<EyeMetric>{
     }
 
 
-    public enum colorOrder{
+    public enum ColorOrder{
         GPP (21, new String[] {"Green", "Purple", "Purple"}),
         PGP (22,new String[] {"Purple", "Green", "Purple"}),
         PPG (23, new String[] {"Purple", "Purple", "Green"});
@@ -113,7 +120,7 @@ public class Eye extends RobotPart<EyeMetric>{
         private final String[] colors;
         private final int id;
 
-        colorOrder(int id, String[] colors) {
+        ColorOrder(int id, String[] colors) {
             this.id = id;
             this.colors = colors;
         }
@@ -125,14 +132,36 @@ public class Eye extends RobotPart<EyeMetric>{
             return colors;
         }
 
-        public static colorOrder fromId(int obeliskColorId) {
-            for (colorOrder order : values()) {
+
+        public static ColorOrder fromId(int obeliskColorId) {
+            for (ColorOrder order : values()) {
                 if (order.id == obeliskColorId) {
                     return order;
                 }
             }
             throw new IllegalArgumentException("Invalid obeliskColorId" + obeliskColorId);
         }
+    }
+
+    public int getFiducialID() {
+        resultInUse = limelight.getLatestResult();
+        List<LLResultTypes.FiducialResult> fiducials = resultInUse.getFiducialResults();
+        for (LLResultTypes.FiducialResult fiducial : fiducials) {
+
+            int obeliskColorId = fiducial.getFiducialId();
+            if ( obeliskColorId >= 21 && obeliskColorId <= 23 ) {
+                return obeliskColorId;
+            }
+        }
+        return -1;
+    }
+
+    public ColorOrder getColorOrder() {
+        return colorOrder;
+    }
+
+    public ColorOrder getColorOrder(int id) {
+        return colorOrder = Eye.ColorOrder.fromId(id);
     }
 
     public void setMode(Mode newMode) {
@@ -167,7 +196,8 @@ public class Eye extends RobotPart<EyeMetric>{
             telemetry.addData("Target X", tx);
             telemetry.addData("Target Y", ty);
             telemetry.addData("Target Area", ta);
-            telemetry.addData("Fiducial", obeliskColorId);
+            telemetry.addData("Fiducial", getId());
+            telemetry.addData("Color Order", colorOrder.colors);
         } else {
             telemetry.addData("Limelight", "No Targets");
         }
