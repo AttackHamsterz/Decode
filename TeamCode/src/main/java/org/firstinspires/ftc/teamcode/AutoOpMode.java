@@ -44,9 +44,7 @@ public class AutoOpMode extends StandardSetupOpMode {
      * It will also reset the timers of the individual switches **/
     public void setPathState(int pState) {
         pathState = pState;
-        //pathTimer.resetTimer();
-        //telemetry.addData("Current Path State:", pathState);
-        //telemetry.update();
+        pathTimer.resetTimer();
     }
 
     /**
@@ -80,8 +78,6 @@ public class AutoOpMode extends StandardSetupOpMode {
         telemetry.addData("ID", eye.getFiducialID());
         telemetry.addData("Color Order", eye.getColorOrder());
         telemetry.update();
-
-
     }
 
     @Override public void loop() {

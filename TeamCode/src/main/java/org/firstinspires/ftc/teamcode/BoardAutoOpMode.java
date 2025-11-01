@@ -10,15 +10,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 @Autonomous(name = "Auto: Board", group = "Robot")
 @Disabled
 public class BoardAutoOpMode extends AutoOpMode{
-    private double PICKUP_VELOCITY = 5.0;
-    private double MAX_VELOCITY = 50.0;
+    private final double PICKUP_VELOCITY_PERCENTAGE = 0.25;
+    private final double PATH_VELOCITY_PERCENTAGE = 1.0;
 
     private static final double FIRST_LAUNCH_RPM = 2500.00;
     private final Pose startPose = new Pose(16.08, 110.62, Math.toRadians(0));
     private final Pose initialScorePose = new Pose(27.78, 112.52, Math.toRadians(135));
     private final Pose firstLineStart = new Pose(42.0,89.0, Math.toRadians(180));
     private final Pose firstLineEnd = new Pose(23.08,89.0, Math.toRadians(180));
-    private final Pose parkPose = new Pose( 38.0, 90.0, Math.toRadians(270));
+    private final Pose parkPose = new Pose( 23, 70, Math.toRadians(270));
     private final Pose secondLineStart = new Pose(42.0, 66.5, Math.toRadians(180));
     private final Pose secondLineEnd = new Pose(23.08, 66.5, Math.toRadians(180));
 
@@ -40,9 +40,8 @@ public class BoardAutoOpMode extends AutoOpMode{
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), firstLineStart.getHeading())
                 .build();
         firstLineEndPath = motion.follower.pathBuilder()
-                .addPath(new BezierLine(firstLineStart, firstLineEnd))
+                .addPath(new BezierLine(motion.follower::getPose, firstLineEnd))
                 .setLinearHeadingInterpolation(firstLineStart.getHeading(), firstLineEnd.getHeading())
-                .setVelocityConstraint(PICKUP_VELOCITY)
                 .build();
         firstLineEndToScore = motion.follower.pathBuilder()
                 .addPath(new BezierLine(firstLineEnd, initialScorePose))
@@ -51,12 +50,10 @@ public class BoardAutoOpMode extends AutoOpMode{
         scoreToSecondLine = motion.follower.pathBuilder()
                 .addPath(new BezierLine(initialScorePose, secondLineStart))
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), secondLineStart.getHeading())
-                .setVelocityConstraint(MAX_VELOCITY)
                 .build();
         secondLineEndPath = motion.follower.pathBuilder()
-                .addPath(new BezierLine(secondLineStart, secondLineEnd))
+                .addPath(new BezierLine(motion.follower::getPose, secondLineEnd))
                 .setLinearHeadingInterpolation(secondLineStart.getHeading(), secondLineEnd.getHeading())
-                .setVelocityConstraint(PICKUP_VELOCITY)
                 .build();
         secondLineEndToScore = motion.follower.pathBuilder()
                 .addPath(new BezierLine(secondLineEnd, initialScorePose))
@@ -83,23 +80,33 @@ public class BoardAutoOpMode extends AutoOpMode{
                 // Follow first path for initial shots
                 motion.follower.followPath(boardToScorePath, true);
 
-                // Adjust sorter to correct color - TODO
-                // Load green left, purple back/right
+                // TODO - Rotate to first color of pattern
+                // Loaded green left, purple back/right
                 sorter.rotateLeftToLaunch();
 
                 // Spin up launcher
                 launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
                 incrementPathState();
                 break;
+
+            // First 3 balls
             case 1:
             case 3:
             case 5:
+            // Second 3 balls
+            case 9:
+            case 11:
+            case 13:
+            // Third 3 balls
+            case 17:
+            case 19:
+            case 21:
                 // Done driving, sorter ready, launcher ready, lifter reset?
                 if(!motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady() && ballLifter.isReset()) {
                     // Launch
                     try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
+                        Thread.sleep(300);
+                    } catch (InterruptedException ignore) {
                     }
                     ballLifter.lift();
                     incrementPathState();
@@ -107,9 +114,13 @@ public class BoardAutoOpMode extends AutoOpMode{
                 break;
             case 2:
             case 4:
+            case 10:
+            case 12:
+            case 18:
+            case 20:
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
-                    // Rotate sorter to next color - TODO
+                    // TODO - Rotate to next color of pattern
                     sorter.rotateRightToLaunch();
                     incrementPathState();
                 }
@@ -121,71 +132,85 @@ public class BoardAutoOpMode extends AutoOpMode{
                     launcher.setVelocityRPM(0);
 
                     // Start front intake
-
+                    intake.frontIntakeOn();
 
                     // Drive to pick up first line of balls
-                    motion.follower.followPath(scoreToFirstLinePath, true);
+                    motion.follower.followPath(scoreToFirstLinePath, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
                 }
                 break;
             case 7:
                 // Pick up balls
                 if(!motion.follower.isBusy()){
-                    motion.follower.followPath(firstLineEndPath, true);
+                    motion.follower.followPath(firstLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
                 }
                 break;
-
             case 8:
                 // Drive to launch again
                 if(!motion.follower.isBusy()){
                     // Stop front intake
+                    intake.frontIntakeStop();
+
+                    // TODO - Rotate to first color of pattern
+
+                    // Spin up launcher
+                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
 
                     // Drive to score
-                    motion.follower.followPath(firstLineEndToScore, true);
-                    incrementPathState();
-                }
-                break;
-            case 9:
-                // Score balls
-                if(!motion.follower.isBusy()) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                    }
-                    incrementPathState();
-                }
-                break;
-            case 10:
-                //Drive from score pose to second line start
-                //if(!ballLifter.isLifting()){
-                    motion.follower.followPath(scoreToSecondLine);
-                    incrementPathState();
-                //}
-                break;
-            case 11:
-                //Pick up balls
-                if(!motion.follower.isBusy()) {
-                    motion.follower.followPath(secondLineEndPath);
-                    incrementPathState();
-                }
-                break;
-            case 12:
-                //Drive to score next round of balls
-                if(!motion.follower.isBusy()){
-                    motion.follower.followPath(secondLineEndToScore, true);
-                    incrementPathState();
-                }
-                break;
-            case 13:
-                // Park
-                if(!motion.follower.isBusy()){
-                    launcher.setVelocityRPM(0);
-                    motion.follower.followPath(scoreToPark, true);
+                    motion.follower.followPath(firstLineEndToScore, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
                 }
                 break;
             case 14:
+                // Are we done lifting?
+                if(!ballLifter.isLifting()){
+                    // Slow down the launcher
+                    launcher.setVelocityRPM(0);
+
+                    // Start front intake
+                    intake.frontIntakeOn();
+
+                    // Drive to pick up first line of balls
+                    motion.follower.followPath(scoreToSecondLine, PATH_VELOCITY_PERCENTAGE, false);
+                    incrementPathState();
+                }
+                break;
+            case 15:
+                //Pick up balls
+                if(!motion.follower.isBusy()) {
+                    motion.follower.followPath(secondLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
+                    incrementPathState();
+                }
+                break;
+            case 16:
+                //Drive to score next round of balls
+                if(!motion.follower.isBusy()){
+                    // Stop intake
+                    intake.frontIntakeStop();
+
+                    // TODO - Rotate to first color of pattern
+
+                    // Spin up launcher
+                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
+
+                    // Drive to score
+                    motion.follower.followPath(secondLineEndToScore, PATH_VELOCITY_PERCENTAGE, true);
+                    incrementPathState();
+                }
+                break;
+            case 22:
+                // Park
+                if(!ballLifter.isLifting()){
+                    // Stop the launcher
+                    launcher.setVelocityRPM(0);
+
+                    // Drive to park
+                    motion.follower.followPath(scoreToPark, PATH_VELOCITY_PERCENTAGE, true);
+                    incrementPathState();
+                }
+                break;
+            case 23:
                 if(!motion.follower.isBusy()) {
                     setPathState(-1);
                 }

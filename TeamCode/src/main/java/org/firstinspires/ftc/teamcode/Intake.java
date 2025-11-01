@@ -34,7 +34,7 @@ public class Intake extends RobotPart<IntakeMetric> {
     public void run() {
         setRunning();
         while (running) {
-            if (!ignoreGamepad) {
+            if (!ssom.gamepadBuffer.ignoreGamepad) {
                 // Left intake (outtake wins)
                 if (ssom.gamepadBuffer.g2RightStickX < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
                     leftIntakeServoPower = -1;

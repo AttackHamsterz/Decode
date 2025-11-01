@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.Observer;
@@ -10,22 +9,10 @@ public abstract class RobotPart<T> extends Thread{
     protected StandardSetupOpMode ssom;
     protected boolean running;
 
-    // Gamepad variables
-    protected boolean ignoreGamepad = false;
-
     // Motor overload protection
     protected static final long SAFE_CHECK_PERIOD_MS = 100;  // Check 10 times a second
     protected static final long LOOP_PAUSE_MS = 100;
     protected Thread protectionThread = new Thread();
-
-    /**
-     * Allows a user to toggle using the gamepad
-     * @param ignoreGamepad true to ignore gamepad inputs
-     */
-    public void setIgnoreGamepad(boolean ignoreGamepad)
-    {
-        this.ignoreGamepad = ignoreGamepad;
-    }
 
     private class TimeoutThread extends Thread{
         private final T metric;

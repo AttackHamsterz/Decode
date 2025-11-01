@@ -61,14 +61,14 @@ public class StandardSetupOpMode extends OpMode {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         // Setup gamepad buffer
-        gamepadBuffer = new GamepadBuffer();
+        gamepadBuffer = new GamepadBuffer(ignoreGamepad);
 
         // Setup robot
-        motion = new Motion(this, ignoreGamepad);
-        sorter = new Sorter(this, ignoreGamepad);
-        ballLifter = new BallLifter(this, ignoreGamepad);
-        finalLift = new FinalLift(this, ignoreGamepad);
-        launcher = new Launcher(this, ignoreGamepad);
+        motion = new Motion(this);
+        sorter = new Sorter(this);
+        ballLifter = new BallLifter(this);
+        finalLift = new FinalLift(this);
+        launcher = new Launcher(this);
         intake = new Intake(this);
         eye = new Eye(this);
 
@@ -134,16 +134,6 @@ public class StandardSetupOpMode extends OpMode {
         this.position = position;
 
         // Should we ignore the gamepad or not?
-        setIgnoreGamepad(ignoreGamepad);
-    }
-
-    /**
-     * Disable all gamepads for autonomous
-     * @param ignoreGamepad true ignores gamepads
-     */
-    public void setIgnoreGamepad(boolean ignoreGamepad)
-    {
         this.ignoreGamepad = ignoreGamepad;
-        if(motion != null) motion.setIgnoreGamepad(ignoreGamepad);
     }
 }

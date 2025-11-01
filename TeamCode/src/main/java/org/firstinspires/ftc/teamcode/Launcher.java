@@ -29,9 +29,8 @@ public class Launcher extends RobotPart<LauncherMetric>{
     // RPM calculations
     private double currentRPM;
 
-    public Launcher(StandardSetupOpMode ssom, boolean ignoreGamepad){
+    public Launcher(StandardSetupOpMode ssom){
         this.ssom = ssom;
-        setIgnoreGamepad(ignoreGamepad);
         launchMotor = ssom.hardwareMap.get(DcMotorEx.class, "launchMotor"); //need to define channel
 
         // Setup PID and motor
@@ -59,7 +58,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
         setRunning();
         while (running) {
             // Task a target velocity
-            if (!ignoreGamepad)
+            if (!ssom.gamepadBuffer.ignoreGamepad)
                 targetVelocityRPM = ssom.gamepadBuffer.g2LeftTrigger * TRIGGER_MAX_RPM;
 
             // Launch motor rpm

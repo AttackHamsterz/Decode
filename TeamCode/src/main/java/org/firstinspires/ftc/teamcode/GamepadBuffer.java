@@ -34,7 +34,9 @@ public class GamepadBuffer {
     public boolean g2DpadRight;    // dpad right forces right ball to launcher
     public boolean g2DpadDown;     // Launch all balls in expected order
 
-    public GamepadBuffer(){
+    public boolean ignoreGamepad;  // Should we even use a gamepad?
+
+    public GamepadBuffer(boolean ignoreGamepad){
         g1LeftStickX = 0;
         g1LeftStickY = 0;
         g1RightStickX = 0;
@@ -56,32 +58,37 @@ public class GamepadBuffer {
         g2DpadUp = false;
         g2DpadRight = false;
         g2DpadDown = false;
+
+        this.ignoreGamepad = ignoreGamepad;
     }
 
     public void update(Gamepad gamepad1, Gamepad gamepad2) {
-        // Driver gamepad (only record buttons we use)
-        g1LeftStickX = gamepad1.left_stick_x;
-        g1LeftStickY = gamepad1.left_stick_y;
-        g1RightStickX = gamepad1.right_stick_x;
-        g1Start = gamepad1.start;
-        g1DpadUp = gamepad1.dpad_up;
-        g1DpadDown = gamepad1.dpad_down;
-        g1RightTrigger = gamepad1.right_trigger;
-        g1RightBumper = gamepad1.right_bumper;
-        g1LeftBumper = gamepad1.left_bumper;
+        // Update controls if we're in tele-op
+        if(!ignoreGamepad) {
+            // Driver gamepad (only record buttons we use)
+            g1LeftStickX = gamepad1.left_stick_x;
+            g1LeftStickY = gamepad1.left_stick_y;
+            g1RightStickX = gamepad1.right_stick_x;
+            g1Start = gamepad1.start;
+            g1DpadUp = gamepad1.dpad_up;
+            g1DpadDown = gamepad1.dpad_down;
+            g1RightTrigger = gamepad1.right_trigger;
+            g1RightBumper = gamepad1.right_bumper;
+            g1LeftBumper = gamepad1.left_bumper;
 
-        // Tool gamepad (only record buttons we use)
-        g2LeftStickX = gamepad2.left_stick_x;
-        g2LeftStickY = gamepad2.left_stick_y;
-        g2RightStickX = gamepad2.right_stick_x;
-        g2RightStickY = gamepad2.right_stick_y;
-        g2LeftTrigger = gamepad2.left_trigger;
-        g2RightTrigger = gamepad2.right_trigger;
-        g2LeftBumper = gamepad2.left_bumper;
-        g2RightBumper = gamepad2.right_bumper;
-        g2DpadLeft = gamepad2.dpad_left;
-        g2DpadUp = gamepad2.dpad_up;
-        g2DpadRight = gamepad2.dpad_right;
-        g2DpadDown = gamepad2.dpad_down;
+            // Tool gamepad (only record buttons we use)
+            g2LeftStickX = gamepad2.left_stick_x;
+            g2LeftStickY = gamepad2.left_stick_y;
+            g2RightStickX = gamepad2.right_stick_x;
+            g2RightStickY = gamepad2.right_stick_y;
+            g2LeftTrigger = gamepad2.left_trigger;
+            g2RightTrigger = gamepad2.right_trigger;
+            g2LeftBumper = gamepad2.left_bumper;
+            g2RightBumper = gamepad2.right_bumper;
+            g2DpadLeft = gamepad2.dpad_left;
+            g2DpadUp = gamepad2.dpad_up;
+            g2DpadRight = gamepad2.dpad_right;
+            g2DpadDown = gamepad2.dpad_down;
+        }
     }
 }

@@ -13,7 +13,7 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     private static final double PPM_IN = 4.75;
     private static final double LIFT_HEIGHT_IN = 18.5;
 
-    public FinalLift(StandardSetupOpMode ssom, boolean ignoreGamepad){
+    public FinalLift(StandardSetupOpMode ssom){
         this.ssom = ssom;
         finalLiftMotorLeft = ssom.hardwareMap.get(DcMotor.class, "finalLiftMotorLeft");
         finalLiftMotorRight = ssom.hardwareMap.get(DcMotor.class, "finalLiftMotorRight");
@@ -46,7 +46,7 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
 
     @Override
     public void run() {
-        if (!ignoreGamepad) {
+        if (!ssom.gamepadBuffer.ignoreGamepad) {
             setRunning();
             while (running){
                 if (ssom.gamepadBuffer.g1Start){

@@ -3,9 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.bylazar.configurables.PanelsConfigurables;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -25,18 +22,16 @@ public class Motion extends RobotPart<MotionMetric>{
      * Setup the motion object
      * @param ssom access to the standard setup op mode
      */
-    public Motion(StandardSetupOpMode ssom, boolean ignoreGamepad){
-        setIgnoreGamepad(ignoreGamepad);
+    public Motion(StandardSetupOpMode ssom){
         this.ssom = ssom;
-        if(follower == null)
-            PanelsConfigurables.INSTANCE.refreshClass(this);
+        PanelsConfigurables.INSTANCE.refreshClass(this);
         follower = Constants.createFollower(ssom.hardwareMap);
     }
 
     @Override
     public void run() {
 
-        if (!ignoreGamepad) {
+        if (!ssom.gamepadBuffer.ignoreGamepad) {
             // Only start teleop drive if the gamepad is enabled
             follower.startTeleopDrive( );
             follower.update();

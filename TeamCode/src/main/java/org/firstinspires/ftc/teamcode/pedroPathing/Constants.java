@@ -54,12 +54,11 @@ public class Constants {
             0.995,
             0.1,
             0.1,
-            0.01,
+            0.007,
             50,
             1.25,
             10,
-            1
-    );
+            1.0);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)

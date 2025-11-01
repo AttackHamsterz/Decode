@@ -99,7 +99,7 @@ public class Eye extends RobotPart<EyeMetric>{
 
                  */
             }
-            if (ssom.gamepadBuffer.g1LeftBumper) {
+            if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1LeftBumper) {
                 setMode(Mode.AIM_POINT);
             }
 

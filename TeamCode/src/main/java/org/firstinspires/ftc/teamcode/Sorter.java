@@ -172,9 +172,8 @@ public class Sorter extends RobotPart<SorterMetric>{
     Sorter.Triplet purple = new Sorter.Triplet(0.0296f,0.048f,0.0258f);
     Sorter.Triplet none = new Sorter.Triplet(0.0011f,0.0009f,0.0007f);
 
-    public Sorter(StandardSetupOpMode ssom, boolean ignoreGamepad){
+    public Sorter(StandardSetupOpMode ssom){
         this.ssom = ssom;
-        this.ignoreGamepad = ignoreGamepad;
         sortMotor = ssom.hardwareMap.get(DcMotor.class, "sortMotor"); //need to define channel
         leftSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "leftSensor"); // ic2 bus
         //rightSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "rightSensor"); // ic2 bus
@@ -238,7 +237,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             }
 
             // Listen for key presses
-            if (!ignoreGamepad) {
+            if (!ssom.gamepadBuffer.ignoreGamepad) {
                 if (!pressed && ssom.gamepadBuffer.g2DpadLeft) {
                     pressed = true;
                     targetPosition -= QUARTER_TURN;
@@ -254,7 +253,7 @@ public class Sorter extends RobotPart<SorterMetric>{
                     targetPosition += HALF_TURN;
                     isSpinning = true;
                 }
-                if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight) {
+                if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight && !ssom.gamepadBuffer.g2DpadUp) {
                    pressed = false;
                    isSpinning = false;
                    stopTime = System.currentTimeMillis();
