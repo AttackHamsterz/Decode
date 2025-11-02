@@ -14,13 +14,13 @@ public class BoardAutoOpMode extends AutoOpMode{
     private final double PATH_VELOCITY_PERCENTAGE = 1.0;
 
     private static final double FIRST_LAUNCH_RPM = 2500.00;
-    private final Pose startPose = new Pose(16.08, 110.62, Math.toRadians(0));
-    private final Pose initialScorePose = new Pose(27.78, 112.52, Math.toRadians(135));
-    private final Pose firstLineStart = new Pose(42.0,89.0, Math.toRadians(180));
-    private final Pose firstLineEnd = new Pose(23.08,89.0, Math.toRadians(180));
+    private final Pose startPose = new Pose(16.00, 111.0, Math.toRadians(0));
+    private final Pose initialScorePose = new Pose(27.78, 113.00, Math.toRadians(135));
+    private final Pose firstLineStart = new Pose(42.0,82.0, Math.toRadians(180));
+    private final Pose firstLineEnd = new Pose(23.08,82.0, Math.toRadians(180));
     private final Pose parkPose = new Pose( 23, 70, Math.toRadians(270));
-    private final Pose secondLineStart = new Pose(42.0, 66.5, Math.toRadians(180));
-    private final Pose secondLineEnd = new Pose(23.08, 66.5, Math.toRadians(180));
+    private final Pose secondLineStart = new Pose(42.0, 58.5, Math.toRadians(180));
+    private final Pose secondLineEnd = new Pose(23.08, 58.5, Math.toRadians(180));
 
     private Path boardToScorePath;
     private PathChain scoreToFirstLinePath;
