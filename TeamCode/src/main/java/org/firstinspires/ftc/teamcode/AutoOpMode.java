@@ -6,6 +6,9 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This super auto entry point runs everything that all auto's will need
  */
@@ -64,9 +67,65 @@ public class AutoOpMode extends StandardSetupOpMode {
         eye.start();
     }
 
+    protected List<Integer> launchPattern = new ArrayList<>();
+    protected int launchIndex = 0;
+
     @Override public void start() {
         // Set the starting path state
         setPathState(0);
+
+        //Setup launch pattern
+        int id = eye.getFiducialID();
+
+        if (id == 21) {
+            //GPP
+            //Counter Clockwise to Green, Clockwise to Purple1, Clockwise to Purple2
+            launchPattern.add(-1);
+            launchPattern.add(1);
+            launchPattern.add(1);
+            //
+            launchPattern.add(-1);
+            launchPattern.add(1);
+            launchPattern.add(1);
+            //
+            launchPattern.add(-1);
+            launchPattern.add(1);
+            launchPattern.add(1);
+        }
+
+        else if (id == 22) {
+            //PGP
+            //Launch Purple1, Counter Clockwise to Green, 2 Clockwise to Purple2
+            launchPattern.add(0);
+            launchPattern.add(-1);
+            launchPattern.add(2);
+            //
+            launchPattern.add(0);
+            launchPattern.add(-1);
+            launchPattern.add(2);
+            //
+            launchPattern.add(0);
+            launchPattern.add(-1);
+            launchPattern.add(2);
+        }
+
+        else if (id == 23) {
+            //PPG
+            //Clockwise to Purple2, Counter Clockwise to Purple1, Counter Clockwise to Green
+            launchPattern.add(1);
+            launchPattern.add(-1);
+            launchPattern.add(-1);
+            //
+            launchPattern.add(1);
+            launchPattern.add(-1);
+            launchPattern.add(-1);
+            //
+            launchPattern.add(1);
+            launchPattern.add(-1);
+            launchPattern.add(-1);
+        }
+
+
 
         // Start all body parts (except the eye, which has already started)
         for( Thread part : partList)

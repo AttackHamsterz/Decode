@@ -96,7 +96,7 @@ public class BoardAutoOpMode extends AutoOpMode{
 
                 // TODO - Rotate to first color of pattern
                 // Loaded green left, purple back/right
-                sorter.rotateLeftToLaunch();
+                sorter.rotateClockwise(launchPattern.get(launchIndex++));
 
                 // Spin up launcher
                 launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
@@ -135,7 +135,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
                     // TODO - Rotate to next color of pattern
-                    sorter.rotateRightToLaunch();
+                    sorter.rotateClockwise(launchPattern.get(launchIndex++));
                     incrementPathState();
                 }
                 break;

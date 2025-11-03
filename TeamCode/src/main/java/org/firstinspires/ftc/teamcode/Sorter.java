@@ -325,6 +325,10 @@ public class Sorter extends RobotPart<SorterMetric>{
         return true;
     }
 
+    public void rotateClockwise(int quarterTurns) {
+        targetPosition = quarterTurns*QUARTER_TURN;
+    }
+
     @Override
     protected void setTo(SorterMetric metric) {
 
