@@ -10,17 +10,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 @Autonomous(name = "Auto: Board", group = "Robot")
 @Disabled
 public class BoardAutoOpMode extends AutoOpMode{
-    private final double PICKUP_VELOCITY_PERCENTAGE = 0.25;
-    private final double PATH_VELOCITY_PERCENTAGE = 1.0;
 
     private static final double FIRST_LAUNCH_RPM = 2500.00;
-    private final Pose startPose = new Pose(16.00, 111.0, Math.toRadians(0));
-    private final Pose initialScorePose = new Pose(27.78, 113.00, Math.toRadians(135));
-    private final Pose firstLineStart = new Pose(42.0,82.0, Math.toRadians(180));
-    private final Pose firstLineEnd = new Pose(23.08,82.0, Math.toRadians(180));
-    private final Pose parkPose = new Pose( 23, 67.5, Math.toRadians(0));
-    private final Pose secondLineStart = new Pose(42.0, 58.5, Math.toRadians(180));
-    private final Pose secondLineEnd = new Pose(23.08, 58.5, Math.toRadians(180));
+    private Pose startPose;
+    private Pose initialScorePose;
+    private Pose firstLineStart;
+    private Pose firstLineEnd;
+    private Pose parkPose;
+    private Pose secondLineStart;
+    private Pose secondLineEnd;
 
     private Path boardToScorePath;
     private PathChain scoreToFirstLinePath;
@@ -30,6 +28,30 @@ public class BoardAutoOpMode extends AutoOpMode{
     private PathChain scoreToSecondLine;
     private PathChain secondLineEndPath;
     private PathChain secondLineEndToScore;
+
+    @Override public void init() {
+        final double centerLineX = 72.0;
+        final double startPoseX = 56.0;
+        final double initialScorePoseX = 44.22;
+        final double lineStartX = 30.0;
+        final double lineEndX = 48.92;
+        final double parkX = 49.0;
+
+        startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, 111.0, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
+        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, 113.00, Math.toRadians((color == COLOR.BLUE) ? 135 : 45));
+        firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-lineStartX :centerLineX+lineStartX,82.0, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-lineEndX :centerLineX+lineEndX,82.0, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        parkPose = new Pose( (color == COLOR.BLUE) ? centerLineX-parkX :centerLineX+parkX, 67.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
+        secondLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-lineStartX :centerLineX+lineStartX, 58.5, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-lineEndX :centerLineX+lineEndX, 58.5, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+
+        super.init();
+
+        motion.follower.setStartingPose(startPose);
+        telemetry.addData("Auto Pose", startPose);
+        telemetry.update();
+        ballLifter.lift();
+    }
 
     @Override
     public void buildPaths() {
@@ -64,14 +86,6 @@ public class BoardAutoOpMode extends AutoOpMode{
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), parkPose.getHeading())
                 .build();
         setPathState(0);
-   }
-
-    @Override public void init() {
-        super.init();
-        motion.follower.setStartingPose(startPose);
-        telemetry.addData("Auto Pose", startPose);
-        telemetry.update();
-        ballLifter.lift();
     }
 
     public void autonomousPathUpdate() {
