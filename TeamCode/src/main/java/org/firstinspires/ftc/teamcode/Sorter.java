@@ -241,29 +241,28 @@ public class Sorter extends RobotPart<SorterMetric>{
                 if (!pressed && ssom.gamepadBuffer.g2DpadLeft) {
                     pressed = true;
                     targetPosition -= QUARTER_TURN;
-                    isSpinning = true;
                 }
                 else if (!pressed && ssom.gamepadBuffer.g2DpadRight) {
                     pressed = true;
                     targetPosition += QUARTER_TURN;
-                    isSpinning = true;
                 }
                 else if (!pressed && ssom.gamepadBuffer.g2DpadUp) {
                     pressed = true;
                     targetPosition += HALF_TURN;
-                    isSpinning = true;
                 }
                 if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight && !ssom.gamepadBuffer.g2DpadUp) {
                    pressed = false;
-                   isSpinning = false;
                    stopTime = System.currentTimeMillis();
                 }
             }
 
             // Are we close enough
-            if(Math.abs(sortMotor.getCurrentPosition() - (int)Math.round(targetPosition)) < CLOSE_ENOUGH_TICKS)
+            if(Math.abs(sortMotor.getCurrentPosition() - (int)Math.round(targetPosition)) < CLOSE_ENOUGH_TICKS) {
                 sortMotor.setPower(HOLD_POWER);
+                isSpinning = false;
+            }
             else{
+                isSpinning = true;
                 sortMotor.setTargetPosition((int)Math.round(targetPosition));
                 sortMotor.setPower(HALF_TURN_POWER);
             }
@@ -325,8 +324,12 @@ public class Sorter extends RobotPart<SorterMetric>{
         return true;
     }
 
+    /**
+     * Rotate the current position by the specified number of quarter turns
+     * @param quarterTurns number of clockwise quarter turns
+     */
     public void rotateClockwise(int quarterTurns) {
-        targetPosition = quarterTurns*QUARTER_TURN;
+        targetPosition += quarterTurns*QUARTER_TURN;
     }
 
     @Override
