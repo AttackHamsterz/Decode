@@ -39,10 +39,8 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .useBrakeModeInTeleOp(true)
-            .xVelocity(5)
-            .yVelocity(5);
-            //.xVelocity(86.647695)
-            //.yVelocity(74.814924);
+            .xVelocity(86.647695)
+            .yVelocity(74.814924);
 
     public static OTOSConstants localizerConstants = new OTOSConstants()
             .hardwareMapName("sensor-otos")
@@ -58,9 +56,9 @@ public class Constants {
             0.1,
             0.007,
             50,
-            1.25,
+            1.35,
             10,
-            1.0);
+            1.1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)

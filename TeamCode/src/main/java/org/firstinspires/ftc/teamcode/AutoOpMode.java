@@ -77,6 +77,7 @@ public class AutoOpMode extends StandardSetupOpMode {
         //Setup launch pattern
         int id = eye.getFiducialID();
 
+        // When looking at the front of the robot, green should be right, purple back and left
         if (id == 21) {
             //GPP
             //Counter Clockwise to Green, Clockwise to Purple1, Clockwise to Purple2
