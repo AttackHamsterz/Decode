@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Math.tan;
+
 import androidx.annotation.NonNull;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -53,6 +55,9 @@ public class Eye extends RobotPart<EyeMetric>{
     private Eye.Mode mode;
     private LLResult resultInUse;
     private ColorOrder colorOrder;
+    private double shotD;
+    private double camAngleDeg = 1;
+
 
 
 
@@ -75,6 +80,7 @@ public class Eye extends RobotPart<EyeMetric>{
 
         // This loop will continue until game end
         setRunning();
+        boolean pressed = false;
         while (running) {
             // Get a result if we're in a mode that needs one
             if (mode == Mode.AIM_POINT) {
@@ -83,6 +89,8 @@ public class Eye extends RobotPart<EyeMetric>{
                 double xrange = Range.clip(tx/25.0, -1.0, 1.0);
                 double Kp = xrange * 0.1;
                 ssom.motion.spin(Kp);
+                double ty = resultInUse.getTy();
+                shotD = 12.5/(Math.tan(Math.toRadians(ty+camAngleDeg)));
             }
             if (mode == Mode.AUTO_START) {
                 /*
@@ -102,6 +110,16 @@ public class Eye extends RobotPart<EyeMetric>{
             if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1LeftBumper) {
                 setMode(Mode.AIM_POINT);
             }
+            if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1DpadUp && !pressed) {
+                camAngleDeg += 0.05;
+                pressed = true;
+            }
+            if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1DpadDown && !pressed) {
+                camAngleDeg -= 0.05;
+                pressed = true;
+            }
+            if (!ssom.gamepadBuffer.g1DpadUp && !ssom.gamepadBuffer.g1DpadDown)
+                pressed = false;
 
             // Short sleep to keep this loop from saturating
             sleep();
@@ -197,7 +215,9 @@ public class Eye extends RobotPart<EyeMetric>{
             telemetry.addData("Target Y", ty);
             telemetry.addData("Target Area", ta);
             telemetry.addData("Fiducial", getId());
-            telemetry.addData("Color Order", colorOrder.colors);
+            telemetry.addData("Shot Distance", shotD );
+            telemetry.addData("Cam Angle", camAngleDeg);
+            //telemetry.addData("Color Order", colorOrder.colors);
         } else {
             telemetry.addData("Limelight", "No Targets");
         }

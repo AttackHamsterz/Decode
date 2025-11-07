@@ -37,7 +37,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double lineEndX = 48.92;
         final double parkX = 49.0;
 
-        startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, 111.0, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
+        startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, 113.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, 113.00, Math.toRadians((color == COLOR.BLUE) ? 135 : 45));
         firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-lineStartX :centerLineX+lineStartX,82.0, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-lineEndX :centerLineX+lineEndX,82.0, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
@@ -86,6 +86,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), parkPose.getHeading())
                 .build();
         setPathState(0);
+
     }
 
     public void autonomousPathUpdate() {
