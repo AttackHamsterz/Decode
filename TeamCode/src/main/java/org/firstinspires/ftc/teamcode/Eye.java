@@ -59,6 +59,7 @@ public class Eye extends RobotPart<EyeMetric>{
     private ColorOrder colorOrder;
     private int fiducialId;
     private double shotD;
+    private double deltaRPM;
 
     public Eye(StandardSetupOpMode ssom){
         this.ssom = ssom;
@@ -104,7 +105,7 @@ public class Eye extends RobotPart<EyeMetric>{
                         shotD = 0;
                     }
                 }
-                ssom.launcher.setRPMFromDistance(shotD);
+                ssom.launcher.setRPMFromDistance(shotD,deltaRPM);
             }
             if (mode == Mode.AUTO_START) {
                 /*
@@ -127,10 +128,25 @@ public class Eye extends RobotPart<EyeMetric>{
                 }
                 else if (pressed && !ssom.gamepadBuffer.g2LeftBumper) {
                     setMode(Mode.NONE);
-                    ssom.launcher.setRPMFromDistance(0);
+                    ssom.launcher.setRPMFromDistance(0, 0);
                     pressed = false;
                 }
             }
+
+            //if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1LeftBumper) {
+                //setMode(Mode.AIM_POINT);
+            //}
+            //if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1DpadUp && !pressed) {
+                //deltaRPM += 50;
+                //pressed = true;
+            //}
+            //if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1DpadDown && !pressed) {
+                //deltaRPM -= 50;
+                //pressed = true;
+            //}
+            //if (!ssom.gamepadBuffer.g1DpadUp && ssom.gamepadBuffer.g1DpadDown) {
+                //pressed = false;
+            //}
 
             // Short sleep to keep this loop from saturating
             sleep();

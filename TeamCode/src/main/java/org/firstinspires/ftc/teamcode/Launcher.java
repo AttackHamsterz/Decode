@@ -62,13 +62,13 @@ public class Launcher extends RobotPart<LauncherMetric>{
                 new RPMEntry(0.0, 0.0),
                 new RPMEntry(1.0, 2500.0),
                 new RPMEntry(2.0, 3200.0),
-                new RPMEntry(3.2, 4200.0),
+                new RPMEntry(3.2, 4250.0),
                 new RPMEntry(4.0, 4600.0),
                 new RPMEntry(5.0, 5600.0)
         ));
     }
 
-    public void setRPMFromDistance(double distance){
+    public void setRPMFromDistance(double distance, double extraRPM){
         // Default RPM
         double rpm = 0;
 
@@ -80,7 +80,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
                 rpm = distanceRPM.get(i).rpm + deltaRPM * ((distance - distanceRPM.get(i).distance) / deltaDistance);
             }
         }
-        setVelocityRPM(rpm);
+        setVelocityRPM(rpm+extraRPM);
     }
 
     public void setVelocityRPM(double velocityRPM) {
