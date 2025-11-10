@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 @Autonomous(name = "Auto: Field", group = "Robot")
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
-    private static final double FIRST_LAUNCH_RPM = 3200.00;
+    private static final double FIRST_LAUNCH_RPM = 4200.00;
     private Pose startPose;
     private Pose initialScorePose;
     private Pose thirdLineStart;
@@ -30,13 +30,13 @@ public class FieldAutoOpMode extends AutoOpMode {
 
         final double centerLineX = 72.0;
         final double startPoseX = 8.0;
-        final double scorePoseX = 15;
+        final double scorePoseX = 10.0;
         final double lineStartX = 30.0;
         final double lineEndX = 48.92;
         final double parkPoseX = 36.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
-        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 84, Math.toRadians(135));
+        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 13.5, Math.toRadians(120));
         thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 10, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
