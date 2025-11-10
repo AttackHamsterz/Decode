@@ -10,6 +10,8 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 import java.util.List;
 
@@ -55,11 +57,8 @@ public class Eye extends RobotPart<EyeMetric>{
     private Eye.Mode mode;
     private LLResult resultInUse;
     private ColorOrder colorOrder;
+    private int fiducialId;
     private double shotD;
-    private double camAngleDeg = 1;
-
-
-
 
     public Eye(StandardSetupOpMode ssom){
         this.ssom = ssom;
@@ -85,12 +84,27 @@ public class Eye extends RobotPart<EyeMetric>{
             // Get a result if we're in a mode that needs one
             if (mode == Mode.AIM_POINT) {
                 resultInUse = limelight.getLatestResult();
-                double tx = resultInUse.getTx();
-                double xrange = Range.clip(tx/25.0, -1.0, 1.0);
-                double Kp = xrange * 0.1;
-                ssom.motion.spin(Kp);
-                double ty = resultInUse.getTy();
-                shotD = 12.5/(Math.tan(Math.toRadians(ty+camAngleDeg)));
+                List<LLResultTypes.FiducialResult> fiducials = resultInUse.getFiducialResults();
+                for(LLResultTypes.FiducialResult fiducial : fiducials)
+                {
+                    if(fiducial.getFiducialId() == 20 && ssom.color == StandardSetupOpMode.COLOR.BLUE){
+                        Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
+                        fiducialId = 20;
+                        shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+                        break;
+                    }
+                    else if (fiducial.getFiducialId() == 24 && ssom.color == StandardSetupOpMode.COLOR.RED){
+                        Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
+                        fiducialId = 24;
+                        shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+                        break;
+                    }
+                    else{
+                        fiducialId = -1;
+                        shotD = 0;
+                    }
+                }
+                ssom.launcher.setRPMFromDistance(shotD);
             }
             if (mode == Mode.AUTO_START) {
                 /*
@@ -104,22 +118,19 @@ public class Eye extends RobotPart<EyeMetric>{
                         break;
                     }
                 }
-
                  */
             }
-            if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1LeftBumper) {
-                setMode(Mode.AIM_POINT);
+            if(!ssom.gamepadBuffer.ignoreGamepad) {
+                if (!pressed && ssom.gamepadBuffer.g2LeftBumper) {
+                    setMode(Mode.AIM_POINT);
+                    pressed = true;
+                }
+                else if (pressed && !ssom.gamepadBuffer.g2LeftBumper) {
+                    setMode(Mode.NONE);
+                    ssom.launcher.setRPMFromDistance(0);
+                    pressed = false;
+                }
             }
-            if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1DpadUp && !pressed) {
-                camAngleDeg += 0.05;
-                pressed = true;
-            }
-            if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1DpadDown && !pressed) {
-                camAngleDeg -= 0.05;
-                pressed = true;
-            }
-            if (!ssom.gamepadBuffer.g1DpadUp && !ssom.gamepadBuffer.g1DpadDown)
-                pressed = false;
 
             // Short sleep to keep this loop from saturating
             sleep();
@@ -202,24 +213,14 @@ public class Eye extends RobotPart<EyeMetric>{
         return false;
     }
 
+    public double getShotDistance(){
+        return shotD;
+    }
+
     @Override
     public void getTelemetry(Telemetry telemetry) {
         // Depending on the mode, the telemetry can change
-        if (resultInUse != null && resultInUse.isValid()) {
-            double tx = resultInUse.getTx(); // How far left or right the target is
-            double ty = resultInUse.getTy(); // How far up or down the target is
-            double ta = resultInUse.getTa(); // How big the target looks (0%-100% of the image)
-
-            telemetry.addData("Eye Mode", mode);
-            telemetry.addData("Target X", tx);
-            telemetry.addData("Target Y", ty);
-            telemetry.addData("Target Area", ta);
-            telemetry.addData("Fiducial", getId());
-            telemetry.addData("Shot Distance", shotD );
-            telemetry.addData("Cam Angle", camAngleDeg);
-            //telemetry.addData("Color Order", colorOrder.colors);
-        } else {
-            telemetry.addData("Limelight", "No Targets");
-        }
+        telemetry.addData("Fiducial", fiducialId);
+        telemetry.addData("Shot Distance", shotD );
     }
 }
