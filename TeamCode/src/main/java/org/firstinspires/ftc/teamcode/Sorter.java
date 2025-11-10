@@ -22,6 +22,14 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double QUARTER_TURN_POWER = 1.0;
     private static final double HALF_TURN_POWER = 1.0;
 
+    private static float redSensorValue;
+    private static float greenSensorValue;
+    private static float blueSensorValue;
+
+    private static float hueValue;
+    private static float saturationValue;
+    private static float brightnessValue;
+
     public enum BallColor{
         None(0),
         Green(1),
@@ -34,12 +42,8 @@ public class Sorter extends RobotPart<SorterMetric>{
         private long time;
 
         private static final double MIN_DIST_CM = 3.0;
-        private static final float PURPLE_HUE_MIN = 165;
-        private static final float PURPLE_HUE_MAX = 240;
-        private static final float GREEN_HUE_MIN = 150;
-        private static final float GREEN_HUE_MAX = 165;
-        private static final float SATURATION_MIN = 0.45f;
-        private static final float VALUE_MIN = 0.18f;
+        private static final float PURPLE_HUE_MIN = 190;
+        private static final float VALUE_MIN = 0.09f;
 
         BallColor(int id) {
             if(id < 1 || id > 2) id = 0;
@@ -105,11 +109,19 @@ public class Sorter extends RobotPart<SorterMetric>{
                             hsv
                     );
 
-                    // Compare to thresholds to generate correct Ball Color
-                    if (hsv[1] >= SATURATION_MIN && hsv[2] >= VALUE_MIN) {
-                        if (hsv[0] >= PURPLE_HUE_MIN && hsv[0] <= PURPLE_HUE_MAX)
+                    //Setting the telemetry.
+                    redSensorValue = colors.red * 255;
+                    greenSensorValue = colors.green * 255;
+                    blueSensorValue = colors.blue * 255;
+                    hueValue = hsv[0];
+                    saturationValue = hsv[1];
+                    brightnessValue = hsv[2];
+
+                    //Checking the brightness to see if it's high enough to be a color value.
+                    if (hsv[2] >= VALUE_MIN) {
+                        if (hsv[0] >= PURPLE_HUE_MIN)
                             ballColor = BallColor.Purple;
-                        else if (hsv[0] >= GREEN_HUE_MIN && hsv[0] < GREEN_HUE_MAX)
+                        else
                             ballColor = BallColor.Green;
                     }
                 }
@@ -130,7 +142,9 @@ public class Sorter extends RobotPart<SorterMetric>{
             telemetry.addData(label + " distance (cm):", distance);
             telemetry.addData(label + " hue:", hsv[0]);
             telemetry.addData(label + " saturation:", hsv[1]);
-            telemetry.addData(label + " value:", hsv[2]);        }
+            telemetry.addData(label + " value:", hsv[2]);
+
+        }
     }
     private final DcMotor sortMotor;
     private final RevColorSensorV3 leftSensor;
@@ -142,35 +156,8 @@ public class Sorter extends RobotPart<SorterMetric>{
     private long lastLeftColorTime;
     private boolean isSpinning;
 
-    private float redSensorValue;
-    private float greenSensorValue;
-    private float blueSensorValue;
     private long stopTime;
     private double targetPosition;
-    private double greenDistance;
-    private double purpleDistance;
-    private double noneDistance;
-
-
-    public static class Triplet {
-        public float r, g, b;
-
-        public Triplet(float r, float g, float b) {
-            this.r = r;
-            this.g = g;
-            this.b = b;
-        }
-        public static double distance(Triplet color1, Triplet color2) {
-            float distanceR = color1.r - color2.r;
-            float distanceG = color1.g - color2.g;
-            float distanceB = color1.b - color2.b;
-            return Math.sqrt(Math.pow(distanceR, 2) + Math.pow(distanceG, 2) + Math.pow(distanceB, 2));
-        }
-    }
-
-    Sorter.Triplet green = new Sorter.Triplet(0.05f,0.372f,0.0139f);
-    Sorter.Triplet purple = new Sorter.Triplet(0.0296f,0.048f,0.0258f);
-    Sorter.Triplet none = new Sorter.Triplet(0.0011f,0.0009f,0.0007f);
 
     public Sorter(StandardSetupOpMode ssom){
         this.ssom = ssom;
@@ -180,7 +167,7 @@ public class Sorter extends RobotPart<SorterMetric>{
         //frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor"); // ic2 bus
         //backSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "backSensor"); // ic2 bus
 
-        leftSensor.setGain(10.0f);
+        leftSensor.setGain(20.0f);
 
         //isSpinning has to be false
         isSpinning = false;
@@ -211,29 +198,17 @@ public class Sorter extends RobotPart<SorterMetric>{
         boolean pressed = false;
         setRunning();
         while (running) {
-            // Sensor query
-            NormalizedRGBA temp = leftSensor.getNormalizedColors();
-            redSensorValue = temp.red;
-            greenSensorValue = temp.green;
-            blueSensorValue = temp.blue;
+            // Getting the color value from the HSV code in BallColor.
+            BallColor leftBallColor = BallColor.fromSensor(leftSensor);
 
-            Sorter.Triplet sensorColor = new Sorter.Triplet(redSensorValue, greenSensorValue, blueSensorValue);
-            noneDistance = Triplet.distance(sensorColor, none);
-            greenDistance = Triplet.distance(sensorColor, green);
-            purpleDistance = Triplet.distance(sensorColor, purple);
-
-            if (noneDistance < 0.01){
+            if (leftBallColor == BallColor.Green) {
+                leftColor = lastLeftColor = 1;
+                lastLeftColorTime = System.currentTimeMillis();
+            } else if (leftBallColor == BallColor.Purple) {
+                leftColor = lastLeftColor = 2;
+                lastLeftColorTime = System.currentTimeMillis();
+            } else {
                 leftColor = 0;
-            }
-            else if (greenSensorValue > blueSensorValue){
-                leftColor = 1;
-                lastLeftColor = 1;
-                lastLeftColorTime = System.currentTimeMillis();
-            }
-            else {
-                leftColor = 2;
-                lastLeftColor = 2;
-                lastLeftColorTime = System.currentTimeMillis();
             }
 
             // Listen for key presses
@@ -270,17 +245,6 @@ public class Sorter extends RobotPart<SorterMetric>{
 
         // Cleanup
         sortMotor.setPower(0);
-    }
-
-    //It checks if the last color time is a quarter of a second, and if not it assigns
-    //black.
-    protected int getColorForSide(long lastColorTime, int lastColor, long stopTime) {
-        long diff = stopTime - lastColorTime;
-        if (diff <= TAIL_ROTATE_TIME_MS) {
-            return lastColor;
-        } else {
-            return 0;
-        }
     }
 
     public boolean isSpinning(){
@@ -350,10 +314,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     @Override
     public void getTelemetry(Telemetry telemetry) {
         // I2C calls in telemetry can be very slow (only for debugging)
-        telemetry.addData("leftRed", redSensorValue);
-        telemetry.addData("leftGreen", greenSensorValue);
-        telemetry.addData("leftBlue", blueSensorValue);
-        //stelemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
+        //telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
         telemetry.addData("leftColor", (leftColor == 0) ? "None" : (leftColor == 1) ? "green" : "purple");
         telemetry.addData("lastLeftColor", lastLeftColor);
         telemetry.addData("lastLeftColorTime", lastLeftColorTime);
@@ -361,12 +322,12 @@ public class Sorter extends RobotPart<SorterMetric>{
         telemetry.addData("sortMotor Power",sortMotor.getPower());
         telemetry.addData("isSpinning", isSpinning);
         telemetry.addData("stopTime", stopTime);
-        telemetry.addData("greenValue", greenSensorValue);
-        telemetry.addData("blueValue", blueSensorValue);
-        telemetry.addData("redValue", redSensorValue);
-        telemetry.addData("greenDistance", greenDistance);
-        telemetry.addData("purpleDistance", purpleDistance);
-        telemetry.addData("noneDistance", noneDistance);
+        telemetry.addData("leftRed", redSensorValue);
+        telemetry.addData("leftGreen", greenSensorValue);
+        telemetry.addData("leftBlue", blueSensorValue);
+        telemetry.addData("leftHue", hueValue);
+        telemetry.addData("leftSaturation", saturationValue);
+        telemetry.addData("leftValue", brightnessValue);
     }
 }
 
