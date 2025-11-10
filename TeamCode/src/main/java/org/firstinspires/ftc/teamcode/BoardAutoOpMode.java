@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
@@ -14,6 +15,7 @@ public class BoardAutoOpMode extends AutoOpMode{
     private static final double FIRST_LAUNCH_RPM = 2500.00;
     private Pose startPose;
     private Pose initialScorePose;
+    private Pose midLinePose;
     private Pose firstLineStart;
     private Pose firstLineEnd;
     private Pose parkPose;
@@ -33,12 +35,14 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double centerLineX = 72.0;
         final double startPoseX = 56.0;
         final double initialScorePoseX = 44.22;
-        final double lineStartX = 30.0;
+        final double midLinePoseX = 30.0;
+        final double lineStartX = 34.0;
         final double lineEndX = 48.92;
         final double parkX = 49.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, 113.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, 113.00, Math.toRadians((color == COLOR.BLUE) ? 135 : 45));
+        midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, 100, Math.toRadians((color == COLOR.BLUE) ? 135 : 45));
         firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-lineStartX :centerLineX+lineStartX,82.0, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-lineEndX :centerLineX+lineEndX,82.0, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         parkPose = new Pose( (color == COLOR.BLUE) ? centerLineX-parkX :centerLineX+parkX, 67.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
@@ -58,8 +62,8 @@ public class BoardAutoOpMode extends AutoOpMode{
         boardToScorePath = new Path(new BezierLine(startPose, initialScorePose));
         boardToScorePath.setLinearHeadingInterpolation(startPose.getHeading(), initialScorePose.getHeading());
         scoreToFirstLinePath = motion.follower.pathBuilder()
-                .addPath(new BezierLine(initialScorePose, firstLineStart))
-                .setLinearHeadingInterpolation(initialScorePose.getHeading(), firstLineStart.getHeading())
+                .addPath(new BezierCurve(initialScorePose, midLinePose, firstLineStart))
+                .setLinearHeadingInterpolation(initialScorePose.getHeading(), midLinePose.getHeading(), firstLineStart.getHeading())
                 .build();
         firstLineEndPath = motion.follower.pathBuilder()
                 .addPath(new BezierLine(motion.follower::getPose, firstLineEnd))
