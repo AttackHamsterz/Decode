@@ -19,15 +19,15 @@ public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(11.62)
-            .forwardZeroPowerAcceleration(-16.49359)
-            .lateralZeroPowerAcceleration(-58.88851)
+            .forwardZeroPowerAcceleration(-29.0)
+            .lateralZeroPowerAcceleration(-50.4)
             .useSecondaryTranslationalPIDF(false)
             .useSecondaryHeadingPIDF(false)
             .useSecondaryDrivePIDF(false)
             .centripetalScaling(0.0005)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.14, 0, 0.01, 0.02))
-            .headingPIDFCoefficients(new PIDFCoefficients(2.7, 0, 0.1, 0.01))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01, 0, 0.000001, 0.2, 0));
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.08, 0, 0.01, 0.0))
+            .headingPIDFCoefficients(new PIDFCoefficients(2.0, 0, 0.1, 0.0))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01, 0, 0.000001, 0.2, 0.0));
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .leftFrontMotorName("leftFront")
@@ -39,16 +39,16 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .useBrakeModeInTeleOp(true)
-            .xVelocity(86.647695)
-            .yVelocity(74.814924);
+            .xVelocity(83.5)
+            .yVelocity(61.2);
 
     public static OTOSConstants localizerConstants = new OTOSConstants()
             .hardwareMapName("sensor-otos")
             .linearUnit(DistanceUnit.INCH)
             .angleUnit(AngleUnit.RADIANS)
-            .offset(new SparkFunOTOS.Pose2D(0, 0, -Math.PI))
-            .linearScalar(0.9865362)
-            .angularScalar(0.99491206);
+            .offset(new SparkFunOTOS.Pose2D(0, 0, 0))
+            .linearScalar(0.95693)
+            .angularScalar(0.9953527);
 
     public static PathConstraints pathConstraints = new PathConstraints(
             0.995,
@@ -58,7 +58,7 @@ public class Constants {
             50,
             1.35,
             10,
-            1.1);
+            1.2);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)

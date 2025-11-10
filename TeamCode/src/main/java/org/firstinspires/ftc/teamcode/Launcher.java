@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import java.util.List;
+import java.util.ArrayList;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.Range;
 
@@ -26,6 +28,17 @@ public class Launcher extends RobotPart<LauncherMetric>{
     private double currentVelocityRPM;
     private double deltaRPM;
 
+    private ArrayList<RPMEntry> distanceRPM;
+
+    private class RPMEntry{
+        public double distance;
+        public double rpm;
+        public RPMEntry(double distance, double rpm){
+            this.distance = distance;
+            this.rpm = rpm;
+        }
+    };
+
     // RPM calculations
     private double currentRPM;
 
@@ -43,6 +56,31 @@ public class Launcher extends RobotPart<LauncherMetric>{
         targetVelocityRPM = 0;
         currentVelocityRPM = 0;
         deltaRPM = 0;
+
+        // Table of distances in meters to RPM
+        distanceRPM = new ArrayList<>(List.of(
+                new RPMEntry(0.0, 0.0),
+                new RPMEntry(1.0, 2500.0),
+                new RPMEntry(2.0, 3200.0),
+                new RPMEntry(3.2, 4200.0),
+                new RPMEntry(4.0, 4600.0),
+                new RPMEntry(5.0, 5600.0)
+        ));
+    }
+
+    public void setRPMFromDistance(double distance){
+        // Default RPM
+        double rpm = 0;
+
+        // Locate closest two points
+        for(int i = 0; i < distanceRPM.size()-1; i++){
+            if(distanceRPM.get(i).distance < distance && distance < distanceRPM.get(i+1).distance){
+                double deltaDistance = distanceRPM.get(i+1).distance - distanceRPM.get(i).distance;
+                double deltaRPM = distanceRPM.get(i+1).rpm - distanceRPM.get(i).rpm;
+                rpm = distanceRPM.get(i).rpm + deltaRPM * ((distance - distanceRPM.get(i).distance) / deltaDistance);
+            }
+        }
+        setVelocityRPM(rpm);
     }
 
     public void setVelocityRPM(double velocityRPM) {
@@ -58,8 +96,8 @@ public class Launcher extends RobotPart<LauncherMetric>{
         setRunning();
         while (running) {
             // Task a target velocity
-            if (!ssom.gamepadBuffer.ignoreGamepad)
-                targetVelocityRPM = ssom.gamepadBuffer.g2LeftTrigger * TRIGGER_MAX_RPM;
+            //if (!ssom.gamepadBuffer.ignoreGamepad)
+            //    targetVelocityRPM = ssom.gamepadBuffer.g2LeftTrigger * TRIGGER_MAX_RPM;
 
             // Launch motor rpm
             launchMotor.setVelocity(targetVelocityRPM * RPM_TO_TPS);
