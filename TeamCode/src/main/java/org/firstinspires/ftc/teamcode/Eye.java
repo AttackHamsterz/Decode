@@ -4,9 +4,12 @@ import static java.lang.Math.tan;
 
 import androidx.annotation.NonNull;
 
+import com.pedropathing.control.PIDFCoefficients;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -61,6 +64,8 @@ public class Eye extends RobotPart<EyeMetric>{
     private double shotD;
     private double deltaRPM;
 
+    private PIDFController aimController;
+
     public Eye(StandardSetupOpMode ssom){
         this.ssom = ssom;
         this.mode = Mode.AUTO_START;
@@ -68,6 +73,8 @@ public class Eye extends RobotPart<EyeMetric>{
         // Setup limelight
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
+        //Set up PIDF aim controller
+        aimController = new PIDFController(0.03, 0, 0.002, 0);
     }
 
     @Override
@@ -89,9 +96,17 @@ public class Eye extends RobotPart<EyeMetric>{
                 for(LLResultTypes.FiducialResult fiducial : fiducials)
                 {
                     if(fiducial.getFiducialId() == 20 && ssom.color == StandardSetupOpMode.COLOR.BLUE){
+                        //launcher speed
                         Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         fiducialId = 20;
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+
+                        //auto aiming
+                        double currentDegrees = fiducial.getTargetXDegrees();
+                        double steeringInput = aimController.calcuate(0, currentDegrees);
+                        ssom.motion.follower.setTeleOpDrive(0, 0, -steeringInput, true);
+                        ssom.motion.follower.update();
+
                         break;
                     }
                     else if (fiducial.getFiducialId() == 24 && ssom.color == StandardSetupOpMode.COLOR.RED){
@@ -239,4 +254,5 @@ public class Eye extends RobotPart<EyeMetric>{
         telemetry.addData("Fiducial", fiducialId);
         telemetry.addData("Shot Distance", shotD );
     }
+
 }
