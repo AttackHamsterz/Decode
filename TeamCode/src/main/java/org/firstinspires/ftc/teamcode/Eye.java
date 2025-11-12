@@ -109,9 +109,15 @@ public class Eye extends RobotPart<EyeMetric>{
                         break;
                     }
                     else if (fiducial.getFiducialId() == 24 && ssom.color == StandardSetupOpMode.COLOR.RED){
+                        //launcher speed
                         Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         fiducialId = 24;
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+
+                        //auto aiming
+                        double currentDegrees = fiducial.getTargetXDegrees();
+                        double steeringInput = aimController.calcuate(0, currentDegrees);
+                        ssom.motion.setTurn(steeringInput);
                         break;
                     }
                     else{
