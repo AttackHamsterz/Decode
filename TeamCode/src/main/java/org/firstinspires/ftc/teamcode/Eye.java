@@ -74,7 +74,7 @@ public class Eye extends RobotPart<EyeMetric>{
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         //Set up PIDF aim controller
-        aimController = new PIDFController(0.1, 0, 0, 0);
+        aimController = new PIDFController(0.03, 0, 0.001, 0);
     }
 
     @Override
@@ -104,8 +104,7 @@ public class Eye extends RobotPart<EyeMetric>{
                         //auto aiming
                         double currentDegrees = fiducial.getTargetXDegrees();
                         double steeringInput = aimController.calcuate(0, currentDegrees);
-                        ssom.motion.follower.setTeleOpDrive(0, 0, steeringInput, true);
-                        ssom.motion.follower.update();
+                        ssom.motion.setTurn(steeringInput);
 
                         break;
                     }
@@ -118,6 +117,7 @@ public class Eye extends RobotPart<EyeMetric>{
                     else{
                         fiducialId = -1;
                         shotD = 0;
+                        ssom.motion.setTurn(0);
                     }
                 }
                 ssom.launcher.setRPMFromDistance(shotD,deltaRPM);
@@ -144,13 +144,11 @@ public class Eye extends RobotPart<EyeMetric>{
                 else if (pressed && !ssom.gamepadBuffer.g2LeftBumper) {
                     setMode(Mode.NONE);
                     ssom.launcher.setRPMFromDistance(0, 0);
+                    ssom.motion.setTurn(0);
                     pressed = false;
                 }
             }
 
-            //if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1LeftBumper) {
-                //setMode(Mode.AIM_POINT);
-            //}
             //if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1DpadUp && !pressed) {
                 //deltaRPM += 50;
                 //pressed = true;
@@ -163,7 +161,7 @@ public class Eye extends RobotPart<EyeMetric>{
                 //pressed = false;
             //}
 
-            // Short sleep to keep this loop from saturating
+            // Short sleep if we're not aiming (to keep this loop from saturating)
             if(mode != Mode.AIM_POINT)
                 sleep();
         }
@@ -171,7 +169,6 @@ public class Eye extends RobotPart<EyeMetric>{
         // Cleanup
         limelight.stop();
     }
-
 
     public enum ColorOrder{
         GPP (21, new String[] {"Green", "Purple", "Purple"}),
@@ -192,7 +189,6 @@ public class Eye extends RobotPart<EyeMetric>{
         public String[] getColors() {
             return colors;
         }
-
 
         public static ColorOrder fromId(int obeliskColorId) {
             for (ColorOrder order : values()) {

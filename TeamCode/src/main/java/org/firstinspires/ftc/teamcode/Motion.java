@@ -18,6 +18,9 @@ public class Motion extends RobotPart<MotionMetric>{
     protected static final double CLOSE_Y_IN = 1.0;
     protected static final double CLOSE_ANG_RAD = Math.toRadians(5.0);
 
+    // Allow the eye to control the robot yaw
+    private double externalTurn;
+
     /**
      * Setup the motion object
      * @param ssom access to the standard setup op mode
@@ -26,6 +29,15 @@ public class Motion extends RobotPart<MotionMetric>{
         this.ssom = ssom;
         PanelsConfigurables.INSTANCE.refreshClass(this);
         follower = Constants.createFollower(ssom.hardwareMap);
+        externalTurn = 0;
+    }
+
+    /**
+     * Allows a third party to turn the robot, great for smoothly aiming at the fiducial
+     * @param turn [-1, 1] to apply to joystick
+     */
+    public void setTurn(double turn){
+        externalTurn = turn;
     }
 
     @Override
@@ -37,9 +49,8 @@ public class Motion extends RobotPart<MotionMetric>{
             follower.update();
             setRunning();
             while (running) {
-                // Update Pedro to move the robot based on:
-                follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY, -ssom.gamepadBuffer.g1LeftStickX, -ssom.gamepadBuffer.g1RightStickX, true);
-
+                // Update Pedro to move the robot based on stick input:
+                follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY, -ssom.gamepadBuffer.g1LeftStickX, (externalTurn!=0) ? externalTurn : -ssom.gamepadBuffer.g1RightStickX, true);
                 follower.update();
 
                 // Short sleep to keep this loop from saturating
