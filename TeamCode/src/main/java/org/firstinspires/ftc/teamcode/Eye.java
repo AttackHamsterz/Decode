@@ -74,7 +74,7 @@ public class Eye extends RobotPart<EyeMetric>{
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         //Set up PIDF aim controller
-        aimController = new PIDFController(0.1, 0, 0, 0);
+        aimController = new PIDFController(0.05, 0.005, 0, 0);
     }
 
     @Override
@@ -96,6 +96,7 @@ public class Eye extends RobotPart<EyeMetric>{
                 for(LLResultTypes.FiducialResult fiducial : fiducials)
                 {
                     if(fiducial.getFiducialId() == 20 && ssom.color == StandardSetupOpMode.COLOR.BLUE){
+
                         //launcher speed
                         Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         fiducialId = 20;
@@ -110,9 +111,16 @@ public class Eye extends RobotPart<EyeMetric>{
                         break;
                     }
                     else if (fiducial.getFiducialId() == 24 && ssom.color == StandardSetupOpMode.COLOR.RED){
+                        //launcher speed
                         Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         fiducialId = 24;
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+
+                        //auto aiming
+                        double currentDegrees = fiducial.getTargetXDegrees();
+                        double steeringInput = aimController.calcuate(0, currentDegrees);
+                        ssom.motion.follower.setTeleOpDrive(0, 0, steeringInput, true);
+                        ssom.motion.follower.update();
                         break;
                     }
                     else{
