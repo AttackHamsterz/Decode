@@ -74,7 +74,7 @@ public class Eye extends RobotPart<EyeMetric>{
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
         //Set up PIDF aim controller
-        aimController = new PIDFController(0.03, 0, 0.002, 0);
+        aimController = new PIDFController(0.1, 0, 0, 0);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class Eye extends RobotPart<EyeMetric>{
                         //auto aiming
                         double currentDegrees = fiducial.getTargetXDegrees();
                         double steeringInput = aimController.calcuate(0, currentDegrees);
-                        ssom.motion.follower.setTeleOpDrive(0, 0, -steeringInput, true);
+                        ssom.motion.follower.setTeleOpDrive(0, 0, steeringInput, true);
                         ssom.motion.follower.update();
 
                         break;
@@ -164,7 +164,8 @@ public class Eye extends RobotPart<EyeMetric>{
             //}
 
             // Short sleep to keep this loop from saturating
-            sleep();
+            if(mode != Mode.AIM_POINT)
+                sleep();
         }
 
         // Cleanup
