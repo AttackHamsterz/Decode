@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 public class PIDFController {
-    public double kP, kI, kD, kF;
+    public final double kP, kI, kD, kF;
     private double integralSum = 0;
     private double lastError = 0;
     private double lastTimestamp = 0;
@@ -13,7 +13,8 @@ public class PIDFController {
         this.kF = kF;
         this.lastTimestamp = System.nanoTime() / 1e9;
     }
-        public double calcuate(double target, double current) {
+
+    public double calcuate(double target, double current) {
         double currentTime = System.nanoTime() / 1e9;
         double dt = currentTime - lastTimestamp;
 

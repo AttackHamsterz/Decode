@@ -11,7 +11,7 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     private final DcMotor finalLiftMotorRight;
     private static final double PPM = 1993.6;
     private static final double PPM_IN = 4.75;
-    private static final double LIFT_HEIGHT_IN = 18.5;
+    private static final double LIFT_HEIGHT_IN = 12;
 
     public FinalLift(StandardSetupOpMode ssom){
         this.ssom = ssom;
@@ -38,10 +38,10 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
 
     public void drop() {
         int pos = 0;
-        finalLiftMotorLeft.setTargetPosition(pos);
-        finalLiftMotorRight.setTargetPosition(pos);
-        finalLiftMotorLeft.setPower(1);
-        finalLiftMotorRight.setPower(1);
+        finalLiftMotorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        finalLiftMotorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        finalLiftMotorLeft.setPower(0);
+        finalLiftMotorRight.setPower(0);
     }
 
     @Override

@@ -16,9 +16,10 @@ public class GamepadBuffer {
     public boolean g1Start;        // Enter final lift mode
     public boolean g1DpadUp;       // Holding start and pressing dpad up will lift robot
     public boolean g1DpadDown;     // Holding start and pressing dpad down will lower robot
-    public float g1RightTrigger;   // Holding the right trigger will slow the robot by the amount pressed
+    public float g1RightTrigger;   // Holding the right trigger will align with targets
     public boolean g1RightBumper;  // Holding the right bumper will keep the robot facing the target
-    public boolean g1LeftBumper; //Holding the right bumper will aim the robot at the scoring april tag
+    public float g1LeftTrigger;    // Holding the left trigger will slow the robot by the amount pressed
+    public boolean g1LeftBumper;   // Holding the left bumper will slow robot to half speed
 
     // Tool gamepad values
     public float g2LeftStickX;     // Intake left/right
@@ -73,6 +74,7 @@ public class GamepadBuffer {
             g1DpadUp = gamepad1.dpad_up;
             g1DpadDown = gamepad1.dpad_down;
             g1RightTrigger = gamepad1.right_trigger;
+            g1LeftTrigger = gamepad1.left_trigger;
             g1RightBumper = gamepad1.right_bumper;
             g1LeftBumper = gamepad1.left_bumper;
 

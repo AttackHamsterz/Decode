@@ -49,8 +49,15 @@ public class Motion extends RobotPart<MotionMetric>{
             follower.update();
             setRunning();
             while (running) {
+                // Scale the speed
+                float scale = 1.0f;
+                if(ssom.gamepadBuffer.g1LeftBumper)
+                    scale = 0.5f;
+                else if(ssom.gamepadBuffer.g1LeftTrigger > 0.05)
+                    scale = 1.0f - ssom.gamepadBuffer.g1LeftTrigger * 0.75f;
+
                 // Update Pedro to move the robot based on stick input:
-                follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY, -ssom.gamepadBuffer.g1LeftStickX, (externalTurn!=0) ? externalTurn : -ssom.gamepadBuffer.g1RightStickX, true);
+                follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY*scale, -ssom.gamepadBuffer.g1LeftStickX*scale, (externalTurn!=0) ? externalTurn*scale : -ssom.gamepadBuffer.g1RightStickX*scale, true);
                 follower.update();
 
                 // Short sleep to keep this loop from saturating
@@ -64,6 +71,7 @@ public class Motion extends RobotPart<MotionMetric>{
             // Stop all motion
             follower.startTeleopDrive(true);
             follower.setTeleOpDrive(0,0,0,true);
+            follower.update();
         }
     }
 
@@ -86,14 +94,16 @@ public class Motion extends RobotPart<MotionMetric>{
         //return follower.atPose(metric.pose, CLOSE_X_IN, CLOSE_Y_IN, CLOSE_ANG_RAD);
         return false;
     }
-    public void spin(double Kp) {
-        //follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY, -ssom.gamepadBuffer.g1LeftStickX, Kp, true);
-    }
+
     @Override
     public void getTelemetry(Telemetry telemetry) {
-        Pose pose = follower.getPose();
-        telemetry.addData("X", pose.getX());
-        telemetry.addData("Y", pose.getY());
-        telemetry.addData("Heading", Math.toDegrees(pose.getHeading()));
+        if(DEBUG) {
+            Pose pose = follower.getPose();
+            if(pose != null) {
+                telemetry.addData("X", pose.getX());
+                telemetry.addData("Y", pose.getY());
+                telemetry.addData("Heading", Math.toDegrees(pose.getHeading()));
+            }
+        }
     }
 }

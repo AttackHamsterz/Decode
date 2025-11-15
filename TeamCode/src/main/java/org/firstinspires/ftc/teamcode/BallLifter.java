@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.LED;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -13,6 +14,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class BallLifter extends RobotPart<BallLifterMetric>{
     private final DigitalChannel ballLiftSwitch;
     private final CRServo ballLiftServo;
+    private final LED redLED;
+    private final LED greenLED;
 
     private static final int INITIAL_WAIT_MS = 150;    // Delay so the magnet moves from the switch (ms)
     private static final int LIFT_COMPLETE_MS = 1500;   // Lift completes and snaps back (ms)
@@ -33,6 +36,11 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
         ballLiftSwitch.setMode(DigitalChannel.Mode.INPUT);
         ballLiftServo = ssom.hardwareMap.get(CRServo.class, "ballLiftServo");
         ballLiftServo.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        redLED = ssom.hardwareMap.get(LED.class, "redLED");
+        greenLED = ssom.hardwareMap.get(LED.class, "greenLED");
+        redLED.off();
+        greenLED.off();
     }
 
     /**
@@ -70,9 +78,9 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     @Override
     public void run() {
         boolean pressed = false;
-        if (!ssom.gamepadBuffer.ignoreGamepad) {
-            setRunning();
-            while (running) {
+        setRunning();
+        while (running) {
+            if (!ssom.gamepadBuffer.ignoreGamepad) {
                 if (!pressed && ssom.gamepadBuffer.g2RightTrigger > TRIGGER_THRESH) {
                     pressed = true;
                     lift();
@@ -80,10 +88,20 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
 
                 if (ssom.gamepadBuffer.g2RightTrigger <= TRIGGER_THRESH)
                     pressed = false;
-
-                // Short sleep to keep this loop from saturating
-                sleep();
             }
+
+            // Color indication
+            if(ssom.launcher.launchReady() && ssom.eye.linedUp() && !ssom.sorter.isSpinning() && isReset()){
+                redLED.off();
+                greenLED.on();
+            }
+            else{
+                redLED.on();
+                greenLED.off();
+            }
+
+            // Short sleep to keep this loop from saturating
+            sleep();
         }
     }
 

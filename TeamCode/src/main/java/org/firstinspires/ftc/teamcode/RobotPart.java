@@ -8,6 +8,7 @@ public abstract class RobotPart<T> extends Thread{
     // Opmode reference
     protected StandardSetupOpMode ssom;
     protected boolean running;
+    protected static final boolean DEBUG = false;
 
     // Motor overload protection
     protected static final long SAFE_CHECK_PERIOD_MS = 100;  // Check 10 times a second

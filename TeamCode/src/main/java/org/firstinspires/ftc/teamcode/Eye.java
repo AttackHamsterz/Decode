@@ -61,6 +61,7 @@ public class Eye extends RobotPart<EyeMetric>{
     private LLResult resultInUse;
     private ColorOrder colorOrder;
     private int fiducialId;
+    private double currentDegrees;
     private double shotD;
     private double deltaRPM;
 
@@ -72,9 +73,9 @@ public class Eye extends RobotPart<EyeMetric>{
 
         // Setup limelight
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
+        limelight.setPollRateHz(150); // This sets how often we ask Limelight for data (100 times per second)
         //Set up PIDF aim controller
-        aimController = new PIDFController(0.03, 0, 0.001, 0);
+        aimController = new PIDFController(0.015, 0.0, 20.0, 0.0);
     }
 
     @Override
@@ -102,9 +103,8 @@ public class Eye extends RobotPart<EyeMetric>{
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
 
                         //auto aiming
-                        double currentDegrees = fiducial.getTargetXDegrees();
-                        double steeringInput = aimController.calcuate(0, currentDegrees);
-                        ssom.motion.setTurn(steeringInput);
+                        currentDegrees = fiducial.getTargetXDegrees();
+                        ssom.motion.setTurn(aimController.calcuate(0, currentDegrees));
 
                         break;
                     }
@@ -115,14 +115,15 @@ public class Eye extends RobotPart<EyeMetric>{
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
 
                         //auto aiming
-                        double currentDegrees = fiducial.getTargetXDegrees();
-                        double steeringInput = aimController.calcuate(0, currentDegrees);
-                        ssom.motion.setTurn(steeringInput);
+                        currentDegrees = fiducial.getTargetXDegrees();
+                        ssom.motion.setTurn(aimController.calcuate(0, currentDegrees));
                         break;
                     }
                     else{
+                        currentDegrees = 180.0;
                         fiducialId = -1;
                         shotD = 0;
+                        aimController.reset();
                         ssom.motion.setTurn(0);
                     }
                 }
@@ -143,11 +144,12 @@ public class Eye extends RobotPart<EyeMetric>{
                  */
             }
             if(!ssom.gamepadBuffer.ignoreGamepad) {
-                if (!pressed && ssom.gamepadBuffer.g2LeftBumper) {
+                if (!pressed && ssom.gamepadBuffer.g1RightBumper) {
+                    aimController.reset();
                     setMode(Mode.AIM_POINT);
                     pressed = true;
                 }
-                else if (pressed && !ssom.gamepadBuffer.g2LeftBumper) {
+                else if (pressed && !ssom.gamepadBuffer.g1RightBumper) {
                     setMode(Mode.NONE);
                     ssom.launcher.setRPMFromDistance(0, 0);
                     ssom.motion.setTurn(0);
@@ -174,6 +176,10 @@ public class Eye extends RobotPart<EyeMetric>{
 
         // Cleanup
         limelight.stop();
+    }
+
+    public boolean linedUp(){
+        return Math.abs(currentDegrees) < 5.0;
     }
 
     public enum ColorOrder{
