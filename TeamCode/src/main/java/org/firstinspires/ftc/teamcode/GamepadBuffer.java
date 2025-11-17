@@ -35,6 +35,9 @@ public class GamepadBuffer {
     public boolean g2DpadRight;    // dpad right forces right ball to launcher
     public boolean g2DpadDown;     // Launch all balls in expected order
 
+    public boolean g2a;
+    public boolean g2y;
+
     public boolean ignoreGamepad;  // Should we even use a gamepad?
 
     public GamepadBuffer(boolean ignoreGamepad){
@@ -59,6 +62,9 @@ public class GamepadBuffer {
         g2DpadUp = false;
         g2DpadRight = false;
         g2DpadDown = false;
+
+        g2a = false;
+        g2y = false;
 
         this.ignoreGamepad = ignoreGamepad;
     }
@@ -91,6 +97,9 @@ public class GamepadBuffer {
             g2DpadUp = gamepad2.dpad_up;
             g2DpadRight = gamepad2.dpad_right;
             g2DpadDown = gamepad2.dpad_down;
+
+            g2a = gamepad2.a;
+            g2y = gamepad2.y;
         }
     }
 }

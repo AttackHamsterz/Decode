@@ -60,8 +60,10 @@ public class Launcher extends RobotPart<LauncherMetric>{
         distanceRPM = new ArrayList<>(List.of(
                 new RPMEntry(0.0, 0.0),
                 new RPMEntry(1.0, 2500.0),
-                new RPMEntry(2.0, 3200.0),
-                new RPMEntry(3.2, 4250.0),
+                new RPMEntry(1.45, 2850.0),
+                new RPMEntry(1.8, 3100.0),
+                new RPMEntry(2.4, 3600.0),
+                new RPMEntry(3.3, 4240.0),
                 new RPMEntry(4.0, 4600.0),
                 new RPMEntry(5.0, 5600.0)
         ));

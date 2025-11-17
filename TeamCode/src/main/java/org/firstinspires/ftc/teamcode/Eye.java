@@ -23,7 +23,6 @@ import java.util.List;
  * Each mode will use a specific pipeline.
  */
 public class Eye extends RobotPart<EyeMetric>{
-
     public enum Mode{
         AUTO_START(0),      // Locate the autonomous decision token
         AIM_POINT(1),       // Locate the aim point for placing or throwing
@@ -75,13 +74,17 @@ public class Eye extends RobotPart<EyeMetric>{
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(150); // This sets how often we ask Limelight for data (100 times per second)
         //Set up PIDF aim controller
-        aimController = new PIDFController(0.015, 0.0, 20.0, 0.0);
+        aimController = new PIDFController(0.015, 0.0, 2.0, 0.0);
     }
 
     @Override
     public void run() {
         // Sanity
-        if(limelight == null) return;
+        if(limelight == null){
+            ssom.telemetry.addLine("No Limelight!");
+            ssom.telemetry.update();
+            return;
+        }
 
         // This tells Limelight to start looking!
         limelight.start();
@@ -89,6 +92,7 @@ public class Eye extends RobotPart<EyeMetric>{
         // This loop will continue until game end
         setRunning();
         boolean pressed = false;
+        boolean g2pressed = false;
         while (running) {
             // Get a result if we're in a mode that needs one
             if (mode == Mode.AIM_POINT) {
@@ -155,19 +159,18 @@ public class Eye extends RobotPart<EyeMetric>{
                     ssom.motion.setTurn(0);
                     pressed = false;
                 }
+                if(!g2pressed && ssom.gamepadBuffer.g2y){
+                    deltaRPM += 50;
+                    g2pressed = true;
+                }
+                else if(!g2pressed && ssom.gamepadBuffer.g2a){
+                    deltaRPM -= 50;
+                    g2pressed = true;
+                }
+                if(!ssom.gamepadBuffer.g2a && !ssom.gamepadBuffer.g2y){
+                    g2pressed = false;
+                }
             }
-
-            //if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1DpadUp && !pressed) {
-                //deltaRPM += 50;
-                //pressed = true;
-            //}
-            //if (!ssom.gamepadBuffer.ignoreGamepad && ssom.gamepadBuffer.g1DpadDown && !pressed) {
-                //deltaRPM -= 50;
-                //pressed = true;
-            //}
-            //if (!ssom.gamepadBuffer.g1DpadUp && ssom.gamepadBuffer.g1DpadDown) {
-                //pressed = false;
-            //}
 
             // Short sleep if we're not aiming (to keep this loop from saturating)
             if(mode != Mode.AIM_POINT)
@@ -260,6 +263,7 @@ public class Eye extends RobotPart<EyeMetric>{
     @Override
     public void getTelemetry(Telemetry telemetry) {
         // Depending on the mode, the telemetry can change
+        telemetry.addData("Mode", mode);
         telemetry.addData("Fiducial", fiducialId);
         telemetry.addData("Shot Distance", shotD );
     }
