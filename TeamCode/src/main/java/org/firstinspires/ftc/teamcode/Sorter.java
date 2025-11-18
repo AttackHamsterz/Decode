@@ -151,13 +151,25 @@ public class Sorter extends RobotPart<SorterMetric>{
     //private final RevColorSensorV3 rightSensor;
     //private final RevColorSensorV3 frontSensor;
     //private final RevColorSensorV3 backSensor;
-    private int leftColor = 0; // 0 = none, 1 = green, 2 = purple
-    private int lastLeftColor;
+    private BallColor leftColor = BallColor.None;
+    private BallColor lastLeftColor;
     private long lastLeftColorTime;
-    private boolean isSpinning;
+    /*private BallColor rightColor = BallColor.none;
+    private BallColor lastRightColor;
+    private long lastRightColorTime;
 
+    //private BallColor frontColor = BallColor.none;
+    //private BallColor lastFrontColor;
+    //private long lastFrontColorTime;
+
+    //private BallColor backColor = BallColor.none;
+    //private BallColor lastBackColor;
+    //private long lastBackColorTime;
+    */
+    private boolean isSpinning;
     private long stopTime;
     private double targetPosition;
+
 
     public Sorter(StandardSetupOpMode ssom){
         this.ssom = ssom;
@@ -168,6 +180,9 @@ public class Sorter extends RobotPart<SorterMetric>{
         //backSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "backSensor"); // ic2 bus
 
         leftSensor.setGain(20.0f);
+        //rightSensor.setGain(20.0f);
+        //frontSensor.setGain(20.0f);
+        //backSensor.setGain(20.0f);
 
         //isSpinning has to be false
         isSpinning = false;
@@ -191,6 +206,38 @@ public class Sorter extends RobotPart<SorterMetric>{
         {
             ssom.telemetry.update();
         }
+
+        /*boolean error = false;
+        if(!rightSensor.isLightOn()) {
+            ssom.telemetry.addLine("Error: Right color sensor light is not on!");
+            error= true;
+        }
+        if(error)
+        {
+            ssom.telemetry.update();
+        }
+
+        boolean error = false;
+        if(!frontSensor.isLightOn()) {
+            ssom.telemetry.addLine("Error: Front color sensor light is not on!");
+            error= true;
+        }
+        if(error)
+        {
+            ssom.telemetry.update();
+        }
+
+        boolean error = false;
+        if(!backSensor.isLightOn()) {
+            ssom.telemetry.addLine("Error: Back color sensor light is not on!");
+            error= true;
+        }
+        if(error)
+        {
+            ssom.telemetry.update();
+        }
+         */
+
     }
 
     @Override
@@ -202,13 +249,13 @@ public class Sorter extends RobotPart<SorterMetric>{
             BallColor leftBallColor = BallColor.fromSensor(leftSensor);
 
             if (leftBallColor == BallColor.Green) {
-                leftColor = lastLeftColor = 1;
+                leftColor = lastLeftColor = BallColor.Green;
                 lastLeftColorTime = System.currentTimeMillis();
             } else if (leftBallColor == BallColor.Purple) {
-                leftColor = lastLeftColor = 2;
+                leftColor = lastLeftColor = BallColor.Purple;
                 lastLeftColorTime = System.currentTimeMillis();
             } else {
-                leftColor = 0;
+                leftColor = BallColor.None;
             }
 
             // Listen for key presses
@@ -240,6 +287,78 @@ public class Sorter extends RobotPart<SorterMetric>{
                 isSpinning = true;
                 sortMotor.setTargetPosition((int)Math.round(targetPosition));
                 sortMotor.setPower(HALF_TURN_POWER);
+            }
+            /*
+            // Getting the color value from the HSV code in BallColor.
+            BallColor rightBallColor = BallColor.fromSensor(rightSensor);
+
+            if (rightBallColor == BallColor.Green) {
+                rightColor = lastRightColor = BallColor.Green;
+                lastRightColorTime = System.currentTimeMillis();
+            } else if (rightBallColor == BallColor.Purple) {
+                rightColor = lastRightColor = BallColor.Purple;
+                lastRightColorTime = System.currentTimeMillis();
+            } else {
+                rightColor = BallColor.None;
+            }
+
+            // Getting the color value from the HSV code in BallColor.
+            BallColor frontBallColor = BallColor.fromSensor(frontSensor);
+
+            if (frontBallColor == BallColor.Green) {
+                frontColor = lastFrontColor = BallColor.Green;
+                lastFrontColorTime = System.currentTimeMillis();
+            } else if (frontBallColor == BallColor.Purple) {
+                frontColor = lastFrontColor = BallColor.Purple;
+                lastFrontColorTime = System.currentTimeMillis();
+            } else {
+                frontColor = BallColor.None;
+            }
+
+            // Getting the color value from the HSV code in BallColor.
+            BallColor backBallColor = BallColor.fromSensor(backSensor);
+
+            if (backBallColor == BallColor.Green) {
+                backColor = lastBackColor = BallColor.Green;
+                lastBackColorTime = System.currentTimeMillis();
+            } else if (backBallColor == BallColor.Purple) {
+                backColor = lastBackColor = BallColor.Purple;
+                lastBackColorTime = System.currentTimeMillis();
+            } else {
+                backColor = BallColor.None;
+            }
+             */
+
+            //Logic to move a selected color to the launcher
+            if(!pressed && ssom.gamepadBuffer.g2LeftBumper){
+                //if (backColor == BallColor.Green) {
+                //   Don't do anything.
+                //}
+                if(leftColor == BallColor.Green){
+                    rotateClockwise(-1);
+                }
+                /*else if(rightColor == BallColor.Green){
+                    rotateClockwise(1);
+                }
+                else if(frontColor == BallColor.Green){
+                    rotateClockwise(2);
+                }
+                 */
+            }
+            if(!pressed && ssom.gamepadBuffer.g2RightBumper){
+                //if (backColor == BallColor.Purple) {
+                //   Don't do anything.
+                //}
+                if(leftColor == BallColor.Purple) {
+                    rotateClockwise(-1);
+                }
+                /*else if(rightColor == BallColor.Purple){
+                    rotateClockwise(1);
+                }
+                else if(frontColor == BallColor.Purple){
+                    rotateClockwise(2);
+                }
+                 */
             }
         }
 
@@ -315,9 +434,20 @@ public class Sorter extends RobotPart<SorterMetric>{
     public void getTelemetry(Telemetry telemetry) {
         // I2C calls in telemetry can be very slow (only for debugging)
         //telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
-        telemetry.addData("leftColor", (leftColor == 0) ? "None" : (leftColor == 1) ? "green" : "purple");
+        telemetry.addData("leftColor", (leftColor == BallColor.None) ? "None" : (leftColor == BallColor.Green) ? "green" : "purple");
         telemetry.addData("lastLeftColor", lastLeftColor);
         telemetry.addData("lastLeftColorTime", lastLeftColorTime);
+        /*
+        telemetry.addData("rightColor", (rightColor == BallColor.None) ? "None" : (rightColor == BallColor.Green) ? "green" : "purple");
+        telemetry.addData("lastRightColor", lastRightColor);
+        telemetry.addData("lastRightColorTime", lastRightColorTime);
+        telemetry.addData("frontColor", (frontColor == BallColor.None) ? "None" : (frontColor == BallColor.Green) ? "green" : "purple");
+        telemetry.addData("lastFrontColor", lastFrontColor);
+        telemetry.addData("lastFrontColorTime", lastFrontColorTime);
+        telemetry.addData("backColor", (backColor == BallColor.None) ? "None" : (backColor == BallColor.Green) ? "green" : "purple");
+        telemetry.addData("lastBackColor", lastBackColor);
+        telemetry.addData("lastBackColorTime", lastBackColorTime);
+         */
         telemetry.addData("sortMotor Ticks", sortMotor.getCurrentPosition());
         telemetry.addData("sortMotor Power",sortMotor.getPower());
         telemetry.addData("isSpinning", isSpinning);
