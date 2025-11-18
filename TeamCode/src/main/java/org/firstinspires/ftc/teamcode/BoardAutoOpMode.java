@@ -98,9 +98,8 @@ public class BoardAutoOpMode extends AutoOpMode{
         switch (pathState) {
             case 0:
                 // Follow first path for initial shots
-                motion.follower.followPath(boardToScorePath,0.5, true);
+                motion.follower.followPath(boardToScorePath, PATH_VELOCITY_PERCENTAGE, true);
 
-                // TODO - Rotate to first color of pattern
                 // Loaded green left, purple back/right
                 sorter.rotateClockwise(launchPattern.get(launchIndex++));
 
@@ -155,7 +154,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                     intake.frontIntakeOn();
 
                     // Drive to pick up first line of balls
-                    motion.follower.followPath(scoreToFirstLinePath, PATH_VELOCITY_PERCENTAGE, true);
+                    motion.follower.followPath(scoreToFirstLinePath, PATH_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
                 }
                 break;

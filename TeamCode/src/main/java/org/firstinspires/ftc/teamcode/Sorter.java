@@ -154,18 +154,19 @@ public class Sorter extends RobotPart<SorterMetric>{
     private BallColor leftColor = BallColor.None;
     private BallColor lastLeftColor;
     private long lastLeftColorTime;
-    /*private BallColor rightColor = BallColor.none;
+
+    private BallColor rightColor = BallColor.None;
     private BallColor lastRightColor;
     private long lastRightColorTime;
 
-    //private BallColor frontColor = BallColor.none;
-    //private BallColor lastFrontColor;
-    //private long lastFrontColorTime;
+    private BallColor frontColor = BallColor.None;
+    private BallColor lastFrontColor;
+    private long lastFrontColorTime;
 
-    //private BallColor backColor = BallColor.none;
-    //private BallColor lastBackColor;
-    //private long lastBackColorTime;
-    */
+    private BallColor backColor = BallColor.None;
+    private BallColor lastBackColor;
+    private long lastBackColorTime;
+
     private boolean isSpinning;
     private long stopTime;
     private double targetPosition;
@@ -202,42 +203,24 @@ public class Sorter extends RobotPart<SorterMetric>{
             ssom.telemetry.addLine("Error: Left color sensor light is not on!");
             error= true;
         }
-        if(error)
-        {
-            ssom.telemetry.update();
-        }
-
-        /*boolean error = false;
+        /*
         if(!rightSensor.isLightOn()) {
             ssom.telemetry.addLine("Error: Right color sensor light is not on!");
             error= true;
         }
-        if(error)
-        {
-            ssom.telemetry.update();
-        }
-
-        boolean error = false;
         if(!frontSensor.isLightOn()) {
             ssom.telemetry.addLine("Error: Front color sensor light is not on!");
             error= true;
         }
-        if(error)
-        {
-            ssom.telemetry.update();
-        }
-
-        boolean error = false;
         if(!backSensor.isLightOn()) {
             ssom.telemetry.addLine("Error: Back color sensor light is not on!");
             error= true;
         }
+        */
         if(error)
         {
             ssom.telemetry.update();
         }
-         */
-
     }
 
     @Override
@@ -246,16 +229,38 @@ public class Sorter extends RobotPart<SorterMetric>{
         setRunning();
         while (running) {
             // Getting the color value from the HSV code in BallColor.
-            BallColor leftBallColor = BallColor.fromSensor(leftSensor);
+            leftColor = BallColor.fromSensor(leftSensor);
+            //rightColor = BallColor.fromSensor(rightSensor);
+            //frontColor = BallColor.fromSensor(frontSensor);
+            //backColor = BallColor.fromSensor(backSensor);
 
-            if (leftBallColor == BallColor.Green) {
-                leftColor = lastLeftColor = BallColor.Green;
+            if (leftColor == BallColor.Green) {
+                 lastLeftColor = BallColor.Green;
                 lastLeftColorTime = System.currentTimeMillis();
-            } else if (leftBallColor == BallColor.Purple) {
-                leftColor = lastLeftColor = BallColor.Purple;
+            } else if (leftColor == BallColor.Purple) {
+                lastLeftColor = BallColor.Purple;
                 lastLeftColorTime = System.currentTimeMillis();
-            } else {
-                leftColor = BallColor.None;
+            }
+            if (rightColor == BallColor.Green) {
+                lastRightColor = BallColor.Green;
+                lastRightColorTime = System.currentTimeMillis();
+            } else if (rightColor == BallColor.Purple) {
+                lastRightColor = BallColor.Purple;
+                lastRightColorTime = System.currentTimeMillis();
+            }
+            if (frontColor == BallColor.Green) {
+                lastFrontColor = BallColor.Green;
+                lastFrontColorTime = System.currentTimeMillis();
+            } else if (frontColor == BallColor.Purple) {
+                lastFrontColor = BallColor.Purple;
+                lastFrontColorTime = System.currentTimeMillis();
+            }
+            if (backColor == BallColor.Green) {
+                lastBackColor = BallColor.Green;
+                lastBackColorTime = System.currentTimeMillis();
+            } else if (backColor == BallColor.Purple) {
+                lastBackColor = BallColor.Purple;
+                lastBackColorTime = System.currentTimeMillis();
             }
 
             // Listen for key presses
@@ -272,7 +277,14 @@ public class Sorter extends RobotPart<SorterMetric>{
                     pressed = true;
                     targetPosition += HALF_TURN;
                 }
-                if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight && !ssom.gamepadBuffer.g2DpadUp) {
+                //Logic to move a selected color to the launcher
+                else if(!pressed && ssom.gamepadBuffer.g2LeftBumper){
+                    rotateGreenToLaunch();
+                }
+                else if(!pressed && ssom.gamepadBuffer.g2RightBumper){
+                    rotatePurpleToLaunch();
+                }
+                if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight && !ssom.gamepadBuffer.g2DpadUp && !ssom.gamepadBuffer.g2LeftBumper && !ssom.gamepadBuffer.g2RightBumper) {
                    pressed = false;
                    stopTime = System.currentTimeMillis();
                 }
@@ -288,78 +300,6 @@ public class Sorter extends RobotPart<SorterMetric>{
                 sortMotor.setTargetPosition((int)Math.round(targetPosition));
                 sortMotor.setPower(HALF_TURN_POWER);
             }
-            /*
-            // Getting the color value from the HSV code in BallColor.
-            BallColor rightBallColor = BallColor.fromSensor(rightSensor);
-
-            if (rightBallColor == BallColor.Green) {
-                rightColor = lastRightColor = BallColor.Green;
-                lastRightColorTime = System.currentTimeMillis();
-            } else if (rightBallColor == BallColor.Purple) {
-                rightColor = lastRightColor = BallColor.Purple;
-                lastRightColorTime = System.currentTimeMillis();
-            } else {
-                rightColor = BallColor.None;
-            }
-
-            // Getting the color value from the HSV code in BallColor.
-            BallColor frontBallColor = BallColor.fromSensor(frontSensor);
-
-            if (frontBallColor == BallColor.Green) {
-                frontColor = lastFrontColor = BallColor.Green;
-                lastFrontColorTime = System.currentTimeMillis();
-            } else if (frontBallColor == BallColor.Purple) {
-                frontColor = lastFrontColor = BallColor.Purple;
-                lastFrontColorTime = System.currentTimeMillis();
-            } else {
-                frontColor = BallColor.None;
-            }
-
-            // Getting the color value from the HSV code in BallColor.
-            BallColor backBallColor = BallColor.fromSensor(backSensor);
-
-            if (backBallColor == BallColor.Green) {
-                backColor = lastBackColor = BallColor.Green;
-                lastBackColorTime = System.currentTimeMillis();
-            } else if (backBallColor == BallColor.Purple) {
-                backColor = lastBackColor = BallColor.Purple;
-                lastBackColorTime = System.currentTimeMillis();
-            } else {
-                backColor = BallColor.None;
-            }
-             */
-
-            //Logic to move a selected color to the launcher
-            if(!pressed && ssom.gamepadBuffer.g2LeftBumper){
-                //if (backColor == BallColor.Green) {
-                //   Don't do anything.
-                //}
-                if(leftColor == BallColor.Green){
-                    rotateClockwise(-1);
-                }
-                /*else if(rightColor == BallColor.Green){
-                    rotateClockwise(1);
-                }
-                else if(frontColor == BallColor.Green){
-                    rotateClockwise(2);
-                }
-                 */
-            }
-            if(!pressed && ssom.gamepadBuffer.g2RightBumper){
-                //if (backColor == BallColor.Purple) {
-                //   Don't do anything.
-                //}
-                if(leftColor == BallColor.Purple) {
-                    rotateClockwise(-1);
-                }
-                /*else if(rightColor == BallColor.Purple){
-                    rotateClockwise(1);
-                }
-                else if(frontColor == BallColor.Purple){
-                    rotateClockwise(2);
-                }
-                 */
-            }
         }
 
         // Cleanup
@@ -371,32 +311,28 @@ public class Sorter extends RobotPart<SorterMetric>{
     }
 
     /**
-     * Rotate the left spot to the launcher
-     */
-    public void rotateLeftToLaunch(){
-        targetPosition -= QUARTER_TURN;
-    }
-
-    /**
-     * Rotate the right spot to the launcher
-     */
-    public void rotateRightToLaunch(){
-        targetPosition += QUARTER_TURN;
-    }
-
-    /**
-     * Rotate the front to the launcher
-     */
-    public void rotateFrontToLaunch(){
-        targetPosition += HALF_TURN;
-    }
-
-    /**
      * Find the closest green and rotate it to the launcher
      * @return true if a green is in the hopper
      */
     public boolean rotateGreenToLaunch(){
-        return true;
+        boolean colorFound = false;
+        if (backColor == BallColor.Green) {
+            // Don't do anything.
+            colorFound = true;
+        }
+        else if(leftColor == BallColor.Green){
+            colorFound = true;
+            rotateClockwise(-1);
+        }
+        else if(rightColor == BallColor.Green){
+            colorFound = true;
+                rotateClockwise(1);
+        }
+        else if(frontColor == BallColor.Green){
+            colorFound = true;
+            rotateClockwise(2);
+        }
+        return colorFound;
     }
 
     /**
@@ -404,7 +340,24 @@ public class Sorter extends RobotPart<SorterMetric>{
      * @return true if a purple is in the hopper
      */
     public boolean rotatePurpleToLaunch(){
-        return true;
+        boolean colorFound = false;
+        if (backColor == BallColor.Purple) {
+           // Don't do anything.
+            colorFound = true;
+        }
+        if(leftColor == BallColor.Purple) {
+            rotateClockwise(-1);
+            colorFound = true;
+        }
+        else if(rightColor == BallColor.Purple){
+            rotateClockwise(1);
+            colorFound = true;
+        }
+        else if(frontColor == BallColor.Purple){
+            rotateClockwise(2);
+            colorFound = true;
+        }
+        return colorFound;
     }
 
     /**
@@ -412,6 +365,7 @@ public class Sorter extends RobotPart<SorterMetric>{
      * @param quarterTurns number of clockwise quarter turns
      */
     public void rotateClockwise(int quarterTurns) {
+        isSpinning = true;
         targetPosition += quarterTurns*QUARTER_TURN;
     }
 

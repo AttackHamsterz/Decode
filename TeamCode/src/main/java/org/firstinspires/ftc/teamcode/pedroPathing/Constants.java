@@ -47,8 +47,12 @@ public class Constants {
             .linearUnit(DistanceUnit.INCH)
             .angleUnit(AngleUnit.RADIANS)
             .offset(new SparkFunOTOS.Pose2D(0, 0, 0))
-            .linearScalar(0.95693)
-            .angularScalar(0.9953527);
+            // Second OTOS Calibration
+            .linearScalar(1.000850)
+            .angularScalar(0.99392600);
+            // First OTOS Calibration
+            //.linearScalar(0.95693)
+            //.angularScalar(0.9953527);
 
     public static PathConstraints pathConstraints = new PathConstraints(
             0.995,

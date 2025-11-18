@@ -5,15 +5,12 @@ import static java.lang.Math.tan;
 import androidx.annotation.NonNull;
 
 import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PIDFController;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 import java.util.List;
@@ -74,7 +71,8 @@ public class Eye extends RobotPart<EyeMetric>{
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(150); // This sets how often we ask Limelight for data (100 times per second)
         //Set up PIDF aim controller
-        aimController = new PIDFController(0.015, 0.0, 2.0, 0.0);
+        aimController = new PIDFController(new PIDFCoefficients(0.015, 0.0, 2.0, 0.0));
+        aimController.setTargetPosition(0.0);
     }
 
     @Override
@@ -108,7 +106,8 @@ public class Eye extends RobotPart<EyeMetric>{
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
-                        ssom.motion.setTurn(aimController.calcuate(0, currentDegrees));
+                        aimController.updateError(currentDegrees);
+                        ssom.motion.setTurn(aimController.run());
 
                         break;
                     }
@@ -120,7 +119,8 @@ public class Eye extends RobotPart<EyeMetric>{
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
-                        ssom.motion.setTurn(aimController.calcuate(0, currentDegrees));
+                        aimController.updateError(currentDegrees);
+                        ssom.motion.setTurn(aimController.run());
                         break;
                     }
                     else{

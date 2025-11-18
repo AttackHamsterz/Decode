@@ -57,7 +57,7 @@ public class Motion extends RobotPart<MotionMetric>{
                     scale = 1.0f - ssom.gamepadBuffer.g1LeftTrigger * 0.75f;
 
                 // Update Pedro to move the robot based on stick input:
-                follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY*scale, -ssom.gamepadBuffer.g1LeftStickX*scale, (externalTurn!=0) ? externalTurn*scale : -ssom.gamepadBuffer.g1RightStickX*scale, true);
+                follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY*scale, -ssom.gamepadBuffer.g1LeftStickX*scale, (-externalTurn-ssom.gamepadBuffer.g1RightStickX)*scale, true);
                 follower.update();
 
                 // Short sleep to keep this loop from saturating
@@ -97,7 +97,7 @@ public class Motion extends RobotPart<MotionMetric>{
 
     @Override
     public void getTelemetry(Telemetry telemetry) {
-        if(DEBUG) {
+        if(!DEBUG) {
             Pose pose = follower.getPose();
             if(pose != null) {
                 telemetry.addData("X", pose.getX());
