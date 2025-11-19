@@ -12,8 +12,6 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-import java.time.LocalDateTime;
-
 public class Sorter extends RobotPart<SorterMetric>{
     private static final double PPM = 1425.1;
     private static final double HALF_TURN = PPM / 2.0;
