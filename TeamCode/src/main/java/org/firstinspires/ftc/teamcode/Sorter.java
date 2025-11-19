@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import java.time.LocalDateTime;
+
 public class Sorter extends RobotPart<SorterMetric>{
     private static final double PPM = 1425.1;
     private static final double HALF_TURN = PPM / 2.0;
@@ -316,19 +318,25 @@ public class Sorter extends RobotPart<SorterMetric>{
      */
     public boolean rotateGreenToLaunch(){
         boolean colorFound = false;
-        if (backColor == BallColor.Green) {
+        long recent = System.currentTimeMillis() - 200;
+
+        if (backColor == BallColor.Green ||
+            (lastBackColor == BallColor.Green && lastBackColorTime > recent)) {
             // Don't do anything.
             colorFound = true;
         }
-        else if(leftColor == BallColor.Green){
+        else if(leftColor == BallColor.Green ||
+                (lastLeftColor == BallColor.Green && lastLeftColorTime > recent)){
             colorFound = true;
             rotateClockwise(-1);
         }
-        else if(rightColor == BallColor.Green){
+        else if(rightColor == BallColor.Green ||
+                (lastRightColor == BallColor.Green && lastRightColorTime > recent)){
             colorFound = true;
                 rotateClockwise(1);
         }
-        else if(frontColor == BallColor.Green){
+        else if(frontColor == BallColor.Green ||
+                (lastFrontColor == BallColor.Green && lastFrontColorTime > recent)){
             colorFound = true;
             rotateClockwise(2);
         }
