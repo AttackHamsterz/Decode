@@ -286,7 +286,6 @@ public class Sorter extends RobotPart<SorterMetric>{
                 }
                 if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight && !ssom.gamepadBuffer.g2DpadUp && !ssom.gamepadBuffer.g2LeftBumper && !ssom.gamepadBuffer.g2RightBumper) {
                    pressed = false;
-                   stopTime = System.currentTimeMillis();
                 }
             }
 
@@ -294,6 +293,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             if(Math.abs(sortMotor.getCurrentPosition() - (int)Math.round(targetPosition)) < CLOSE_ENOUGH_TICKS) {
                 sortMotor.setPower(HOLD_POWER);
                 isSpinning = false;
+                stopTime = System.currentTimeMillis();
             }
             else{
                 isSpinning = true;
@@ -316,7 +316,7 @@ public class Sorter extends RobotPart<SorterMetric>{
      */
     public boolean rotateGreenToLaunch(){
         boolean colorFound = false;
-        long recent = System.currentTimeMillis() - 200;
+        long recent = stopTime - 500;
 
         if (backColor == BallColor.Green ||
             (lastBackColor == BallColor.Green && lastBackColorTime > recent)) {
@@ -347,19 +347,25 @@ public class Sorter extends RobotPart<SorterMetric>{
      */
     public boolean rotatePurpleToLaunch(){
         boolean colorFound = false;
-        if (backColor == BallColor.Purple) {
+        long recent = stopTime - 500;
+
+        if (backColor == BallColor.Purple ||
+                (lastBackColor == BallColor.Purple && lastBackColorTime > recent)) {
            // Don't do anything.
             colorFound = true;
         }
-        if(leftColor == BallColor.Purple) {
+        if(leftColor == BallColor.Purple||
+                (lastLeftColor == BallColor.Purple && lastLeftColorTime > recent)) {
             rotateClockwise(-1);
             colorFound = true;
         }
-        else if(rightColor == BallColor.Purple){
+        else if(rightColor == BallColor.Purple ||
+                (lastRightColor == BallColor.Purple && lastRightColorTime > recent)){
             rotateClockwise(1);
             colorFound = true;
         }
-        else if(frontColor == BallColor.Purple){
+        else if(frontColor == BallColor.Purple ||
+                (lastFrontColor == BallColor.Purple && lastFrontColorTime > recent)){
             rotateClockwise(2);
             colorFound = true;
         }
