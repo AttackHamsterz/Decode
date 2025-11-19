@@ -136,14 +136,22 @@ public class BoardAutoOpMode extends AutoOpMode{
                 break;
             case 2:
             case 4:
+                // Are we done lifting?
+                if(!ballLifter.isLifting()){
+                    sorter.rotateClockwise(launchPattern.get(launchIndex++));
+                    incrementPathState();
+                }
+                break;
             case 10:
             case 12:
             case 18:
             case 20:
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
-                    // TODO - Rotate to next color of pattern
-                    sorter.rotateClockwise(launchPattern.get(launchIndex++));
+                    if(colorPattern.get(launchIndex++) == Sorter.BallColor.Green)
+                        sorter.rotateGreenToLaunch();
+                    else
+                        sorter.rotatePurpleToLaunch();
                     incrementPathState();
                 }
                 break;

@@ -68,6 +68,7 @@ public class AutoOpMode extends StandardSetupOpMode {
     }
 
     protected List<Integer> launchPattern = new ArrayList<>();
+    protected List<Sorter.BallColor> colorPattern = new ArrayList<>();
     protected int launchIndex = 0;
 
     @Override public void start() {
@@ -92,6 +93,16 @@ public class AutoOpMode extends StandardSetupOpMode {
             launchPattern.add(-1);
             launchPattern.add(1);
             launchPattern.add(1);
+            //
+            colorPattern.add(Sorter.BallColor.Green);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Green);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Green);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Purple);
         }
 
         else if (id == 22) {
@@ -108,6 +119,16 @@ public class AutoOpMode extends StandardSetupOpMode {
             launchPattern.add(0);
             launchPattern.add(-1);
             launchPattern.add(2);
+            //
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Green);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Green);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Green);
+            colorPattern.add(Sorter.BallColor.Purple);
         }
 
         else if (id == 23) {
@@ -124,6 +145,16 @@ public class AutoOpMode extends StandardSetupOpMode {
             launchPattern.add(1);
             launchPattern.add(-1);
             launchPattern.add(-1);
+            //
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Green);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Green);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Purple);
+            colorPattern.add(Sorter.BallColor.Green);
         }
 
         // Start all body parts (except the eye, which has already started)
