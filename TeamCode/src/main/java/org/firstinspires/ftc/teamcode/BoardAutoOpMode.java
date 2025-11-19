@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -21,7 +22,7 @@ public class BoardAutoOpMode extends AutoOpMode{
     private Pose secondLineStart;
     private Pose secondLineEnd;
 
-    private PathChain boardToScorePath;
+    private Path boardToScorePath;
     private PathChain scoreToFirstLinePath;
     private PathChain firstLineEndPath;
     private PathChain firstLineEndToScore;
@@ -58,7 +59,9 @@ public class BoardAutoOpMode extends AutoOpMode{
 
     @Override
     public void buildPaths() {
-        boardToScorePath = motion.follower.pathBuilder()
+        boardToScorePath = new Path(new BezierLine(startPose, initialScorePose));
+        boardToScorePath.setLinearHeadingInterpolation(startPose.getHeading(), initialScorePose.getHeading());
+        motion.follower.pathBuilder()
                 .addPath(new BezierLine(startPose, initialScorePose))
                 .setLinearHeadingInterpolation(firstLineStart.getHeading(), firstLineEnd.getHeading())
                 .build();
@@ -98,7 +101,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         switch (pathState) {
             case 0:
                 // Follow first path for initial shots
-                motion.follower.followPath(boardToScorePath, PATH_VELOCITY_PERCENTAGE, true);
+                motion.follower.followPath(boardToScorePath, true);
 
                 // Loaded green left, purple back/right
                 sorter.rotateClockwise(launchPattern.get(launchIndex++));

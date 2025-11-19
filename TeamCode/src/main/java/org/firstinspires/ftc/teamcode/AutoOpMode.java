@@ -126,12 +126,13 @@ public class AutoOpMode extends StandardSetupOpMode {
             launchPattern.add(-1);
         }
 
-
-
         // Start all body parts (except the eye, which has already started)
         for( Thread part : partList)
             if(!part.equals(eye))
                 part.start();
+
+        // Ensure follower uses PIDFs
+        motion.follower.activateAllPIDFs();
     }
 
     @Override public void init_loop() {
