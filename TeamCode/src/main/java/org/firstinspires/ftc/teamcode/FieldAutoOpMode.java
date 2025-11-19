@@ -36,7 +36,7 @@ public class FieldAutoOpMode extends AutoOpMode {
         final double parkPoseX = 36.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
-        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 13.5, Math.toRadians(120));
+        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 13.5, Math.toRadians(110));
         thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 10, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
