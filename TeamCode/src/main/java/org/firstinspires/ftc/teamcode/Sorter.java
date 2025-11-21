@@ -21,6 +21,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double TAIL_ROTATE_TIME_MS = 100;
     private static final double QUARTER_TURN_POWER = 1.0;
     private static final double HALF_TURN_POWER = 1.0;
+    private static final long LAST_COLOR_WAIT_MS = 250;
 
     private static float redSensorValue;
     private static float greenSensorValue;
@@ -316,7 +317,7 @@ public class Sorter extends RobotPart<SorterMetric>{
      */
     public boolean rotateGreenToLaunch(){
         boolean colorFound = false;
-        long recent = stopTime - 500;
+        long recent = stopTime - LAST_COLOR_WAIT_MS;
 
         if (backColor == BallColor.Green ||
             (lastBackColor == BallColor.Green && lastBackColorTime > recent)) {
@@ -347,7 +348,7 @@ public class Sorter extends RobotPart<SorterMetric>{
      */
     public boolean rotatePurpleToLaunch(){
         boolean colorFound = false;
-        long recent = stopTime - 500;
+        long recent = stopTime - LAST_COLOR_WAIT_MS;
 
         if (backColor == BallColor.Purple ||
                 (lastBackColor == BallColor.Purple && lastBackColorTime > recent)) {
