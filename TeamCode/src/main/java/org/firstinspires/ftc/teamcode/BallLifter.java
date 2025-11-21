@@ -122,7 +122,8 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
 
     @Override
     public void getTelemetry(Telemetry telemetry) {
-
+        if((DEBUG & 32) != 0) {
+        }
     }
 
     public boolean isLifting(){

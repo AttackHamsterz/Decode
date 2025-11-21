@@ -148,9 +148,9 @@ public class Sorter extends RobotPart<SorterMetric>{
     }
     private final DcMotor sortMotor;
     private final RevColorSensorV3 leftSensor;
-    //private final RevColorSensorV3 rightSensor;
-    //private final RevColorSensorV3 frontSensor;
-    //private final RevColorSensorV3 backSensor;
+    private final RevColorSensorV3 rightSensor;
+    private final RevColorSensorV3 frontSensor;
+    private final RevColorSensorV3 backSensor;
     private BallColor leftColor = BallColor.None;
     private BallColor lastLeftColor;
     private long lastLeftColorTime;
@@ -176,14 +176,14 @@ public class Sorter extends RobotPart<SorterMetric>{
         this.ssom = ssom;
         sortMotor = ssom.hardwareMap.get(DcMotor.class, "sortMotor"); //need to define channel
         leftSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "leftSensor"); // ic2 bus
-        //rightSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "rightSensor"); // ic2 bus
-        //frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor"); // ic2 bus
-        //backSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "backSensor"); // ic2 bus
+        rightSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "rightSensor"); // ic2 bus
+        frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor"); // ic2 bus
+        backSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "backSensor"); // ic2 bus
 
         leftSensor.setGain(20.0f);
-        //rightSensor.setGain(20.0f);
-        //frontSensor.setGain(20.0f);
-        //backSensor.setGain(20.0f);
+        rightSensor.setGain(20.0f);
+        frontSensor.setGain(20.0f);
+        backSensor.setGain(20.0f);
 
         //isSpinning has to be false
         isSpinning = false;
@@ -203,7 +203,6 @@ public class Sorter extends RobotPart<SorterMetric>{
             ssom.telemetry.addLine("Error: Left color sensor light is not on!");
             error= true;
         }
-        /*
         if(!rightSensor.isLightOn()) {
             ssom.telemetry.addLine("Error: Right color sensor light is not on!");
             error= true;
@@ -216,7 +215,6 @@ public class Sorter extends RobotPart<SorterMetric>{
             ssom.telemetry.addLine("Error: Back color sensor light is not on!");
             error= true;
         }
-        */
         if(error)
         {
             ssom.telemetry.update();
@@ -230,9 +228,9 @@ public class Sorter extends RobotPart<SorterMetric>{
         while (running) {
             // Getting the color value from the HSV code in BallColor.
             leftColor = BallColor.fromSensor(leftSensor);
-            //rightColor = BallColor.fromSensor(rightSensor);
-            //frontColor = BallColor.fromSensor(frontSensor);
-            //backColor = BallColor.fromSensor(backSensor);
+            rightColor = BallColor.fromSensor(rightSensor);
+            frontColor = BallColor.fromSensor(frontSensor);
+            backColor = BallColor.fromSensor(backSensor);
 
             if (leftColor == BallColor.Green) {
                  lastLeftColor = BallColor.Green;
@@ -279,9 +277,11 @@ public class Sorter extends RobotPart<SorterMetric>{
                 }
                 //Logic to move a selected color to the launcher
                 else if(!pressed && ssom.gamepadBuffer.g2LeftBumper){
+                    pressed = true;
                     rotateGreenToLaunch();
                 }
                 else if(!pressed && ssom.gamepadBuffer.g2RightBumper){
+                    pressed = true;
                     rotatePurpleToLaunch();
                 }
                 if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight && !ssom.gamepadBuffer.g2DpadUp && !ssom.gamepadBuffer.g2LeftBumper && !ssom.gamepadBuffer.g2RightBumper) {
@@ -336,7 +336,7 @@ public class Sorter extends RobotPart<SorterMetric>{
         else if(frontColor == BallColor.Green ||
                 (lastFrontColor == BallColor.Green && lastFrontColorTime > recent)){
             colorFound = true;
-            rotateClockwise(2);
+            rotateClockwise(-2);
         }
         return colorFound;
     }
@@ -354,7 +354,7 @@ public class Sorter extends RobotPart<SorterMetric>{
            // Don't do anything.
             colorFound = true;
         }
-        if(leftColor == BallColor.Purple||
+        else if(leftColor == BallColor.Purple||
                 (lastLeftColor == BallColor.Purple && lastLeftColorTime > recent)) {
             rotateClockwise(-1);
             colorFound = true;
@@ -366,7 +366,7 @@ public class Sorter extends RobotPart<SorterMetric>{
         }
         else if(frontColor == BallColor.Purple ||
                 (lastFrontColor == BallColor.Purple && lastFrontColorTime > recent)){
-            rotateClockwise(2);
+            rotateClockwise(-2);
             colorFound = true;
         }
         return colorFound;
@@ -398,32 +398,28 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     @Override
     public void getTelemetry(Telemetry telemetry) {
-        // I2C calls in telemetry can be very slow (only for debugging)
-        //telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
-        telemetry.addData("leftColor", (leftColor == BallColor.None) ? "None" : (leftColor == BallColor.Green) ? "green" : "purple");
-        telemetry.addData("lastLeftColor", lastLeftColor);
-        telemetry.addData("lastLeftColorTime", lastLeftColorTime);
-        /*
-        telemetry.addData("rightColor", (rightColor == BallColor.None) ? "None" : (rightColor == BallColor.Green) ? "green" : "purple");
-        telemetry.addData("lastRightColor", lastRightColor);
-        telemetry.addData("lastRightColorTime", lastRightColorTime);
-        telemetry.addData("frontColor", (frontColor == BallColor.None) ? "None" : (frontColor == BallColor.Green) ? "green" : "purple");
-        telemetry.addData("lastFrontColor", lastFrontColor);
-        telemetry.addData("lastFrontColorTime", lastFrontColorTime);
-        telemetry.addData("backColor", (backColor == BallColor.None) ? "None" : (backColor == BallColor.Green) ? "green" : "purple");
-        telemetry.addData("lastBackColor", lastBackColor);
-        telemetry.addData("lastBackColorTime", lastBackColorTime);
-         */
-        telemetry.addData("sortMotor Ticks", sortMotor.getCurrentPosition());
-        telemetry.addData("sortMotor Power",sortMotor.getPower());
-        telemetry.addData("isSpinning", isSpinning);
-        telemetry.addData("stopTime", stopTime);
-        telemetry.addData("leftRed", redSensorValue);
-        telemetry.addData("leftGreen", greenSensorValue);
-        telemetry.addData("leftBlue", blueSensorValue);
-        telemetry.addData("leftHue", hueValue);
-        telemetry.addData("leftSaturation", saturationValue);
-        telemetry.addData("leftValue", brightnessValue);
+        if((DEBUG & 8) != 0) {
+            // I2C calls in telemetry can be very slow (only for debugging)
+            //telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
+            telemetry.addData("leftColor", (leftColor == BallColor.None) ? "None" : (leftColor == BallColor.Green) ? "green" : "purple");
+            telemetry.addData("rightColor", (rightColor == BallColor.None) ? "None" : (rightColor == BallColor.Green) ? "green" : "purple");
+            telemetry.addData("frontColor", (frontColor == BallColor.None) ? "None" : (frontColor == BallColor.Green) ? "green" : "purple");
+            telemetry.addData("backColor", (backColor == BallColor.None) ? "None" : (backColor == BallColor.Green) ? "green" : "purple");
+            telemetry.addData("sortMotor Ticks", sortMotor.getCurrentPosition());
+            telemetry.addData("sortMotor Power", sortMotor.getPower());
+            telemetry.addData("isSpinning", isSpinning);
+            /*
+            telemetry.addData("lastLeftColor", lastLeftColor);
+            telemetry.addData("lastLeftColorTime", lastLeftColorTime);
+            telemetry.addData("lastRightColor", lastRightColor);
+            telemetry.addData("lastRightColorTime", lastRightColorTime);
+            telemetry.addData("lastFrontColor", lastFrontColor);
+            telemetry.addData("lastFrontColorTime", lastFrontColorTime);
+            telemetry.addData("lastBackColor", lastBackColor);
+            telemetry.addData("lastBackColorTime", lastBackColorTime);
+            telemetry.addData("stopTime", stopTime);
+             */
+        }
     }
 }
 

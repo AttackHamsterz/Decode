@@ -97,7 +97,7 @@ public class Motion extends RobotPart<MotionMetric>{
 
     @Override
     public void getTelemetry(Telemetry telemetry) {
-        if(DEBUG) {
+        if((DEBUG & 1) != 0) {
             Pose pose = follower.getPose();
             if(pose != null) {
                 telemetry.addData("X", pose.getX());

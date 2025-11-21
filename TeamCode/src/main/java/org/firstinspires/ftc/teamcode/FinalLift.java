@@ -80,10 +80,12 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
 
     @Override
     public void getTelemetry(Telemetry telemetry) {
-        telemetry.addData("liftLeftTicks", finalLiftMotorLeft.getCurrentPosition());
-        telemetry.addData("liftRightTicks", finalLiftMotorRight.getCurrentPosition());
-        telemetry.addData("liftLeftPower", finalLiftMotorLeft.getPower());
-        telemetry.addData("liftRightPower", finalLiftMotorRight.getPower());
+        if((DEBUG & 64) != 0) {
+            telemetry.addData("liftLeftTicks", finalLiftMotorLeft.getCurrentPosition());
+            telemetry.addData("liftRightTicks", finalLiftMotorRight.getCurrentPosition());
+            telemetry.addData("liftLeftPower", finalLiftMotorLeft.getPower());
+            telemetry.addData("liftRightPower", finalLiftMotorRight.getPower());
+        }
     }
 }
 

@@ -94,9 +94,11 @@ public class Intake extends RobotPart<IntakeMetric> {
 
     @Override
     public void getTelemetry(Telemetry telemetry) {
-        telemetry.addData("RightServoPower", rightIntakeServoPower);
-        telemetry.addData("LeftServoPower", leftIntakeServoPower);
-        telemetry.addData("FrontServoPower", frontIntakeServoPower);
+        if((DEBUG & 16) != 0) {
+            telemetry.addData("RightServoPower", rightIntakeServoPower);
+            telemetry.addData("LeftServoPower", leftIntakeServoPower);
+            telemetry.addData("FrontServoPower", frontIntakeServoPower);
+        }
     }
 
     /**

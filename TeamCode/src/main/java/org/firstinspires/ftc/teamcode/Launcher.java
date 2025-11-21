@@ -135,7 +135,9 @@ public class Launcher extends RobotPart<LauncherMetric>{
 
     @Override
     public void getTelemetry(Telemetry telemetry) {
-        telemetry.addData("launchTargetVelocity", targetVelocityRPM);
-        telemetry.addData("launchCurrentVelocity", currentVelocityRPM);
+        if((DEBUG & 2) != 0) {
+            telemetry.addData("launchTargetVelocity", targetVelocityRPM);
+            telemetry.addData("launchCurrentVelocity", currentVelocityRPM);
+        }
     }
 }

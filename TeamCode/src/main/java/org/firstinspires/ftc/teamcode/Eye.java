@@ -263,9 +263,11 @@ public class Eye extends RobotPart<EyeMetric>{
     @Override
     public void getTelemetry(Telemetry telemetry) {
         // Depending on the mode, the telemetry can change
-        telemetry.addData("Mode", mode);
-        telemetry.addData("Fiducial", fiducialId);
-        telemetry.addData("Shot Distance", shotD );
+        if((DEBUG & 4) != 0) {
+            telemetry.addData("Mode", mode);
+            telemetry.addData("Fiducial", fiducialId);
+            telemetry.addData("Shot Distance", shotD);
+        }
     }
 
 }
