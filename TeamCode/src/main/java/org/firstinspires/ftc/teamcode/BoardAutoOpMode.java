@@ -36,7 +36,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double startPoseX = 56.0;
         final double initialScorePoseX = 44.22;
         final double midLinePoseX = 30.0;
-        final double lineStartX = 34.0;
+        final double lineStartX = 30.0;
         final double lineEndX = 48.92;
         final double parkX = 49.0;
 
@@ -49,6 +49,17 @@ public class BoardAutoOpMode extends AutoOpMode{
         secondLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-lineStartX :centerLineX+lineStartX, 58.5, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-lineEndX :centerLineX+lineEndX, 58.5, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
 
+        // Test moving all the poses as close to zero as possible to see if that helps the overshoot
+        initialScorePose = initialScorePose.minus(startPose);
+        midLinePose = midLinePose.minus(startPose);
+        firstLineStart = firstLineStart.minus(startPose);
+        firstLineEnd = firstLineEnd.minus(startPose);
+        parkPose = parkPose.minus(startPose);
+        secondLineStart = secondLineStart.minus(startPose);
+        secondLineEnd = secondLineEnd.minus(startPose);
+        startPose = startPose.minus(startPose);
+
+        // Setup and build paths
         super.init();
 
         motion.follower.setStartingPose(startPose);
@@ -103,7 +114,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 // Follow first path for initial shots
                 motion.follower.followPath(boardToScorePath, true);
 
-                // Loaded green left, purple back/right
+                // Loaded purple left and back and green right when looking at robot
                 sorter.rotateClockwise(launchPattern.get(launchIndex++));
 
                 // Spin up launcher
@@ -125,6 +136,12 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 21:
                 // Done driving, sorter ready, launcher ready, lifter reset?
                 if(!motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady() && ballLifter.isReset()) {
+                    // Stop the front intake (needed for 9 and 17)
+                    if(pathState==9 || pathState == 17) {
+                        intake.frontIntakeStop();
+                        // TODO - Get hopper loaded here and queue up first shot
+                    }
+
                     // Launch
                     try {
                         Thread.sleep(300);
@@ -161,9 +178,6 @@ public class BoardAutoOpMode extends AutoOpMode{
                     // Slow down the launcher
                     launcher.setVelocityRPM(0);
 
-                    // Start front intake
-                    intake.frontIntakeOn();
-
                     // Drive to pick up first line of balls
                     motion.follower.followPath(scoreToFirstLinePath, PATH_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
@@ -172,6 +186,10 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 7:
                 // Pick up balls
                 if(!motion.follower.isBusy()){
+                    // Start front intake
+                    intake.frontIntakeOn();
+
+                    // Drive to path end
                     motion.follower.followPath(firstLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
                 }
@@ -179,10 +197,11 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 8:
                 // Drive to launch again
                 if(!motion.follower.isBusy()){
-                    // Stop front intake
-                    intake.frontIntakeStop();
-
-                    // TODO - Rotate to first color of pattern
+                    // TODO - Rotate to first color of pattern, might need a slow spin to load hopper
+                    if(colorPattern.get(launchIndex++) == Sorter.BallColor.Green)
+                        sorter.rotateGreenToLaunch();
+                    else
+                        sorter.rotatePurpleToLaunch();
 
                     // Spin up launcher
                     launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
@@ -198,9 +217,6 @@ public class BoardAutoOpMode extends AutoOpMode{
                     // Slow down the launcher
                     launcher.setVelocityRPM(0);
 
-                    // Start front intake
-                    intake.frontIntakeOn();
-
                     // Drive to pick up first line of balls
                     motion.follower.followPath(scoreToSecondLine, PATH_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
@@ -209,6 +225,9 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 15:
                 //Pick up balls
                 if(!motion.follower.isBusy()) {
+                    // Start front intake
+                    intake.frontIntakeOn();
+
                     motion.follower.followPath(secondLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
                 }
@@ -216,10 +235,11 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 16:
                 //Drive to score next round of balls
                 if(!motion.follower.isBusy()){
-                    // Stop intake
-                    intake.frontIntakeStop();
-
-                    // TODO - Rotate to first color of pattern
+                    // TODO - Rotate to first color of pattern, might need a slow spin to load hopper
+                    if(colorPattern.get(launchIndex++) == Sorter.BallColor.Green)
+                        sorter.rotateGreenToLaunch();
+                    else
+                        sorter.rotatePurpleToLaunch();
 
                     // Spin up launcher
                     launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
@@ -241,6 +261,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 }
                 break;
             case 23:
+                // Need to actually wait for park
                 if(!motion.follower.isBusy()) {
                     setPathState(-1);
                 }

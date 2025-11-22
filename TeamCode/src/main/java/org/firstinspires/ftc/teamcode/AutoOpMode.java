@@ -161,9 +161,6 @@ public class AutoOpMode extends StandardSetupOpMode {
         for( Thread part : partList)
             if(!part.equals(eye))
                 part.start();
-
-        // Ensure follower uses PIDFs
-        motion.follower.activateAllPIDFs();
     }
 
     @Override public void init_loop() {

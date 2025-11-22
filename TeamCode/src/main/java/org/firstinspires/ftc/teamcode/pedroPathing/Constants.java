@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(20.00)
+            .mass(16.00)
             .forwardZeroPowerAcceleration(-29.0)
             .lateralZeroPowerAcceleration(-50.4)
             .useSecondaryTranslationalPIDF(false)
@@ -39,8 +39,8 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .useBrakeModeInTeleOp(true)
-            .xVelocity(83.5)
-            .yVelocity(61.2);
+            .xVelocity(80.3)
+            .yVelocity(60.0);
 
     public static OTOSConstants localizerConstants = new OTOSConstants()
             .hardwareMapName("sensor-otos")
@@ -59,16 +59,16 @@ public class Constants {
             0.1,
             0.1,
             0.007,
-            50,
+            500,
             1.35,
             10,
             1.2);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
+                .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
                 .OTOSLocalizer(localizerConstants)
-                .pathConstraints(pathConstraints)
                 .build();
     }
 }
