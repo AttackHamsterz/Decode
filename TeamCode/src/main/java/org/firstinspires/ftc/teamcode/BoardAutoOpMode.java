@@ -35,14 +35,14 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double centerLineX = 72.0;
         final double startPoseX = 56.0;
         final double initialScorePoseX = 44.22;
-        final double midLinePoseX = 30.0;
-        final double lineStartX = 30.0;
+        final double midLinePoseX = 29.0;
+        final double lineStartX = 25.0;
         final double lineEndX = 48.92;
         final double parkX = 49.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, 113.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, 113.00, Math.toRadians((color == COLOR.BLUE) ? 135 : 45));
-        midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, 100, Math.toRadians((color == COLOR.BLUE) ? 135 : 45));
+        midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, 100, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-lineStartX :centerLineX+lineStartX,82.0, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-lineEndX :centerLineX+lineEndX,82.0, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         parkPose = new Pose( (color == COLOR.BLUE) ? centerLineX-parkX :centerLineX+parkX, 67.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
@@ -50,14 +50,14 @@ public class BoardAutoOpMode extends AutoOpMode{
         secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-lineEndX :centerLineX+lineEndX, 58.5, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
 
         // Test moving all the poses as close to zero as possible to see if that helps the overshoot
-        initialScorePose = initialScorePose.minus(startPose);
-        midLinePose = midLinePose.minus(startPose);
-        firstLineStart = firstLineStart.minus(startPose);
-        firstLineEnd = firstLineEnd.minus(startPose);
-        parkPose = parkPose.minus(startPose);
-        secondLineStart = secondLineStart.minus(startPose);
-        secondLineEnd = secondLineEnd.minus(startPose);
-        startPose = startPose.minus(startPose);
+        //initialScorePose = initialScorePose.minus(startPose);
+        //midLinePose = midLinePose.minus(startPose);
+        //firstLineStart = firstLineStart.minus(startPose);
+        //firstLineEnd = firstLineEnd.minus(startPose);
+        //parkPose = parkPose.minus(startPose);
+        //secondLineStart = secondLineStart.minus(startPose);
+        //secondLineEnd = secondLineEnd.minus(startPose);
+        //startPose = startPose.minus(startPose);
 
         // Setup and build paths
         super.init();
