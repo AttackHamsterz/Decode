@@ -48,6 +48,25 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
         finalLiftMotorRight.setPower(0);
     }
 
+    public void slightLift() {
+        /* int leftPos = (int)Math.round(LIFT_HEIGHT_LEFT_START_IN/PPM_IN*PPM);
+        int rightPos = (int)Math.round(LIFT_HEIGHT_RIGHT_START_IN/PPM_IN*PPM);
+        finalLiftMotorLeft.setTargetPosition(leftPos);
+        finalLiftMotorRight.setTargetPosition(rightPos);
+        finalLiftMotorLeft.setPower(0.97);
+        finalLiftMotorRight.setPower(1);
+         */
+    }
+
+    public void slightDrop() {
+        /* int pos = 0;
+        finalLiftMotorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        finalLiftMotorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        finalLiftMotorLeft.setPower(0);
+        finalLiftMotorRight.setPower(0);
+         */
+    }
+
     @Override
     public void run() {
         if (!ssom.gamepadBuffer.ignoreGamepad) {
@@ -58,6 +77,10 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
                         lift();
                     } else if (ssom.gamepadBuffer.g1DpadDown) {
                         drop();
+                    } else if (ssom.gamepadBuffer.g1DpadRight){
+                        slightLift ();
+                    } else if (ssom.gamepadBuffer.g1DpadLeft){
+                        slightDrop ();
                     }
                 }
 
