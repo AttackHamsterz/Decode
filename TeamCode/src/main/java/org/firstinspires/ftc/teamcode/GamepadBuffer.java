@@ -16,6 +16,8 @@ public class GamepadBuffer {
     public boolean g1Start;        // Enter final lift mode
     public boolean g1DpadUp;       // Holding start and pressing dpad up will lift robot
     public boolean g1DpadDown;     // Holding start and pressing dpad down will lower robot
+    public boolean g1DpadLeft;       // Holding start and pressing dpad left will TWEAK lift robot
+    public boolean g1DpadRight;     // Holding start and pressing dpad right will TWEAK lower robot
     public float g1RightTrigger;   // Holding the right trigger will align with targets
     public boolean g1RightBumper;  // Holding the right bumper will keep the robot facing the target
     public float g1LeftTrigger;    // Holding the left trigger will slow the robot by the amount pressed
@@ -31,12 +33,14 @@ public class GamepadBuffer {
     public boolean g2LeftBumper;   // Forces purple ball to launcher
     public boolean g2RightBumper;  // Forces green ball to launcher
     public boolean g2DpadLeft;     // dpad left forces left ball to launcher
-    public boolean g2DpadUp;       // dpad up forces front ball to launcher
+    public boolean g2DpadUp;       // dpad up tweaks delta x by +20
     public boolean g2DpadRight;    // dpad right forces right ball to launcher
-    public boolean g2DpadDown;     // Launch all balls in expected order
+    public boolean g2DpadDown;     // // dpad up tweaks delta x by +20
 
-    public boolean g2a;
+    public boolean g2a; // Half Turn
     public boolean g2y;
+    public boolean g2x; // Quarter Turn Clockwise
+    public boolean g2b; // Quarter Turn Counter Clockwise
 
     public boolean ignoreGamepad;  // Should we even use a gamepad?
 
@@ -47,6 +51,8 @@ public class GamepadBuffer {
         g1Start = false;
         g1DpadUp = false;
         g1DpadDown = false;
+        g1DpadLeft = false;
+        g1DpadRight = false;
         g1RightTrigger = 0;
         g1RightBumper = false;
 
@@ -65,6 +71,8 @@ public class GamepadBuffer {
 
         g2a = false;
         g2y = false;
+        g2x = false;
+        g2b = false;
 
         this.ignoreGamepad = ignoreGamepad;
     }
@@ -79,6 +87,8 @@ public class GamepadBuffer {
             g1Start = gamepad1.start;
             g1DpadUp = gamepad1.dpad_up;
             g1DpadDown = gamepad1.dpad_down;
+            g1DpadLeft = gamepad1.dpad_left;
+            g1DpadRight = gamepad1.dpad_right;
             g1RightTrigger = gamepad1.right_trigger;
             g1LeftTrigger = gamepad1.left_trigger;
             g1RightBumper = gamepad1.right_bumper;
@@ -100,6 +110,8 @@ public class GamepadBuffer {
 
             g2a = gamepad2.a;
             g2y = gamepad2.y;
+            g2x = gamepad2.x;
+            g2b = gamepad2.b;
         }
     }
 }

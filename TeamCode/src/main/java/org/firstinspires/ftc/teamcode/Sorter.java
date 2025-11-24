@@ -12,6 +12,10 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class Sorter extends RobotPart<SorterMetric>{
     private static final double PPM = 1425.1;
     private static final double HALF_TURN = PPM / 2.0;
@@ -30,6 +34,9 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static float hueValue;
     private static float saturationValue;
     private static float brightnessValue;
+
+    private boolean autoTurn = false;
+    private boolean autoTurnTrigger = false;
 
     public enum BallColor{
         None(0),
@@ -222,6 +229,24 @@ public class Sorter extends RobotPart<SorterMetric>{
         }
     }
 
+    public void autoTurnOn(){
+        autoTurn = true;
+    }
+    public void autoTurnOff(){
+        autoTurn = false;
+    }
+
+
+    public void autoTurnThread(){
+        autoTurnTrigger = true;
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        Runnable task = () -> {
+            rotateClockwise(-1);
+            autoTurnTrigger = false;
+        };
+        scheduler.schedule(task, 100, TimeUnit.MILLISECONDS);
+    }
+
     @Override
     public void run() {
         boolean pressed = false;
@@ -250,9 +275,15 @@ public class Sorter extends RobotPart<SorterMetric>{
             if (frontColor == BallColor.Green) {
                 lastFrontColor = BallColor.Green;
                 lastFrontColorTime = System.currentTimeMillis();
+                if (frontColor.distance < 1.15 && !isSpinning && autoTurn && !autoTurnTrigger) {
+                    autoTurnThread();
+                }
             } else if (frontColor == BallColor.Purple) {
                 lastFrontColor = BallColor.Purple;
                 lastFrontColorTime = System.currentTimeMillis();
+                if (frontColor.distance < 1.15 && !isSpinning && autoTurn &&!autoTurnTrigger) {
+                    autoTurnThread();
+                }
             }
             if (backColor == BallColor.Green) {
                 lastBackColor = BallColor.Green;
@@ -264,15 +295,15 @@ public class Sorter extends RobotPart<SorterMetric>{
 
             // Listen for key presses
             if (!ssom.gamepadBuffer.ignoreGamepad) {
-                if (!pressed && ssom.gamepadBuffer.g2DpadLeft) {
+                if (!pressed && ssom.gamepadBuffer.g2b) {
                     pressed = true;
                     targetPosition -= QUARTER_TURN;
                 }
-                else if (!pressed && ssom.gamepadBuffer.g2DpadRight) {
+                else if (!pressed && ssom.gamepadBuffer.g2x) {
                     pressed = true;
                     targetPosition += QUARTER_TURN;
                 }
-                else if (!pressed && ssom.gamepadBuffer.g2DpadUp) {
+                else if (!pressed && ssom.gamepadBuffer.g2a) {
                     pressed = true;
                     targetPosition += HALF_TURN;
                 }
@@ -285,7 +316,7 @@ public class Sorter extends RobotPart<SorterMetric>{
                     pressed = true;
                     rotatePurpleToLaunch();
                 }
-                if (!ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight && !ssom.gamepadBuffer.g2DpadUp && !ssom.gamepadBuffer.g2LeftBumper && !ssom.gamepadBuffer.g2RightBumper) {
+                if (!ssom.gamepadBuffer.g2x && !ssom.gamepadBuffer.g2b && !ssom.gamepadBuffer.g2a && !ssom.gamepadBuffer.g2LeftBumper && !ssom.gamepadBuffer.g2RightBumper) {
                    pressed = false;
                 }
             }

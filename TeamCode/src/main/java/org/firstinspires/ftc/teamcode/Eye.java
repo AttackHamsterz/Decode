@@ -159,15 +159,15 @@ public class Eye extends RobotPart<EyeMetric>{
                     ssom.motion.setTurn(0);
                     pressed = false;
                 }
-                if(!g2pressed && ssom.gamepadBuffer.g2y){
-                    deltaRPM += 50;
+                if(!g2pressed && ssom.gamepadBuffer.g2DpadUp){
+                    deltaRPM += 20;
                     g2pressed = true;
                 }
-                else if(!g2pressed && ssom.gamepadBuffer.g2a){
-                    deltaRPM -= 50;
+                else if(!g2pressed && ssom.gamepadBuffer.g2DpadDown){
+                    deltaRPM -= 20;
                     g2pressed = true;
                 }
-                if(!ssom.gamepadBuffer.g2a && !ssom.gamepadBuffer.g2y){
+                if(!ssom.gamepadBuffer.g2DpadDown && !ssom.gamepadBuffer.g2DpadUp){
                     g2pressed = false;
                 }
             }

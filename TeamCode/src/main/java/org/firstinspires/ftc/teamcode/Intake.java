@@ -56,10 +56,13 @@ public class Intake extends RobotPart<IntakeMetric> {
                 // Forward intake (outtake wins)
                 if (ssom.gamepadBuffer.g2RightStickY < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
                     frontIntakeServoPower = -1;
+                    ssom.sorter.autoTurnOff();
                 } else if (ssom.gamepadBuffer.g2LeftStickY < -0.1 || ssom.gamepadBuffer.g2LeftStickY > 0.1) {
                     frontIntakeServoPower = 1;
+                    ssom.sorter.autoTurnOn();
                 } else {
                     frontIntakeServoPower = 0;
+                    ssom.sorter.autoTurnOff();
                 }
             }
 
