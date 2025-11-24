@@ -7,7 +7,9 @@ import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
 import com.pedropathing.ftc.localization.constants.OTOSConstants;
+import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.paths.PathConstraints;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -42,7 +44,19 @@ public class Constants {
             .xVelocity(80.3)
             .yVelocity(60.0);
 
-    public static OTOSConstants localizerConstants = new OTOSConstants()
+    public static PinpointConstants localizerConstants = new PinpointConstants()
+            .forwardPodY(-5)
+            .strafePodX(0.5)
+            .distanceUnit(DistanceUnit.INCH)
+            .hardwareMapName("pinpoint")
+            .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
+            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
+            .forwardPodY(6.139)
+            .strafePodX(8.65);
+
+
+    /*public static OTOSConstants localizerConstants = new OTOSConstants()
             .hardwareMapName("sensor-otos")
             .linearUnit(DistanceUnit.INCH)
             .angleUnit(AngleUnit.RADIANS)
@@ -53,7 +67,7 @@ public class Constants {
             // First OTOS Calibration
             //.linearScalar(0.95693)
             //.angularScalar(0.9953527);
-
+*/
     public static PathConstraints pathConstraints = new PathConstraints(
             0.975,
             0.1,
@@ -68,7 +82,8 @@ public class Constants {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
-                .OTOSLocalizer(localizerConstants)
+                .pinpointLocalizer(localizerConstants)
+                //.OTOSLocalizer(localizerConstants)
                 .build();
     }
 }
