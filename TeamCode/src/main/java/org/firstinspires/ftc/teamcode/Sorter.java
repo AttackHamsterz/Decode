@@ -37,6 +37,7 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     private boolean autoTurn = false;
     private boolean autoTurnTrigger = false;
+    private int autoTurnCount = 0;
 
     public enum BallColor{
         None(0),
@@ -231,11 +232,14 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     public void autoTurnOn(){
         autoTurn = true;
+        autoTurnCount = 0;
     }
     public void autoTurnOff(){
         autoTurn = false;
     }
-
+    public int getCount(){
+        return autoTurnCount;
+    }
 
     public void autoTurnThread(){
         autoTurnTrigger = true;
@@ -243,6 +247,7 @@ public class Sorter extends RobotPart<SorterMetric>{
         Runnable task = () -> {
             rotateClockwise(-1);
             autoTurnTrigger = false;
+            autoTurnCount++;
         };
         scheduler.schedule(task, 100, TimeUnit.MILLISECONDS);
     }

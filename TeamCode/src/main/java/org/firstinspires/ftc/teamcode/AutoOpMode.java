@@ -15,12 +15,15 @@ import java.util.List;
 @Autonomous(name = "Auto", group = "Robot")
 @Disabled
 public class AutoOpMode extends StandardSetupOpMode {
-    protected final double PICKUP_VELOCITY_PERCENTAGE = 0.25;
+    protected final double PICKUP_VELOCITY_PERCENTAGE = 0.20;
     protected final double PATH_VELOCITY_PERCENTAGE = 1.0;
 
     protected Timer pathTimer;
 
     // Finite state machine state
+    protected List<Integer> launchPattern = new ArrayList<>();
+    protected List<Sorter.BallColor> colorPattern = new ArrayList<>();
+    protected int launchIndex = 0;
     protected int pathState;
 
     /* There are two major types of paths components: BezierCurves and BezierLines.
@@ -67,9 +70,6 @@ public class AutoOpMode extends StandardSetupOpMode {
         eye.start();
     }
 
-    protected List<Integer> launchPattern = new ArrayList<>();
-    protected List<Sorter.BallColor> colorPattern = new ArrayList<>();
-    protected int launchIndex = 0;
 
     @Override public void start() {
         // Set the starting path state
