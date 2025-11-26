@@ -139,6 +139,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                     // Stop the front intake (needed for 9 and 17)
                     if(pathState==9 || pathState == 17) {
                         intake.frontIntakeStop();
+                        sorter.autoTurnOff();
                         // TODO - Get hopper loaded here and queue up first shot
                     }
 
@@ -188,6 +189,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 if(!motion.follower.isBusy()){
                     // Start front intake
                     intake.frontIntakeOn();
+                    sorter.autoTurnOn();
 
                     // Drive to path end
                     motion.follower.followPath(firstLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
@@ -227,6 +229,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 if(!motion.follower.isBusy()) {
                     // Start front intake
                     intake.frontIntakeOn();
+                    sorter.autoTurnOn();
 
                     motion.follower.followPath(secondLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
