@@ -18,10 +18,11 @@ public class BoardAutoOpMode extends AutoOpMode{
 
     private static final double FIRST_LAUNCH_RPM = 2500.00; // Launcher speed
     private static final int SHOT_DELAY_MS = 50;            // Ball settle time
-    private static final int LINE_END_DELAY_MS = 1000;      // Wait after line to rotate to color
+    private static final int LINE_END_DELAY_MS = 1050;      // Wait after line to rotate to color
 
     private Pose startPose;
     private Pose initialScorePose;
+    private Pose secondScorePose;
     private Pose midLinePose;
     private Pose firstLineStart;
     private Pose firstLineEnd;
@@ -44,17 +45,20 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double startPoseY = 113.5;
         final double initialScorePoseX = 44.22;
         final double initialScorePoseY = 113.0;
+        final double secondScorePoseX = 37;
+        final double secondScorePoseY = 121;
         final double midLinePoseX = 25.0;
         final double midLinePoseY = 100.0;
-        final double lineStartX = 25.0;
-        final double firstLineStartY = 85.0;
-        final double secondLineStartY = 58.5;
-        final double lineEndX = 50.0;
+        final double lineStartX = 28.5;
+        final double firstLineStartY = 85.5;
+        final double secondLineStartY = 59.5;
+        final double lineEndX = 53.0;
         final double parkX = 49.0;
         final double parkY = 67.5;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, startPoseY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, initialScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 135 : 45));
+        secondScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-secondScorePoseX :centerLineX+secondScorePoseX, secondScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 155 : 25));
         midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, midLinePoseY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-lineStartX :centerLineX+lineStartX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-lineEndX :centerLineX+lineEndX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
@@ -97,12 +101,12 @@ public class BoardAutoOpMode extends AutoOpMode{
                 .setLinearHeadingInterpolation(secondLineStart.getHeading(), secondLineEnd.getHeading())
                 .build();
         secondLineEndToScore = motion.follower.pathBuilder()
-                .addPath(new BezierLine(secondLineEnd, initialScorePose))
-                .setLinearHeadingInterpolation(secondLineEnd.getHeading(), initialScorePose.getHeading())
+                .addPath(new BezierLine(secondLineEnd, secondScorePose))
+                .setLinearHeadingInterpolation(secondLineEnd.getHeading(), secondScorePose.getHeading())
                 .build();
         scoreToPark = motion.follower.pathBuilder()
-                .addPath(new BezierLine(initialScorePose, parkPose))
-                .setLinearHeadingInterpolation(initialScorePose.getHeading(), parkPose.getHeading())
+                .addPath(new BezierLine(secondScorePose, parkPose))
+                .setLinearHeadingInterpolation(secondScorePose.getHeading(), parkPose.getHeading())
                 .build();
         setPathState(0);
 
@@ -144,20 +148,15 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 3:
             case 5:
             // Second 3 balls
-            case 9:
-            case 11:
-            case 13:
+            case 10:
+            case 12:
+            case 14:
             // Third 3 balls
-            case 17:
             case 19:
             case 21:
+            case 23:
                 // Done driving, sorter ready, launcher ready, lifter reset?
                 if(!motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady() && ballLifter.isReset()) {
-                    // Stop the front intake (needed for 9 and 17)
-                    if(pathState==9 || pathState == 17) {
-                        intake.frontIntakeStop();
-                        sorter.autoTurnOff();
-                    }
 
                     // Launch (delay let's ball settle from rotation)
                     try {
@@ -176,10 +175,10 @@ public class BoardAutoOpMode extends AutoOpMode{
                     incrementPathState();
                 }
                 break;
-            case 10:
-            case 12:
-            case 18:
+            case 11:
+            case 13:
             case 20:
+            case 22:
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
                     if(colorPattern.get(launchIndex++) == Sorter.BallColor.Green) {
@@ -219,8 +218,6 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 8:
                 // Drive to launch again
                 if(!motion.follower.isBusy()){
-                    // After end of line delay spinning to color for 1 second (finish intake)
-                    delayedColorQueue(colorPattern.get(launchIndex++), LINE_END_DELAY_MS);
 
                     // Spin up launcher
                     launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
@@ -230,7 +227,35 @@ public class BoardAutoOpMode extends AutoOpMode{
                     incrementPathState();
                 }
                 break;
-            case 14:
+            case 9:
+                if(!motion.follower.isBusy()){
+                    try {
+                        Thread.sleep(LINE_END_DELAY_MS);
+                    } catch (InterruptedException ignore) {}
+
+                    intake.frontIntakeStop();
+                    sorter.autoTurnOff();
+
+                    // After end of line delay spinning to color for 1 second (finish intake)
+                    delayedColorQueue(colorPattern.get(launchIndex++), 0);
+                    incrementPathState();
+                }
+                break;
+            case 18:
+                if(!motion.follower.isBusy()){
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException ignore) {}
+
+                    intake.frontIntakeStop();
+                    sorter.autoTurnOff();
+
+                    // After end of line delay spinning to color for 1 second (finish intake)
+                    delayedColorQueue(colorPattern.get(launchIndex++), 0);
+                    incrementPathState();
+                }
+                break;
+            case 15:
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
                     // Slow down the launcher
@@ -241,7 +266,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                     incrementPathState();
                 }
                 break;
-            case 15:
+            case 16:
                 //Pick up balls
                 if(!motion.follower.isBusy()) {
                     // Start front intake
@@ -252,11 +277,9 @@ public class BoardAutoOpMode extends AutoOpMode{
                     incrementPathState();
                 }
                 break;
-            case 16:
+            case 17:
                 //Drive to score next round of balls
                 if(!motion.follower.isBusy()){
-                    // After end of line delay spinning to color for 1 second (finish intake)
-                    delayedColorQueue(colorPattern.get(launchIndex++), LINE_END_DELAY_MS);
 
                     // Spin up launcher
                     launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
@@ -266,7 +289,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                     incrementPathState();
                 }
                 break;
-            case 22:
+            case 24:
                 // Park
                 if(!ballLifter.isLifting()){
                     // Stop the launcher
@@ -277,7 +300,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                     incrementPathState();
                 }
                 break;
-            case 23:
+            case 25:
                 // Need to actually wait for park
                 if(!motion.follower.isBusy()) {
                     setPathState(-1);

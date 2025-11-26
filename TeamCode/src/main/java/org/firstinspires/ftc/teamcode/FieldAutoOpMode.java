@@ -35,17 +35,17 @@ public class FieldAutoOpMode extends AutoOpMode {
     public void init() {
 
         final double centerLineX = 72.0;
-        final double startPoseX = 8.0;
-        final double scorePoseX = 10.0;
+        final double startPoseX = 10.5;
+        final double scorePoseX = 12.5;
         final double lineStartX = 30.0;
-        final double lineEndX = 48.92;
+        final double lineEndX = 54.92;
         final double parkPoseX = 36.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
-        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 13.5, Math.toRadians(110));
+        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 19.5, Math.toRadians(110));
         thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
-        parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 10, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 10, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
 
         super.init();
 
@@ -67,7 +67,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), thirdLineStart.getHeading())
                 .build();
         thirdLineEndPath = motion.follower.pathBuilder()
-                .addPath(new BezierLine(motion.follower::getPose, thirdLineEnd))
+                .addPath(new BezierLine(motion.follower :: getPose, thirdLineEnd))
                 .setLinearHeadingInterpolation(thirdLineStart.getHeading(), thirdLineEnd.getHeading())
                 .build();
         thirdLineEndToScore = motion.follower.pathBuilder()
@@ -116,9 +116,9 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 3:
             case 5:
             // Second 3 balls
-            case 9:
-            case 11:
-            case 13:
+            case 10:
+            case 12:
+            case 14:
                 if(!motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady() && ballLifter.isReset()) {
                     // Stop the front intake (needed for 9 and 17)
                     if(pathState==9) {
@@ -143,8 +143,8 @@ public class FieldAutoOpMode extends AutoOpMode {
                     incrementPathState();
                 }
                 break;
-            case 10:
-            case 12:
+            case 11:
+            case 13:
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
                     if(colorPattern.get(launchIndex++) == Sorter.BallColor.Green) {
@@ -164,9 +164,6 @@ public class FieldAutoOpMode extends AutoOpMode {
                     // Slow down the launcher
                     launcher.setVelocityRPM(0);
 
-                    // Start front intake
-                    intake.frontIntakeOn();
-
                     // Drive to pick up first line of balls
                     motion.follower.followPath(scoreToThirdLinePath, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
@@ -175,6 +172,10 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 7:
                 // Pick up balls
                 if(!motion.follower.isBusy()){
+                    // Start front intake
+                    intake.frontIntakeOn();
+                    sorter.autoTurnOn();
+
                     motion.follower.followPath(thirdLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
                 }
@@ -182,18 +183,29 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 8:
                 // Drive to launch again
                 if(!motion.follower.isBusy()){
-                    // After end of line delay spinning to color for 1 second (finish intake)
-                    delayedColorQueue(colorPattern.get(launchIndex++), LINE_END_DELAY_MS);
-
                     // Spin up launcher
                     launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
 
                     // Drive to score
-                    motion.follower.followPath(thirdLineEndPath, PATH_VELOCITY_PERCENTAGE, true);
+                    motion.follower.followPath(thirdLineEndToScore, 0.7, true);
                     incrementPathState();
                 }
+                break;
+            case 9:
+                if(!motion.follower.isBusy()){
+                    try {
+                        Thread.sleep(LINE_END_DELAY_MS);
+                    } catch (InterruptedException ignore) {}
 
-            case 14:
+                    intake.frontIntakeStop();
+                    sorter.autoTurnOff();
+
+                    // After end of line delay spinning to color for 1 second (finish intake)
+                    delayedColorQueue(colorPattern.get(launchIndex++), 0);
+                    incrementPathState();
+                }
+                break;
+            case 15:
                 // Park
                 if(!ballLifter.isLifting()){
                     // Stop the launcher
@@ -204,7 +216,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     incrementPathState();
                 }
                 break;
-            case 15:
+            case 16:
                 if(!motion.follower.isBusy()) {
                     setPathState(-1);
                 }
