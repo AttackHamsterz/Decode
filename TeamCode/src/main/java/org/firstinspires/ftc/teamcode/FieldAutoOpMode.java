@@ -42,7 +42,7 @@ public class FieldAutoOpMode extends AutoOpMode {
         final double parkPoseX = 36.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
-        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 13.5, Math.toRadians(110));
+        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 13.5, Math.toRadians((color == COLOR.BLUE) ? 110 : 70));
         thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 10, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
@@ -162,10 +162,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
                     // Slow down the launcher
-                    launcher.setVelocityRPM(0);
-
-                    // Start front intake
-                    intake.frontIntakeOn();
+                    launcher.setVelocityRPM(1500);
 
                     // Drive to pick up first line of balls
                     motion.follower.followPath(scoreToThirdLinePath, PATH_VELOCITY_PERCENTAGE, true);
@@ -175,6 +172,10 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 7:
                 // Pick up balls
                 if(!motion.follower.isBusy()){
+                    // Start front intake
+                    intake.frontIntakeOn();
+                    sorter.autoTurnOn();
+
                     motion.follower.followPath(thirdLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
                 }
