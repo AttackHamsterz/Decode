@@ -38,7 +38,7 @@ public class StandardSetupOpMode extends OpMode {
     public boolean ignoreGamepad = false;
 
     // Timing
-    private Timer opmodeTimer;
+    protected Timer opmodeTimer;
 
     // Gamepad buffers
     public GamepadBuffer gamepadBuffer;

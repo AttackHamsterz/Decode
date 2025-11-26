@@ -14,7 +14,9 @@ import java.util.concurrent.TimeUnit;
 @Autonomous(name = "Auto: Field", group = "Robot")
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
-    private static final double FIRST_LAUNCH_RPM = 4200.00;
+    protected final double PICKUP_VELOCITY_PERCENTAGE = 0.18;
+    private static final double FIRST_LAUNCH_RPM = 4250.00;
+    private static final double SECOND_LAUNCH_RPM = 4250.00;
     private static final int SHOT_DELAY_MS = 50; // Ball settle time
     private static final int LINE_END_DELAY_MS = 1000;
     private Pose startPose;
@@ -36,16 +38,16 @@ public class FieldAutoOpMode extends AutoOpMode {
 
         final double centerLineX = 72.0;
         final double startPoseX = 10.5;
-        final double scorePoseX = 12.5;
+        final double scorePoseX = 13.5;
         final double lineStartX = 30.0;
-        final double lineEndX = 55;
+        final double lineEndX = 53.5;
         final double parkPoseX = 36.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
-        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 19.5, Math.toRadians((color == COLOR.BLUE) ? 110 : 70));
+        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 20.5, Math.toRadians((color == COLOR.BLUE) ? 110 : 70));
         thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
-        parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 10, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
+        parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 12.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         super.init();
 
         motion.follower.setStartingPose(startPose);
@@ -106,8 +108,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 sorter.rotateClockwise(launchPattern.get(launchIndex++));
 
                 // Spin up launcher
-                //launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
-                eye.enableAimMode();
+                launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
                 incrementPathState();
                 break;
 
@@ -126,7 +127,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                         sorter.autoTurnOff();
                     }
 
-                    // Launch (delay let's ball settle from rotation)
+                    // Launch (delay lets ball settle from rotation)
                     try {
                         Thread.sleep(SHOT_DELAY_MS);
                     } catch (InterruptedException ignore) {
@@ -162,7 +163,6 @@ public class FieldAutoOpMode extends AutoOpMode {
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
                     // Slow down the launcher
-                    eye.disableAimMode();
                     launcher.setVelocityRPM(1500);
 
                     // Drive to pick up first line of balls
@@ -185,10 +185,10 @@ public class FieldAutoOpMode extends AutoOpMode {
                 // Drive to launch again
                 if(!motion.follower.isBusy()){
                     // After end of line delay spinning to color for 1 second (finish intake)
-                    delayedColorQueue(colorPattern.get(launchIndex++), LINE_END_DELAY_MS);
+                    delayedColorQueue(colorPattern.get(launchIndex++), 500);
 
                     // Spin up launcher
-                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
+                    launcher.setVelocityRPM(SECOND_LAUNCH_RPM);
 
                     // Drive to score
                     motion.follower.followPath(thirdLineEndToScore, 0.7, true);
@@ -198,7 +198,7 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 9:
                 if(!motion.follower.isBusy()){
                     try {
-                        Thread.sleep(LINE_END_DELAY_MS);
+                        Thread.sleep(250);
                     } catch (InterruptedException ignore) {}
 
                     intake.frontIntakeStop();

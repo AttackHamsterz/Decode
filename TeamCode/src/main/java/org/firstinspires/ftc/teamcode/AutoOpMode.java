@@ -15,7 +15,7 @@ import java.util.List;
 @Autonomous(name = "Auto", group = "Robot")
 @Disabled
 public class AutoOpMode extends StandardSetupOpMode {
-    protected final double PICKUP_VELOCITY_PERCENTAGE = 0.15;
+    //protected final double PICKUP_VELOCITY_PERCENTAGE = 0.15;
     protected final double PATH_VELOCITY_PERCENTAGE = 1.0;
 
     protected Timer pathTimer;
