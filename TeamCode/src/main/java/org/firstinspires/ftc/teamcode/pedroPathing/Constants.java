@@ -7,7 +7,9 @@ import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
 import com.pedropathing.ftc.localization.constants.OTOSConstants;
+import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.paths.PathConstraints;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -18,9 +20,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(16.00)
-            .forwardZeroPowerAcceleration(-29.0)
-            .lateralZeroPowerAcceleration(-50.4)
+            .mass(13.6) // 30 pounds!
+            .forwardZeroPowerAcceleration(-23.6)
+            .lateralZeroPowerAcceleration(-56.4)
             .useSecondaryTranslationalPIDF(false)
             .useSecondaryHeadingPIDF(false)
             .useSecondaryDrivePIDF(false)
@@ -39,36 +41,33 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .useBrakeModeInTeleOp(true)
-            .xVelocity(80.3)
-            .yVelocity(60.0);
+            .xVelocity(71)
+            .yVelocity(56.8);
 
-    public static OTOSConstants localizerConstants = new OTOSConstants()
-            .hardwareMapName("sensor-otos")
-            .linearUnit(DistanceUnit.INCH)
-            .angleUnit(AngleUnit.RADIANS)
-            .offset(new SparkFunOTOS.Pose2D(0, 0, 0))
-            // Second OTOS Calibration
-            .linearScalar(1.000850)
-            .angularScalar(0.99392600);
-            // First OTOS Calibration
-            //.linearScalar(0.95693)
-            //.angularScalar(0.9953527);
+    public static PinpointConstants localizerConstants = new PinpointConstants()
+            .distanceUnit(DistanceUnit.INCH)
+            .hardwareMapName("pinpoint")
+            .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
+            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
+            .forwardPodY(0.07874016)
+            .strafePodX(-0.03937008);
 
     public static PathConstraints pathConstraints = new PathConstraints(
-            0.975,
+            0.99,
             0.1,
             0.1,
-            0.007,
-            500,
-            1.35,
+            0.017,
+            200,
+            2,
             10,
-            1.2);
+            1.05);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
-                .OTOSLocalizer(localizerConstants)
+                .pinpointLocalizer(localizerConstants)
                 .build();
     }
 }
