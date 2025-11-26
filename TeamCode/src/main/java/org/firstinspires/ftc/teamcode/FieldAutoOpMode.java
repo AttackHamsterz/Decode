@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
     private static final double FIRST_LAUNCH_RPM = 4200.00;
-    private static final int SHOT_DELAY_MS = 50;            // Ball settle time
+    private static final int SHOT_DELAY_MS = 50; // Ball settle time
     private static final int LINE_END_DELAY_MS = 1000;
     private Pose startPose;
     private Pose initialScorePose;
@@ -38,15 +38,14 @@ public class FieldAutoOpMode extends AutoOpMode {
         final double startPoseX = 10.5;
         final double scorePoseX = 12.5;
         final double lineStartX = 30.0;
-        final double lineEndX = 54.92;
+        final double lineEndX = 55;
         final double parkPoseX = 36.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
-        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 13.5, Math.toRadians((color == COLOR.BLUE) ? 110 : 70));
+        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 19.5, Math.toRadians((color == COLOR.BLUE) ? 110 : 70));
         thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 10, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
-
         super.init();
 
         motion.follower.setStartingPose(startPose);
@@ -107,7 +106,8 @@ public class FieldAutoOpMode extends AutoOpMode {
                 sorter.rotateClockwise(launchPattern.get(launchIndex++));
 
                 // Spin up launcher
-                launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
+                //launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
+                eye.enableAimMode();
                 incrementPathState();
                 break;
 
@@ -162,6 +162,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
                     // Slow down the launcher
+                    eye.disableAimMode();
                     launcher.setVelocityRPM(1500);
 
                     // Drive to pick up first line of balls
