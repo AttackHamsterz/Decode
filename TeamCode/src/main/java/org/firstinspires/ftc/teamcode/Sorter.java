@@ -307,7 +307,9 @@ public class Sorter extends RobotPart<SorterMetric>{
                     pressed = true;
                     rotatePurpleToLaunch();
                 }
-                if (!ssom.gamepadBuffer.g2x && !ssom.gamepadBuffer.g2b && !ssom.gamepadBuffer.g2a && !ssom.gamepadBuffer.g2LeftBumper && !ssom.gamepadBuffer.g2RightBumper) {
+                if (!ssom.gamepadBuffer.g2x && !ssom.gamepadBuffer.g2b && !ssom.gamepadBuffer.g2a &&
+                        !ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight &&
+                        !ssom.gamepadBuffer.g2LeftBumper && !ssom.gamepadBuffer.g2RightBumper) {
                    pressed = false;
                 }
             }

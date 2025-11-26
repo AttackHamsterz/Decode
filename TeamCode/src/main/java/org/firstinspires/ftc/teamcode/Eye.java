@@ -151,14 +151,11 @@ public class Eye extends RobotPart<EyeMetric>{
             }
             if(!ssom.gamepadBuffer.ignoreGamepad) {
                 if (!pressed && ssom.gamepadBuffer.g1RightBumper) {
-                    aimController.reset();
-                    setMode(Mode.AIM_POINT);
+                    enableAimMode();
                     pressed = true;
                 }
                 else if (pressed && !ssom.gamepadBuffer.g1RightBumper) {
-                    setMode(Mode.NONE);
-                    ssom.launcher.setRPMFromDistance(0, 0);
-                    ssom.motion.setTurn(0);
+                    disableAimMode();
                     pressed = false;
                 }
                 if(!g2pressed && ssom.gamepadBuffer.g2DpadUp){
@@ -181,6 +178,17 @@ public class Eye extends RobotPart<EyeMetric>{
 
         // Cleanup
         limelight.stop();
+    }
+
+    public void enableAimMode(){
+        aimController.reset();
+        setMode(Mode.AIM_POINT);
+    }
+
+    public void disableAimMode(){
+        setMode(Mode.NONE);
+        ssom.launcher.setRPMFromDistance(0, 0);
+        ssom.motion.setTurn(0);
     }
 
     public boolean linedUp(){
