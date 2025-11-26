@@ -20,6 +20,8 @@ import java.util.List;
  * Each mode will use a specific pipeline.
  */
 public class Eye extends RobotPart<EyeMetric>{
+    private static final double CLOSE_ENOUGH_DEGREES = 8.0;
+
     public enum Mode{
         AUTO_START(0),      // Locate the autonomous decision token
         AIM_POINT(1),       // Locate the aim point for placing or throwing
@@ -149,14 +151,11 @@ public class Eye extends RobotPart<EyeMetric>{
             }
             if(!ssom.gamepadBuffer.ignoreGamepad) {
                 if (!pressed && ssom.gamepadBuffer.g1RightBumper) {
-                    aimController.reset();
-                    setMode(Mode.AIM_POINT);
+                    enableAimMode();
                     pressed = true;
                 }
                 else if (pressed && !ssom.gamepadBuffer.g1RightBumper) {
-                    setMode(Mode.NONE);
-                    ssom.launcher.setRPMFromDistance(0, 0);
-                    ssom.motion.setTurn(0);
+                    disableAimMode();
                     pressed = false;
                 }
                 if(!g2pressed && ssom.gamepadBuffer.g2DpadUp){
@@ -181,8 +180,19 @@ public class Eye extends RobotPart<EyeMetric>{
         limelight.stop();
     }
 
+    public void enableAimMode(){
+        aimController.reset();
+        setMode(Mode.AIM_POINT);
+    }
+
+    public void disableAimMode(){
+        setMode(Mode.NONE);
+        ssom.launcher.setRPMFromDistance(0, 0);
+        ssom.motion.setTurn(0);
+    }
+
     public boolean linedUp(){
-        return Math.abs(currentDegrees) < 5.0;
+        return Math.abs(currentDegrees) < CLOSE_ENOUGH_DEGREES;
     }
 
     public enum ColorOrder{
