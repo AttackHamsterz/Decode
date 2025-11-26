@@ -20,6 +20,8 @@ import java.util.List;
  * Each mode will use a specific pipeline.
  */
 public class Eye extends RobotPart<EyeMetric>{
+    private static final double CLOSE_ENOUGH_DEGREES = 8.0;
+
     public enum Mode{
         AUTO_START(0),      // Locate the autonomous decision token
         AIM_POINT(1),       // Locate the aim point for placing or throwing
@@ -182,7 +184,7 @@ public class Eye extends RobotPart<EyeMetric>{
     }
 
     public boolean linedUp(){
-        return Math.abs(currentDegrees) < 5.0;
+        return Math.abs(currentDegrees) < CLOSE_ENOUGH_DEGREES;
     }
 
     public enum ColorOrder{

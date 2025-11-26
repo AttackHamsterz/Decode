@@ -20,24 +20,14 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double PPM = 1425.1;
     private static final double HALF_TURN = PPM / 2.0;
     private static final double QUARTER_TURN = PPM / 4.0;
-    private static final int CLOSE_ENOUGH_TICKS = 14;
+    private static final double ONE_DEGREE_TURN = PPM / 360.0;
+    private static final int CLOSE_ENOUGH_TICKS = (int)Math.ceil(3.0 * ONE_DEGREE_TURN);
     private static final double HOLD_POWER = 0.1;
-    private static final double TAIL_ROTATE_TIME_MS = 100;
-    private static final double QUARTER_TURN_POWER = 1.0;
-    private static final double HALF_TURN_POWER = 1.0;
+    private static final double TURN_POWER = 1.0;
     private static final long LAST_COLOR_WAIT_MS = 250;
-
-    private static float redSensorValue;
-    private static float greenSensorValue;
-    private static float blueSensorValue;
-
-    private static float hueValue;
-    private static float saturationValue;
-    private static float brightnessValue;
 
     private boolean autoTurn = false;
     private boolean autoTurnTrigger = false;
-    private int autoTurnCount = 0;
 
     public enum BallColor{
         None(0),
@@ -117,14 +107,6 @@ public class Sorter extends RobotPart<SorterMetric>{
                             (int) (colors.blue * 255),
                             hsv
                     );
-
-                    //Setting the telemetry.
-                    redSensorValue = colors.red * 255;
-                    greenSensorValue = colors.green * 255;
-                    blueSensorValue = colors.blue * 255;
-                    hueValue = hsv[0];
-                    saturationValue = hsv[1];
-                    brightnessValue = hsv[2];
 
                     //Checking the brightness to see if it's high enough to be a color value.
                     if (hsv[2] >= VALUE_MIN) {
@@ -232,13 +214,9 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     public void autoTurnOn(){
         autoTurn = true;
-        autoTurnCount = 0;
     }
     public void autoTurnOff(){
         autoTurn = false;
-    }
-    public int getCount(){
-        return autoTurnCount;
     }
 
     public void autoTurnThread(){
@@ -247,7 +225,6 @@ public class Sorter extends RobotPart<SorterMetric>{
         Runnable task = () -> {
             rotateClockwise(-1);
             autoTurnTrigger = false;
-            autoTurnCount++;
         };
         scheduler.schedule(task, 100, TimeUnit.MILLISECONDS);
     }
@@ -312,6 +289,15 @@ public class Sorter extends RobotPart<SorterMetric>{
                     pressed = true;
                     targetPosition += HALF_TURN;
                 }
+                // Logic to nudge sorter for alignment
+                else if (!pressed && ssom.gamepadBuffer.g2DpadLeft) {
+                    pressed = true;
+                    targetPosition += 2.0 * ONE_DEGREE_TURN;
+                }
+                else if (!pressed && ssom.gamepadBuffer.g2DpadRight) {
+                    pressed = true;
+                    targetPosition -= 2.0 * ONE_DEGREE_TURN;
+                }
                 //Logic to move a selected color to the launcher
                 else if(!pressed && ssom.gamepadBuffer.g2LeftBumper){
                     pressed = true;
@@ -335,7 +321,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             else{
                 isSpinning = true;
                 sortMotor.setTargetPosition((int)Math.round(targetPosition));
-                sortMotor.setPower(HALF_TURN_POWER);
+                sortMotor.setPower(TURN_POWER);
             }
         }
 
@@ -407,6 +393,69 @@ public class Sorter extends RobotPart<SorterMetric>{
             colorFound = true;
         }
         return colorFound;
+    }
+
+    public boolean frontOccupied(){
+        long recent = stopTime - LAST_COLOR_WAIT_MS;
+        return frontColor != BallColor.None || (lastFrontColor != BallColor.None && lastFrontColorTime > recent);
+    }
+    public boolean leftOccupied(){
+        long recent = stopTime - LAST_COLOR_WAIT_MS;
+        return leftColor != BallColor.None || (lastLeftColor != BallColor.None && lastLeftColorTime > recent);
+    }
+    public boolean rightOccupied(){
+        long recent = stopTime - LAST_COLOR_WAIT_MS;
+        return rightColor != BallColor.None || (lastRightColor != BallColor.None && lastRightColorTime > recent);
+    }
+    public boolean backOccupied(){
+        long recent = stopTime - LAST_COLOR_WAIT_MS;
+        return backColor != BallColor.None || (lastBackColor != BallColor.None && lastBackColorTime > recent);
+    }
+
+    public int getBallCount(){
+        int count = 0;
+        if(frontOccupied())
+            count++;
+        if(leftOccupied())
+            count++;
+        if(rightOccupied())
+            count++;
+        if(backOccupied())
+            count++;
+        return count;
+    }
+
+    public void emptyFront(){
+        if(frontOccupied()){
+            if(!rightOccupied())
+                rotateClockwise(-1);
+            else if(!leftOccupied())
+                rotateClockwise(1);
+            else if(!backOccupied())
+                rotateClockwise(-2);
+        }
+    }
+
+    public void emptyLeft(){
+        if(leftOccupied()){
+            if(!frontOccupied())
+                rotateClockwise(-1);
+            else if(!backOccupied())
+                rotateClockwise(1);
+            else if(!rightOccupied())
+                rotateClockwise(-2);
+        }
+    }
+
+    public void emptyRight(){
+        if(rightOccupied()){
+            if(!backOccupied())
+                rotateClockwise(-1);
+            else if(!frontOccupied())
+                rotateClockwise(1);
+            else if(!leftOccupied())
+                rotateClockwise(-2);
+        }
     }
 
     /**

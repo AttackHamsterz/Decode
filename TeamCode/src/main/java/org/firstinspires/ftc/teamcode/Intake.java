@@ -38,7 +38,10 @@ public class Intake extends RobotPart<IntakeMetric> {
                 // Left intake (outtake wins)
                 if (ssom.gamepadBuffer.g2RightStickX < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
                     leftIntakeServoPower = -1;
-                } else if (ssom.gamepadBuffer.g2LeftStickX < -0.1 || ssom.gamepadBuffer.g2LeftStickY > 0.1) {
+                } else if (ssom.gamepadBuffer.g2LeftStickX < -0.1) {
+                    leftIntakeServoPower = 1;
+                    ssom.sorter.emptyLeft();
+                } else if (ssom.gamepadBuffer.g2LeftStickY > 0.1) {
                     leftIntakeServoPower = 1;
                 } else {
                     leftIntakeServoPower = 0;
@@ -47,7 +50,10 @@ public class Intake extends RobotPart<IntakeMetric> {
                 // Right intake (outtake wins)
                 if (ssom.gamepadBuffer.g2RightStickX > 0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
                     rightIntakeServoPower = -1;
-                } else if (ssom.gamepadBuffer.g2LeftStickX > 0.1 || ssom.gamepadBuffer.g2LeftStickY > 0.1) {
+                } else if (ssom.gamepadBuffer.g2LeftStickX > 0.1) {
+                    rightIntakeServoPower = 1;
+                    ssom.sorter.emptyRight();
+                }  else if (ssom.gamepadBuffer.g2LeftStickY > 0.1) {
                     rightIntakeServoPower = 1;
                 } else {
                     rightIntakeServoPower = 0;
@@ -57,7 +63,11 @@ public class Intake extends RobotPart<IntakeMetric> {
                 if (ssom.gamepadBuffer.g2RightStickY < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
                     frontIntakeServoPower = -1;
                     ssom.sorter.autoTurnOff();
-                } else if (ssom.gamepadBuffer.g2LeftStickY < -0.1 || ssom.gamepadBuffer.g2LeftStickY > 0.1) {
+                } else if (ssom.gamepadBuffer.g2LeftStickY < -0.1) {
+                    frontIntakeServoPower = 1;
+                    ssom.sorter.emptyFront();
+                    ssom.sorter.autoTurnOn();
+                } else if (ssom.gamepadBuffer.g2LeftStickY > 0.1) {
                     frontIntakeServoPower = 1;
                     ssom.sorter.autoTurnOn();
                 } else {

@@ -13,7 +13,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
     private static final double TPR = 28.0;
     private static final double MIN_RPM = 0.0;
     private static final double MAX_RPM = 6000.0;
-    private static final double CLOSE_ENOUGH_RPM = 150.0;
+    private static final double CLOSE_ENOUGH_RPM_PERCENT = 8.0;
     private static final double TPS_TO_RPM = 60.0 / TPR;
     private static final double RPM_TO_TPS = TPR / 60.0;
 
@@ -90,7 +90,8 @@ public class Launcher extends RobotPart<LauncherMetric>{
     }
 
     public boolean launchReady(){
-        return targetVelocityRPM > 0 && Math.abs(deltaRPM) < CLOSE_ENOUGH_RPM;
+        double closeEnoughRPM = targetVelocityRPM * CLOSE_ENOUGH_RPM_PERCENT / 100.0;
+        return targetVelocityRPM > 0 && Math.abs(deltaRPM) < closeEnoughRPM;
     }
 
     @Override
