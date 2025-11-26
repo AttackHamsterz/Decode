@@ -7,10 +7,16 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 @Autonomous(name = "Auto: Field", group = "Robot")
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
     private static final double FIRST_LAUNCH_RPM = 4200.00;
+    private static final int SHOT_DELAY_MS = 50;            // Ball settle time
+    private static final int LINE_END_DELAY_MS = 1000;
     private Pose startPose;
     private Pose initialScorePose;
     private Pose thirdLineStart;
@@ -75,18 +81,36 @@ public class FieldAutoOpMode extends AutoOpMode {
         setPathState(0);
     }
 
-    public void autonomousPathUpdate() {
+    private void delayedColorQueue(Sorter.BallColor color, int msDelay) {
+        // Schedules a sorter rotation for the future
+        // We try to launch the tasked color first, but will queue the other color if not found
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        Runnable task = () -> {
+            if (color == Sorter.BallColor.Green) {
+                if (!sorter.rotateGreenToLaunch())
+                    sorter.rotatePurpleToLaunch();
+            } else {
+                if (!sorter.rotatePurpleToLaunch())
+                    sorter.rotateGreenToLaunch();
+            }
+        };
+        scheduler.schedule(task, msDelay, TimeUnit.MILLISECONDS);
+    }
+
+        public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                motion.follower.followPath(startToScorePath, 0.7,true);
-                // TODO - Rotate to first color of pattern
-                // Loaded green left, purple back/right
+                // Follow first path for initial shots
+                motion.follower.followPath(startToScorePath, 0.7, true);
+
+                // Loaded purple left and back and green right when looking at robot
                 sorter.rotateClockwise(launchPattern.get(launchIndex++));
 
                 // Spin up launcher
                 launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
                 incrementPathState();
                 break;
+
             // First 3 balls
             case 1:
             case 3:
@@ -95,26 +119,42 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 9:
             case 11:
             case 13:
-                // Done driving, sorter ready, launcher ready, lifter reset?
                 if(!motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady() && ballLifter.isReset()) {
-                    // Launch
+                    // Stop the front intake (needed for 9 and 17)
+                    if(pathState==9) {
+                        intake.frontIntakeStop();
+                        sorter.autoTurnOff();
+                    }
+
+                    // Launch (delay let's ball settle from rotation)
                     try {
-                        Thread.sleep(300);
+                        Thread.sleep(SHOT_DELAY_MS);
                     } catch (InterruptedException ignore) {
                     }
                     ballLifter.lift();
                     incrementPathState();
                 }
                 break;
-
             case 2:
             case 4:
+                // Are we done lifting?
+                if(!ballLifter.isLifting()){
+                    sorter.rotateClockwise(launchPattern.get(launchIndex++));
+                    incrementPathState();
+                }
+                break;
             case 10:
             case 12:
                 // Are we done lifting?
                 if(!ballLifter.isLifting()){
-                    // TODO - Rotate to next color of pattern
-                    sorter.rotateClockwise(launchPattern.get(launchIndex++));
+                    if(colorPattern.get(launchIndex++) == Sorter.BallColor.Green) {
+                        if(!sorter.rotateGreenToLaunch())
+                            sorter.rotatePurpleToLaunch();
+                    }
+                    else {
+                        if(!sorter.rotatePurpleToLaunch())
+                            sorter.rotateGreenToLaunch();
+                    }
                     incrementPathState();
                 }
                 break;
@@ -142,19 +182,16 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 8:
                 // Drive to launch again
                 if(!motion.follower.isBusy()){
-                    // Stop front intake
-                    intake.frontIntakeStop();
-
-                    // TODO - Rotate to first color of pattern
+                    // After end of line delay spinning to color for 1 second (finish intake)
+                    delayedColorQueue(colorPattern.get(launchIndex++), LINE_END_DELAY_MS);
 
                     // Spin up launcher
                     launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
 
                     // Drive to score
-                    motion.follower.followPath(thirdLineEndToScore, PATH_VELOCITY_PERCENTAGE, true);
+                    motion.follower.followPath(thirdLineEndPath, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
                 }
-                break;
 
             case 14:
                 // Park
