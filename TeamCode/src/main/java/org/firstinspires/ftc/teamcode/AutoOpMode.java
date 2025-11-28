@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +16,13 @@ import java.util.List;
 @Autonomous(name = "Auto", group = "Robot")
 @Disabled
 public class AutoOpMode extends StandardSetupOpMode {
-    protected final double PICKUP_VELOCITY_PERCENTAGE = 0.15;
+    protected final double MIN_PICKUP_VOTAGE = 13.0;
+    protected final double MIN_PICKUP_POWER = 0.15;
+    protected final double MAX_PICKUP_VOTAGE = 12.25;
+    protected final double MAX_PICKUP_POWER = 0.25;
     protected final double PATH_VELOCITY_PERCENTAGE = 1.0;
 
+    protected double pickupPower = 0.2;
     protected Timer pathTimer;
 
     // Finite state machine state
@@ -130,8 +135,8 @@ public class AutoOpMode extends StandardSetupOpMode {
             colorPattern.add(Sorter.BallColor.Green);
             colorPattern.add(Sorter.BallColor.Purple);
         }
-
-        else if (id == 23) {
+        // Always provide at least an order
+        else{
             //PPG
             //Clockwise to Purple2, Counter Clockwise to Purple1, Counter Clockwise to Green
             launchPattern.add(1);
@@ -156,6 +161,16 @@ public class AutoOpMode extends StandardSetupOpMode {
             colorPattern.add(Sorter.BallColor.Purple);
             colorPattern.add(Sorter.BallColor.Green);
         }
+
+        // Voltage sets min power for pickup speed
+        double minVoltage = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) {           // Ignore sensors that return 0
+                minVoltage = Math.min(minVoltage, voltage);
+            }
+        }
+
 
         // Start all body parts (except the eye, which has already started)
         for( Thread part : partList)

@@ -20,7 +20,7 @@ import java.util.List;
  * Each mode will use a specific pipeline.
  */
 public class Eye extends RobotPart<EyeMetric>{
-    private static final double CLOSE_ENOUGH_DEGREES = 8.0;
+    private static final double CLOSE_ENOUGH_DEGREES = 10.0;
 
     public enum Mode{
         AUTO_START(0),      // Locate the autonomous decision token

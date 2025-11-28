@@ -156,7 +156,7 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 21:
             case 23:
                 // Done driving, sorter ready, launcher ready, lifter reset?
-                if(!motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady() && ballLifter.isReset()) {
+                if(!motion.follower.isBusy() && sorter.isNotSpinning() && launcher.launchReady() && ballLifter.isReset()) {
 
                     // Launch (delay let's ball settle from rotation)
                     try {
@@ -211,7 +211,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                     sorter.autoTurnOn();
 
                     // Drive to path end
-                    motion.follower.followPath(firstLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
+                    motion.follower.followPath(firstLineEndPath, pickupPower, false);
                     incrementPathState();
                 }
                 break;
@@ -273,7 +273,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                     intake.frontIntakeOn();
                     sorter.autoTurnOn();
 
-                    motion.follower.followPath(secondLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
+                    motion.follower.followPath(secondLineEndPath, pickupPower, false);
                     incrementPathState();
                 }
                 break;

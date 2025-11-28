@@ -81,6 +81,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
         setRunning();
         while (running) {
             if (!ssom.gamepadBuffer.ignoreGamepad) {
+                //if (!pressed && ssom.sorter.isNotSpinning() && ssom.gamepadBuffer.g2RightTrigger > TRIGGER_THRESH) {
                 if (!pressed && ssom.gamepadBuffer.g2RightTrigger > TRIGGER_THRESH) {
                     pressed = true;
                     lift();
@@ -91,7 +92,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
             }
 
             // Color indication
-            if(ssom.launcher.launchReady() && ssom.eye.linedUp() && !ssom.sorter.isSpinning() && isReset()){
+            if(ssom.launcher.launchReady() && ssom.eye.linedUp() && ssom.sorter.isNotSpinning() && isReset()){
                 redLED.off();
                 greenLED.on();
             }

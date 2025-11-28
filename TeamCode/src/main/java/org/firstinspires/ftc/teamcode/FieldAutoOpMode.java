@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -119,7 +118,7 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 10:
             case 12:
             case 14:
-                if(!motion.follower.isBusy() && !sorter.isSpinning() && launcher.launchReady() && ballLifter.isReset()) {
+                if(!motion.follower.isBusy() && sorter.isNotSpinning() && launcher.launchReady() && ballLifter.isReset()) {
                     // Stop the front intake (needed for 9 and 17)
                     if(pathState==9) {
                         intake.frontIntakeStop();
@@ -177,7 +176,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     intake.frontIntakeOn();
                     sorter.autoTurnOn();
 
-                    motion.follower.followPath(thirdLineEndPath, PICKUP_VELOCITY_PERCENTAGE, false);
+                    motion.follower.followPath(thirdLineEndPath, pickupPower, false);
                     incrementPathState();
                 }
                 break;

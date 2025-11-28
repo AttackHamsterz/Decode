@@ -25,7 +25,9 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double HOLD_POWER = 0.1;
     private static final double TURN_POWER = 1.0;
     private static final long LAST_COLOR_WAIT_MS = 250;
+    private static final long STUCK_TIME_MS = 2000;
 
+    private long spinStartTime = 0;
     private boolean autoTurn = false;
     private boolean autoTurnTrigger = false;
 
@@ -319,8 +321,20 @@ public class Sorter extends RobotPart<SorterMetric>{
                 sortMotor.setPower(HOLD_POWER);
                 isSpinning = false;
                 stopTime = System.currentTimeMillis();
+                spinStartTime = 0;
             }
-            else{
+            // Are we stuck
+            else if(spinStartTime > 0 && System.currentTimeMillis() - spinStartTime > STUCK_TIME_MS){
+                if(targetPosition > sortMotor.getCurrentPosition())
+                    targetPosition -= QUARTER_TURN;
+                else
+                    targetPosition += QUARTER_TURN;
+                spinStartTime = 0;
+            }
+            // Spin to target position if not lifting
+            else if (!ssom.ballLifter.isLifting()){
+                if(spinStartTime == 0)
+                    spinStartTime = System.currentTimeMillis();
                 isSpinning = true;
                 sortMotor.setTargetPosition((int)Math.round(targetPosition));
                 sortMotor.setPower(TURN_POWER);
@@ -331,8 +345,8 @@ public class Sorter extends RobotPart<SorterMetric>{
         sortMotor.setPower(0);
     }
 
-    public boolean isSpinning(){
-        return isSpinning;
+    public boolean isNotSpinning(){
+        return !isSpinning;
     }
 
     /**
