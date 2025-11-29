@@ -18,7 +18,7 @@ public class BoardAutoOpMode extends AutoOpMode{
     protected final double PICKUP_VELOCITY_PERCENTAGE = 0.20;
     private static final double FIRST_LAUNCH_RPM = 2500.00; // Launcher speed
     private static final int SHOT_DELAY_MS = 50;            // Ball settle time
-    private static final int LINE_END_DELAY_MS = 1050;      // Wait after line to rotate to color
+    private static final int LINE_END_DELAY_MS = 1200;      // Wait after line to rotate to color
 
     private Pose startPose;
     private Pose initialScorePose;
@@ -46,26 +46,27 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double initialScorePoseX = 44.22;
         final double initialScorePoseY = 113.0;
         final double secondScorePoseX = 37;
-        final double secondScorePoseY = 121;
+        final double secondScorePoseY = 123;
         final double midLinePoseX = 25.0;
         final double midLinePoseY = 100.0;
         final double firstlineStartX = 28.5;
         final double secondLineStartX = 29.5;
         final double firstLineStartY = 85.5;
-        final double secondLineStartY = 61.0;
-        final double lineEndX = 53.0;
-        final double parkX = 49.0;
-        final double parkY = 67.5;
+        final double secondLineStartY = 62.0;
+        final double firstlineEndX = 53.5;
+        final double secondlineEndX = 52.5;
+        final double parkX = 47.5;
+        final double parkY = 69;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, startPoseY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, initialScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 135 : 45));
         secondScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-secondScorePoseX :centerLineX+secondScorePoseX, secondScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 155 : 25));
         midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, midLinePoseY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineStartX :centerLineX+firstlineStartX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
-        firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-lineEndX :centerLineX+lineEndX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineEndX :centerLineX+firstlineEndX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         parkPose = new Pose( (color == COLOR.BLUE) ? centerLineX-parkX :centerLineX+parkX, parkY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         secondLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-secondLineStartX :centerLineX+secondLineStartX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
-        secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-lineEndX :centerLineX+lineEndX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-secondlineEndX :centerLineX+secondlineEndX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
 
         // Setup and build paths
         super.init();
@@ -102,7 +103,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 .setLinearHeadingInterpolation(secondLineStart.getHeading(), secondLineEnd.getHeading())
                 .build();
         secondLineEndToScore = motion.follower.pathBuilder()
-                .addPath(new BezierLine(secondLineEnd, secondScorePose))
+                .addPath(new BezierCurve(secondLineEnd, midLinePose, secondScorePose))
                 .setLinearHeadingInterpolation(secondLineEnd.getHeading(), secondScorePose.getHeading())
                 .build();
         scoreToPark = motion.follower.pathBuilder()
@@ -164,7 +165,9 @@ public class BoardAutoOpMode extends AutoOpMode{
                         Thread.sleep(SHOT_DELAY_MS);
                     } catch (InterruptedException ignore) {
                     }
-                    ballLifter.lift();
+                    if (!(pathState>5 && sorter.getBallCount()<1)){
+                        ballLifter.lift();
+                    }
                     incrementPathState();
                 }
                 break;

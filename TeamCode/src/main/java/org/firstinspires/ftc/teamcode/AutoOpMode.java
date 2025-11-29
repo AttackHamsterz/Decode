@@ -16,10 +16,10 @@ import java.util.List;
 @Autonomous(name = "Auto", group = "Robot")
 @Disabled
 public class AutoOpMode extends StandardSetupOpMode {
-    protected final double MIN_PICKUP_VOTAGE = 13.0;
-    protected final double MIN_PICKUP_POWER = 0.15;
-    protected final double MAX_PICKUP_VOTAGE = 12.25;
-    protected final double MAX_PICKUP_POWER = 0.25;
+    protected final double MAX_PICKUP_VOLTAGE = 13.0;
+    protected final double MIN_PICKUP_POWER = 0.18;
+    protected final double MIN_PICKUP_VOLTAGE = 12.75;
+    protected final double MAX_PICKUP_POWER = 0.2;
     protected final double PATH_VELOCITY_PERCENTAGE = 1.0;
 
     protected double pickupPower = 0.2;
@@ -79,6 +79,7 @@ public class AutoOpMode extends StandardSetupOpMode {
     @Override public void start() {
         // Set the starting path state
         setPathState(0);
+        opmodeTimer.resetTimer();
 
         //Setup launch pattern
         int id = eye.getFiducialID();
@@ -163,12 +164,23 @@ public class AutoOpMode extends StandardSetupOpMode {
         }
 
         // Voltage sets min power for pickup speed
-        double minVoltage = Double.POSITIVE_INFINITY;
+        double currentVoltage = Double.POSITIVE_INFINITY;
         for (VoltageSensor sensor : hardwareMap.voltageSensor) {
             double voltage = sensor.getVoltage();
             if (voltage > 0) {           // Ignore sensors that return 0
-                minVoltage = Math.min(minVoltage, voltage);
+                currentVoltage = Math.min(currentVoltage, voltage);
             }
+        }
+
+        if (currentVoltage < MIN_PICKUP_VOLTAGE) {
+            pickupPower = MAX_PICKUP_POWER;
+        } else if (currentVoltage > MAX_PICKUP_VOLTAGE) {
+            pickupPower = MIN_PICKUP_POWER;
+        } else {
+            double deltaVoltage = MAX_PICKUP_VOLTAGE-MIN_PICKUP_VOLTAGE;
+            double myFraction = (currentVoltage-MIN_PICKUP_VOLTAGE)/deltaVoltage;
+            double deltaPower = (MAX_PICKUP_POWER-MIN_PICKUP_POWER);
+            pickupPower = MAX_PICKUP_POWER-(myFraction * deltaPower);
         }
 
 

@@ -131,7 +131,9 @@ public class FieldAutoOpMode extends AutoOpMode {
                         Thread.sleep(SHOT_DELAY_MS);
                     } catch (InterruptedException ignore) {
                     }
-                    ballLifter.lift();
+                    if (!(pathState>5 && sorter.getBallCount()<1)){
+                        ballLifter.lift();
+                    }
                     incrementPathState();
                 }
                 break;

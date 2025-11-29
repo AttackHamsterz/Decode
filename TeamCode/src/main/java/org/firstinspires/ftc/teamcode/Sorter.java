@@ -26,6 +26,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double TURN_POWER = 1.0;
     private static final long LAST_COLOR_WAIT_MS = 250;
     private static final long STUCK_TIME_MS = 2000;
+    private static final long AUTO_TURN_DELAY_MS = 200;
 
     private long spinStartTime = 0;
     private boolean autoTurn = false;
@@ -228,7 +229,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             rotateClockwise(-1);
             autoTurnTrigger = false;
         };
-        scheduler.schedule(task, 100, TimeUnit.MILLISECONDS);
+        scheduler.schedule(task, AUTO_TURN_DELAY_MS, TimeUnit.MILLISECONDS);
     }
 
     @Override
