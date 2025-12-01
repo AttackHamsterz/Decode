@@ -20,7 +20,7 @@ import java.util.List;
  * Each mode will use a specific pipeline.
  */
 public class Eye extends RobotPart<EyeMetric>{
-    private static final double CLOSE_ENOUGH_DEGREES = 10.0;
+    private static final double CLOSE_ENOUGH_DEGREES = 6.0;
 
     public enum Mode{
         AUTO_START(0),      // Locate the autonomous decision token
@@ -73,7 +73,7 @@ public class Eye extends RobotPart<EyeMetric>{
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(150); // This sets how often we ask Limelight for data (100 times per second)
         //Set up PIDF aim controller
-        aimController = new PIDFController(new PIDFCoefficients(0.015, 0.0, 2.0, 0.0));
+        aimController = new PIDFController(new PIDFCoefficients(0.01, 0.0, 1.0, 0.0));
         aimController.setTargetPosition(0.0);
     }
 

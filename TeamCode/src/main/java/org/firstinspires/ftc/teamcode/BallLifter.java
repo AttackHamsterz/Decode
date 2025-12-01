@@ -92,7 +92,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
             }
 
             // Color indication
-            if(ssom.launcher.launchReady() && ssom.eye.linedUp() && ssom.sorter.isNotSpinning() && isReset()){
+            if(ssom.launcher.launchReady() && ssom.sorter.isNotSpinning() && isReset()){
                 redLED.off();
                 greenLED.on();
             }
