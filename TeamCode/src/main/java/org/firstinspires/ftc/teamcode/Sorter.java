@@ -89,7 +89,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             return color;
         }
 
-        public static BallColor fromSensor(RevColorSensorV3 sensor) {
+        public static BallColor fromSensor(RevColorSensorV3 sensor, boolean isIntakeOn) {
             BallColor ballColor = BallColor.None;
             float[] hsv = new float[3];
             long time = System.currentTimeMillis();
@@ -99,7 +99,8 @@ public class Sorter extends RobotPart<SorterMetric>{
             if(sensor != null){
                 // Get distance (if too far, then no color)
                 distance = sensor.getDistance(DistanceUnit.CM);
-                if(distance <= MIN_DIST_CM) {
+
+                if(distance <= (isIntakeOn ? MIN_DIST_CM * 3 : MIN_DIST_CM)) {
                     // Get normalized RGB (adjust gain at each competition)
                     NormalizedRGBA colors = sensor.getNormalizedColors();
 
@@ -238,10 +239,10 @@ public class Sorter extends RobotPart<SorterMetric>{
         setRunning();
         while (running) {
             // Getting the color value from the HSV code in BallColor.
-            leftColor = BallColor.fromSensor(leftSensor);
-            rightColor = BallColor.fromSensor(rightSensor);
-            frontColor = BallColor.fromSensor(frontSensor);
-            backColor = BallColor.fromSensor(backSensor);
+            leftColor = BallColor.fromSensor(leftSensor, ssom.intake.isLeftIntakeOn());
+            rightColor = BallColor.fromSensor(rightSensor, ssom.intake.isRightIntakeOn());
+            frontColor = BallColor.fromSensor(frontSensor, ssom.intake.isFrontIntakeOn());
+            backColor = BallColor.fromSensor(backSensor, false);
 
             if (leftColor == BallColor.Green) {
                  lastLeftColor = BallColor.Green;

@@ -137,6 +137,10 @@ public class Intake extends RobotPart<IntakeMetric> {
         leftIntakeServoPower = 1;
     }
 
+    public boolean isLeftIntakeOn() {
+        return leftIntakeServoPower == 1;
+    }
+
     /**
      * Turns right intake on
      */
@@ -144,11 +148,19 @@ public class Intake extends RobotPart<IntakeMetric> {
         rightIntakeServoPower = 1;
     }
 
+    public boolean isRightIntakeOn() {
+        return rightIntakeServoPower == 1;
+    }
+
     /**
      * Turns on front intake
      */
     public void frontIntakeOn() {
         frontIntakeServoPower = 1;
+    }
+
+    public boolean isFrontIntakeOn() {
+        return frontIntakeServoPower == 1;
     }
 
     /**
