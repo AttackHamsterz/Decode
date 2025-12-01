@@ -50,7 +50,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double midLinePoseX = 25.0;
         final double midLinePoseY = 100.0;
         final double firstlineStartX = 28.5;
-        final double secondLineStartX = 29.5;
+        final double secondLineStartX = 30;
         final double firstLineStartY = 85.5;
         final double secondLineStartY = 62.0;
         final double firstlineEndX = 53.5;
@@ -59,7 +59,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double parkY = 69;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, startPoseY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
-        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, initialScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 135 : 45));
+        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, initialScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 132 : 48));
         secondScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-secondScorePoseX :centerLineX+secondScorePoseX, secondScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 155 : 25));
         midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, midLinePoseY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineStartX :centerLineX+firstlineStartX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
