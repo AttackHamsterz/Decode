@@ -227,7 +227,9 @@ public class Sorter extends RobotPart<SorterMetric>{
         autoTurnTrigger = true;
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
-            rotateClockwise(-1);
+            // Only do the auto rotation if we're not intaking on the sides
+            if(ssom.intake.isLeftOff() && ssom.intake.isRightOff())
+                rotateClockwise(-1);
             autoTurnTrigger = false;
         };
         long turnDelay = ssom.gamepadBuffer.ignoreGamepad? AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;

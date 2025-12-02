@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Intake extends RobotPart<IntakeMetric> {
+    private static final double ENOUGH_JOYSTICK = 0.1;
     private final CRServo leftIntakeServo;
     private final CRServo frontIntakeServo;
     private final CRServo rightIntakeServo;
@@ -39,15 +40,15 @@ public class Intake extends RobotPart<IntakeMetric> {
         while (running) {
             if (!ssom.gamepadBuffer.ignoreGamepad) {
                 // Left intake (outtake wins)
-                if (ssom.gamepadBuffer.g2RightStickX < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
+                if (ssom.gamepadBuffer.g2RightStickX < -ENOUGH_JOYSTICK || ssom.gamepadBuffer.g2RightStickY > ENOUGH_JOYSTICK) {
                     leftIntakeServoPower = -1;
-                } else if (ssom.gamepadBuffer.g2LeftStickX < -0.1) {
+                } else if (ssom.gamepadBuffer.g2LeftStickX < -ENOUGH_JOYSTICK) {
                     leftIntakeServoPower = 1;
                     if(!emptyLeft) {
                         emptyLeft = true;
                         ssom.sorter.emptyLeft();
                     }
-                } else if (ssom.gamepadBuffer.g2LeftStickY > 0.1) {
+                } else if (ssom.gamepadBuffer.g2LeftStickY > ENOUGH_JOYSTICK) {
                     leftIntakeServoPower = 1;
                 } else {
                     leftIntakeServoPower = 0;
@@ -55,15 +56,15 @@ public class Intake extends RobotPart<IntakeMetric> {
                 }
 
                 // Right intake (outtake wins)
-                if (ssom.gamepadBuffer.g2RightStickX > 0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
+                if (ssom.gamepadBuffer.g2RightStickX > ENOUGH_JOYSTICK || ssom.gamepadBuffer.g2RightStickY > ENOUGH_JOYSTICK) {
                     rightIntakeServoPower = -1;
-                } else if (ssom.gamepadBuffer.g2LeftStickX > 0.1) {
+                } else if (ssom.gamepadBuffer.g2LeftStickX > ENOUGH_JOYSTICK) {
                     rightIntakeServoPower = 1;
                     if(!emptyRight) {
                         emptyRight = true;
                         ssom.sorter.emptyRight();
                     }
-                }  else if (ssom.gamepadBuffer.g2LeftStickY > 0.1) {
+                }  else if (ssom.gamepadBuffer.g2LeftStickY > ENOUGH_JOYSTICK) {
                     rightIntakeServoPower = 1;
                 } else {
                     rightIntakeServoPower = 0;
@@ -71,17 +72,17 @@ public class Intake extends RobotPart<IntakeMetric> {
                 }
 
                 // Forward intake (outtake wins)
-                if (ssom.gamepadBuffer.g2RightStickY < -0.1 || ssom.gamepadBuffer.g2RightStickY > 0.1) {
+                if (ssom.gamepadBuffer.g2RightStickY < -ENOUGH_JOYSTICK || ssom.gamepadBuffer.g2RightStickY > ENOUGH_JOYSTICK) {
                     frontIntakeServoPower = -1;
                     ssom.sorter.autoTurnOff();
-                } else if (ssom.gamepadBuffer.g2LeftStickY < -0.1) {
+                } else if (ssom.gamepadBuffer.g2LeftStickY < -ENOUGH_JOYSTICK) {
                     frontIntakeServoPower = 1;
                     if(!emptyFront) {
                         emptyFront = true;
                         ssom.sorter.emptyFront();
                     }
                     ssom.sorter.autoTurnOn();
-                } else if (ssom.gamepadBuffer.g2LeftStickY > 0.1) {
+                } else if (ssom.gamepadBuffer.g2LeftStickY > ENOUGH_JOYSTICK) {
                     frontIntakeServoPower = 1;
                     ssom.sorter.autoTurnOn();
                 } else {
@@ -174,5 +175,16 @@ public class Intake extends RobotPart<IntakeMetric> {
     }
     public void frontIntakeStop(){
         frontIntakeServoPower = 0;
+    }
+
+    // Check the intakes
+    public boolean isLeftOff(){
+        return leftIntakeServoPower == 0;
+    }
+    public boolean isRightOff(){
+        return rightIntakeServoPower == 0;
+    }
+    public boolean isFrontOff(){
+        return frontIntakeServoPower == 0;
     }
 }
