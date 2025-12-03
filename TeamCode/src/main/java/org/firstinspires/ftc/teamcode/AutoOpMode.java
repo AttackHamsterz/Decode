@@ -16,8 +16,8 @@ import java.util.List;
 @Autonomous(name = "Auto", group = "Robot")
 @Disabled
 public class AutoOpMode extends StandardSetupOpMode {
-    protected final double MAX_PICKUP_VOLTAGE = 13.0;
-    protected final double MIN_PICKUP_POWER = 0.1825;
+    protected final double MAX_PICKUP_VOLTAGE = 12.9;
+    protected final double MIN_PICKUP_POWER = 0.19;
     protected final double MIN_PICKUP_VOLTAGE = 12.75;
     protected final double MAX_PICKUP_POWER = 0.2;
     protected final double PATH_VELOCITY_PERCENTAGE = 1.0;
@@ -192,8 +192,10 @@ public class AutoOpMode extends StandardSetupOpMode {
 
     @Override public void init_loop() {
         // Watch obelisk for april tag
-        telemetry.addData("ID", eye.getFiducialID());
-        telemetry.addData("Color Order", eye.getColorOrder());
+        int id = eye.getFiducialID();
+        Eye.ColorOrder co = Eye.ColorOrder.fromId(id);
+        telemetry.addData("ID", id);
+        telemetry.addData("Color Order", co.toString());
         telemetry.update();
     }
 

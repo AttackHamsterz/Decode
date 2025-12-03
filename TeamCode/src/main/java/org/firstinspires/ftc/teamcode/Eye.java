@@ -196,6 +196,7 @@ public class Eye extends RobotPart<EyeMetric>{
     }
 
     public enum ColorOrder{
+        NONE (-1, new String[] {"None", "None", "None"}),
         GPP (21, new String[] {"Green", "Purple", "Purple"}),
         PGP (22,new String[] {"Purple", "Green", "Purple"}),
         PPG (23, new String[] {"Purple", "Purple", "Green"});
@@ -211,8 +212,9 @@ public class Eye extends RobotPart<EyeMetric>{
             return id;
         }
 
-        public String[] getColors() {
-            return colors;
+        @NonNull
+        public String toString() {
+            return  String.join( " ", colors);
         }
 
         public static ColorOrder fromId(int obeliskColorId) {
