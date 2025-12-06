@@ -72,6 +72,7 @@ public class Eye extends RobotPart<EyeMetric>{
         // Setup limelight
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(150); // This sets how often we ask Limelight for data (100 times per second)
+
         //Set up PIDF aim controller
         aimController = new PIDFController(new PIDFCoefficients(0.01, 0.0, 1.0, 0.0));
         aimController.setTargetPosition(0.0);
@@ -87,6 +88,7 @@ public class Eye extends RobotPart<EyeMetric>{
         }
 
         // This tells Limelight to start looking!
+        limelight.pipelineSwitch(0);
         limelight.start();
 
         // This loop will continue until game end

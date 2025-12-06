@@ -13,11 +13,11 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     private static final double PPM = 1993.6;
     private static final double PPM_IN = 4.75;
     private static final double MAX_LIFT_HEIGHT_LEFT_IN = 20.0;
-    private static final double MAX_LIFT_HEIGHT_RIGHT_IN = 20.25;
+    private static final double MAX_LIFT_HEIGHT_RIGHT_IN = 20.5;
     private static final double LIFT_HEIGHT_INCREMENT_LEFT_IN = MAX_LIFT_HEIGHT_LEFT_IN / 5.0;
     private static final double LIFT_HEIGHT_INCREMENT_RIGHT_IN = MAX_LIFT_HEIGHT_RIGHT_IN / 5.0;
-    private static final double LIFT_HEIGHT_LEFT_START_IN = 18.0;
-    private static final double LIFT_HEIGHT_RIGHT_START_IN = 18.25;
+    private static final double LIFT_HEIGHT_LEFT_START_IN = MAX_LIFT_HEIGHT_LEFT_IN * 0.9;
+    private static final double LIFT_HEIGHT_RIGHT_START_IN = MAX_LIFT_HEIGHT_RIGHT_IN * 0.9;
     private static final double LIFT_POWER_LEFT = 0.97;
     private static final double LIFT_POWER_RIGHT = 1.0;
 
