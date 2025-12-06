@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 public class BoardAutoOpMode extends AutoOpMode{
     protected final double PICKUP_VELOCITY_PERCENTAGE = 0.20;
     private static final double FIRST_LAUNCH_RPM = 2500.00; // Launcher speed
-    private static final int SHOT_DELAY_MS = 50;            // Ball settle time
-    private static final int LINE_END_DELAY_MS = 1200;      // Wait after line to rotate to color
+    private static final int SHOT_DELAY_MS = 70;            // Ball settle time
+    private static final int LINE_END_DELAY_MS = 250;      // Wait after line to rotate to color
 
     private Pose startPose;
     private Pose initialScorePose;
@@ -50,23 +50,28 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double midLinePoseX = 25.0;
         final double midLinePoseY = 100.0;
         final double firstlineStartX = 28.5;
-        final double secondLineStartX = 30;
-        final double firstLineStartY = 85.5;
+        final double secondLineStartX = 32;
+        final double firstLineStartY = 84.5;
         final double secondLineStartY = 62.0;
-        final double firstlineEndX = 53.5;
-        final double secondlineEndX = 52.5;
+        final double firstlineEndX = 54;
+        final double secondlineEndX = 52;
         final double parkX = 47.5;
         final double parkY = 69;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, startPoseY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, initialScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 132 : 48));
         secondScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-secondScorePoseX :centerLineX+secondScorePoseX, secondScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 155 : 25));
-        midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, midLinePoseY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
-        firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineStartX :centerLineX+firstlineStartX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
-        firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineEndX :centerLineX+firstlineEndX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        //midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, midLinePoseY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, midLinePoseY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
+        //firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineStartX :centerLineX+firstlineStartX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineStartX :centerLineX+firstlineStartX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
+        //firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineEndX :centerLineX+firstlineEndX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineEndX :centerLineX+firstlineEndX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
         parkPose = new Pose( (color == COLOR.BLUE) ? centerLineX-parkX :centerLineX+parkX, parkY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
-        secondLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-secondLineStartX :centerLineX+secondLineStartX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
-        secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-secondlineEndX :centerLineX+secondlineEndX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        //secondLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-secondLineStartX :centerLineX+secondLineStartX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        secondLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-secondLineStartX :centerLineX+secondLineStartX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
+        //secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-secondlineEndX :centerLineX+secondlineEndX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-secondlineEndX :centerLineX+secondlineEndX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
 
         // Setup and build paths
         super.init();
@@ -211,11 +216,18 @@ public class BoardAutoOpMode extends AutoOpMode{
                 // Pick up balls
                 if(!motion.follower.isBusy()){
                     // Start front intake
-                    intake.frontIntakeOn();
-                    sorter.autoTurnOn();
+                    //intake.frontIntakeOn();
+                    if (color == COLOR.BLUE) {
+                        intake.leftIntakeOn();
+                        sorter.leftAutoTurnOn();
+                    }
+                    else {
+                        intake.rightIntakeOn();
+                        sorter.rightAutoTurnOn();
+                    }
 
                     // Drive to path end
-                    motion.follower.followPath(firstLineEndPath, pickupPower, false);
+                    motion.follower.followPath(firstLineEndPath, pickupPower*1.3, false);
                     incrementPathState();
                 }
                 break;
@@ -238,7 +250,13 @@ public class BoardAutoOpMode extends AutoOpMode{
                     } catch (InterruptedException ignore) {}
 
                     intake.frontIntakeStop();
-                    sorter.autoTurnOff();
+                    intake.leftIntakeStop();
+                    intake.rightIntakeStop();
+
+                    sorter.frontAutoTurnOff();
+                    sorter.leftAutoTurnOff();
+                    sorter.rightAutoTurnOff();
+
 
                     // After end of line delay spinning to color for 1 second (finish intake)
                     delayedColorQueue(colorPattern.get(launchIndex++), 0);
@@ -252,7 +270,12 @@ public class BoardAutoOpMode extends AutoOpMode{
                     } catch (InterruptedException ignore) {}
 
                     intake.frontIntakeStop();
-                    sorter.autoTurnOff();
+                    intake.leftIntakeStop();
+                    intake.rightIntakeStop();
+
+                    sorter.frontAutoTurnOff();
+                    sorter.leftAutoTurnOff();
+                    sorter.rightAutoTurnOff();
 
                     // After end of line delay spinning to color for 1 second (finish intake)
                     delayedColorQueue(colorPattern.get(launchIndex++), 0);
@@ -274,10 +297,16 @@ public class BoardAutoOpMode extends AutoOpMode{
                 //Pick up balls
                 if(!motion.follower.isBusy()) {
                     // Start front intake
-                    intake.frontIntakeOn();
-                    sorter.autoTurnOn();
+                    if (color == COLOR.BLUE) {
+                        intake.leftIntakeOn();
+                        sorter.leftAutoTurnOn();
+                    }
+                    else {
+                        intake.rightIntakeOn();
+                        sorter.rightAutoTurnOn();
+                    }
 
-                    motion.follower.followPath(secondLineEndPath, pickupPower, false);
+                    motion.follower.followPath(secondLineEndPath, pickupPower*1.4, false);
                     incrementPathState();
                 }
                 break;

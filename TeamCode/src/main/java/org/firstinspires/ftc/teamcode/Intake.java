@@ -74,21 +74,21 @@ public class Intake extends RobotPart<IntakeMetric> {
                 // Forward intake (outtake wins)
                 if (ssom.gamepadBuffer.g2RightStickY < -ENOUGH_JOYSTICK || ssom.gamepadBuffer.g2RightStickY > ENOUGH_JOYSTICK) {
                     frontIntakeServoPower = -1;
-                    ssom.sorter.autoTurnOff();
+                    ssom.sorter.frontAutoTurnOff();
                 } else if (ssom.gamepadBuffer.g2LeftStickY < -ENOUGH_JOYSTICK) {
                     frontIntakeServoPower = 1;
                     if(!emptyFront) {
                         emptyFront = true;
                         ssom.sorter.emptyFront();
                     }
-                    ssom.sorter.autoTurnOn();
+                    ssom.sorter.frontAutoTurnOn();
                 } else if (ssom.gamepadBuffer.g2LeftStickY > ENOUGH_JOYSTICK) {
                     frontIntakeServoPower = 1;
-                    ssom.sorter.autoTurnOn();
+                    ssom.sorter.frontAutoTurnOn();
                 } else {
                     frontIntakeServoPower = 0;
                     emptyFront = false;
-                    ssom.sorter.autoTurnOff();
+                    ssom.sorter.frontAutoTurnOff();
                 }
             }
 
