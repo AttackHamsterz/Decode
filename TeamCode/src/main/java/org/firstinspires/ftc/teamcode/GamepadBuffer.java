@@ -13,6 +13,7 @@ public class GamepadBuffer {
     public float g1LeftStickX;     // Strafe left/right
     public float g1LeftStickY;     // Drive Forward/Backward
     public float g1RightStickX;    // Rotate clockwise/counterclockwise
+    public boolean g1Back;         // For resetting limelight
     public boolean g1Start;        // Enter final lift mode
     public boolean g1DpadUp;       // Holding start and pressing dpad up will lift robot
     public boolean g1DpadDown;     // Holding start and pressing dpad down will lower robot
@@ -48,6 +49,7 @@ public class GamepadBuffer {
         g1LeftStickX = 0;
         g1LeftStickY = 0;
         g1RightStickX = 0;
+        g1Back = false;
         g1Start = false;
         g1DpadUp = false;
         g1DpadDown = false;
@@ -84,6 +86,7 @@ public class GamepadBuffer {
             g1LeftStickX = gamepad1.left_stick_x;
             g1LeftStickY = gamepad1.left_stick_y;
             g1RightStickX = gamepad1.right_stick_x;
+            g1Back = gamepad1.back;
             g1Start = gamepad1.start;
             g1DpadUp = gamepad1.dpad_up;
             g1DpadDown = gamepad1.dpad_down;

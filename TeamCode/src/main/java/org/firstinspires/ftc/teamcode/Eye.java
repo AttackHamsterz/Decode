@@ -67,7 +67,7 @@ public class Eye extends RobotPart<EyeMetric>{
 
     public Eye(StandardSetupOpMode ssom){
         this.ssom = ssom;
-        this.mode = Mode.AUTO_START;
+        this.mode = Mode.NONE;
 
         // Setup limelight
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
@@ -156,10 +156,20 @@ public class Eye extends RobotPart<EyeMetric>{
                     enableAimMode();
                     pressed = true;
                 }
+                else if (!pressed && ssom.gamepadBuffer.g1Back) {
+                    pressed = true;
+                    limelight.pipelineSwitch(0);
+                    limelight.reloadPipeline();
+                    //if(!limelight.isRunning())
+                    //    limelight.start();
+                }
                 else if (pressed && !ssom.gamepadBuffer.g1RightBumper) {
                     disableAimMode();
+                }
+                if(!ssom.gamepadBuffer.g1RightBumper && !ssom.gamepadBuffer.g1Back){
                     pressed = false;
                 }
+
                 if(!g2pressed && ssom.gamepadBuffer.g2DpadUp){
                     deltaRPM += 20;
                     g2pressed = true;
