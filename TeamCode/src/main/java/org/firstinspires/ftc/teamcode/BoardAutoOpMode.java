@@ -39,6 +39,7 @@ public class BoardAutoOpMode extends AutoOpMode{
     private PathChain secondLineEndPath;
     private PathChain secondLineEndToScore;
 
+
     @Override public void init() {
         final double centerLineX = 72.0;
         final double startPoseX = 56.0;
@@ -227,7 +228,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                     }
 
                     // Drive to path end
-                    motion.follower.followPath(firstLineEndPath, pickupPower*1.3, false);
+                    motion.follower.followPath(firstLineEndPath, pickupPower*1.4, false);
                     incrementPathState();
                 }
                 break;
@@ -306,7 +307,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                         sorter.rightAutoTurnOn();
                     }
 
-                    motion.follower.followPath(secondLineEndPath, pickupPower*1.4, false);
+                    motion.follower.followPath(secondLineEndPath, pickupPower*1.45, false);
                     incrementPathState();
                 }
                 break;

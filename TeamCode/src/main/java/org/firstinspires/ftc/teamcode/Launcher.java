@@ -63,8 +63,8 @@ public class Launcher extends RobotPart<LauncherMetric>{
                 new RPMEntry(1.45, 2870.0),
                 new RPMEntry(1.8, 3120.0),
                 new RPMEntry(2.4, 3620.0),
-                new RPMEntry(3.3, 4260.0),
-                new RPMEntry(4.0, 4620.0),
+                new RPMEntry(3.3, 4220.0),
+                new RPMEntry(4.0, 4520.0),
                 new RPMEntry(5.0, 5620.0)
         ));
         // added 20 to each on 11/23

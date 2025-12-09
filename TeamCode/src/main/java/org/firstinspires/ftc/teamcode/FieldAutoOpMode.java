@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
     protected final double PICKUP_VELOCITY_PERCENTAGE = 0.18;
-    private static final double FIRST_LAUNCH_RPM = 4250.00;
-    private static final double SECOND_LAUNCH_RPM = 4250.00;
+    private static final double FIRST_LAUNCH_RPM = 4150.00;
+    private static final double SECOND_LAUNCH_RPM = 4200.00;
     private static final int SHOT_DELAY_MS = 50; // Ball settle time
     private static final int LINE_END_DELAY_MS = 1000;
     private Pose startPose;
@@ -30,6 +30,12 @@ public class FieldAutoOpMode extends AutoOpMode {
     private PathChain thirdLineEndPath;
     private PathChain thirdLineEndToScore;
     private PathChain scoreToPark;
+
+    private boolean endEarly = false;
+
+    public void setEndEarly() {
+        endEarly = true;
+    }
 
 
     @Override
@@ -157,7 +163,12 @@ public class FieldAutoOpMode extends AutoOpMode {
                         if(!sorter.rotatePurpleToLaunch())
                             sorter.rotateGreenToLaunch();
                     }
-                    incrementPathState();
+                    if(endEarly) {
+                        pathState = 15;
+                    }
+                    else {
+                        incrementPathState();
+                    }
                 }
                 break;
             case 6:
