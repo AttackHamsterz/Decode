@@ -20,7 +20,7 @@ import java.util.List;
  * Each mode will use a specific pipeline.
  */
 public class Eye extends RobotPart<EyeMetric>{
-    private static final double CLOSE_ENOUGH_DEGREES = 10.0;
+    private static final double CLOSE_ENOUGH_DEGREES = 6.0;
 
     public enum Mode{
         AUTO_START(0),      // Locate the autonomous decision token
@@ -67,13 +67,14 @@ public class Eye extends RobotPart<EyeMetric>{
 
     public Eye(StandardSetupOpMode ssom){
         this.ssom = ssom;
-        this.mode = Mode.AUTO_START;
+        this.mode = Mode.NONE;
 
         // Setup limelight
         limelight = ssom.hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(150); // This sets how often we ask Limelight for data (100 times per second)
+
         //Set up PIDF aim controller
-        aimController = new PIDFController(new PIDFCoefficients(0.015, 0.0, 2.0, 0.0));
+        aimController = new PIDFController(new PIDFCoefficients(0.01, 0.0, 1.0, 0.0));
         aimController.setTargetPosition(0.0);
     }
 
@@ -87,6 +88,7 @@ public class Eye extends RobotPart<EyeMetric>{
         }
 
         // This tells Limelight to start looking!
+        limelight.pipelineSwitch(0);
         limelight.start();
 
         // This loop will continue until game end
@@ -154,10 +156,20 @@ public class Eye extends RobotPart<EyeMetric>{
                     enableAimMode();
                     pressed = true;
                 }
+                else if (!pressed && ssom.gamepadBuffer.g1Back) {
+                    pressed = true;
+                    limelight.pipelineSwitch(0);
+                    limelight.reloadPipeline();
+                    //if(!limelight.isRunning())
+                    //    limelight.start();
+                }
                 else if (pressed && !ssom.gamepadBuffer.g1RightBumper) {
                     disableAimMode();
+                }
+                if(!ssom.gamepadBuffer.g1RightBumper && !ssom.gamepadBuffer.g1Back){
                     pressed = false;
                 }
+
                 if(!g2pressed && ssom.gamepadBuffer.g2DpadUp){
                     deltaRPM += 20;
                     g2pressed = true;
@@ -196,6 +208,7 @@ public class Eye extends RobotPart<EyeMetric>{
     }
 
     public enum ColorOrder{
+        NONE (-1, new String[] {"None", "None", "None"}),
         GPP (21, new String[] {"Green", "Purple", "Purple"}),
         PGP (22,new String[] {"Purple", "Green", "Purple"}),
         PPG (23, new String[] {"Purple", "Purple", "Green"});
@@ -211,8 +224,9 @@ public class Eye extends RobotPart<EyeMetric>{
             return id;
         }
 
-        public String[] getColors() {
-            return colors;
+        @NonNull
+        public String toString() {
+            return  String.join( " ", colors);
         }
 
         public static ColorOrder fromId(int obeliskColorId) {

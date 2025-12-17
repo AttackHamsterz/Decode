@@ -26,11 +26,15 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double TURN_POWER = 1.0;
     private static final long LAST_COLOR_WAIT_MS = 250;
     private static final long STUCK_TIME_MS = 2000;
-    private static final long AUTO_TURN_DELAY_MS = 150;
+    private static final long FRONT_AUTO_TURN_DELAY_MS = 150;
+    private static final long LEFT_AUTO_TURN_DELAY_MS = 300;
+    private static final long RIGHT_AUTO_TURN_DELAY_MS = 300;
     private static final long TELE_TURN_DELAY_MS = 100;
 
     private long spinStartTime = 0;
-    private boolean autoTurn = false;
+    private boolean frontAutoTurn = false;
+    private boolean leftAutoTurn = false;
+    private boolean rightAutoTurn = false;
     private boolean autoTurnTrigger = false;
 
     public enum BallColor{
@@ -217,23 +221,69 @@ public class Sorter extends RobotPart<SorterMetric>{
         }
     }
 
-    public void autoTurnOn(){
-        autoTurn = true;
+    public void frontAutoTurnOn(){
+        frontAutoTurn = true;
     }
-    public void autoTurnOff(){
-        autoTurn = false;
+    public void frontAutoTurnOff(){
+        frontAutoTurn = false;
     }
 
-    public void autoTurnThread(){
+    public void frontAutoTurnThread(){
         autoTurnTrigger = true;
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
-            rotateClockwise(-1);
+            // Only do the auto rotation if we're not intaking on the sides
+            if(ssom.intake.isLeftOff() && ssom.intake.isRightOff())
+                rotateClockwise(-1);
             autoTurnTrigger = false;
         };
-        long turnDelay = ssom.gamepadBuffer.ignoreGamepad? AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
+        long turnDelay = ssom.gamepadBuffer.ignoreGamepad? FRONT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
         scheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
     }
+
+    public void leftAutoTurnOn(){
+        leftAutoTurn = true;
+    }
+    public void leftAutoTurnOff(){
+        leftAutoTurn = false;
+    }
+
+    public void leftAutoTurnThread(){
+        autoTurnTrigger = true;
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        Runnable task = () -> {
+            // Only do the auto rotation if we're not intaking on the sides
+            if(ssom.intake.isFrontOff() && ssom.intake.isRightOff())
+                rotateClockwise(-1);
+            autoTurnTrigger = false;
+        };
+        long turnDelay = ssom.gamepadBuffer.ignoreGamepad? LEFT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
+        scheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
+    }
+
+    public void rightAutoTurnOn(){
+        rightAutoTurn = true;
+    }
+    public void rightAutoTurnOff(){
+        rightAutoTurn = false;
+    }
+
+    public void rightAutoTurnThread(){
+        autoTurnTrigger = true;
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        Runnable task = () -> {
+            // Only do the auto rotation if we're not intaking on the sides
+            if(ssom.intake.isLeftOff() && ssom.intake.isFrontOff())
+                rotateClockwise(-1);
+            autoTurnTrigger = false;
+        };
+        long turnDelay = ssom.gamepadBuffer.ignoreGamepad? RIGHT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
+        scheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
+    }
+
+
+
+
 
     @Override
     public void run() {
@@ -249,28 +299,41 @@ public class Sorter extends RobotPart<SorterMetric>{
             if (leftColor == BallColor.Green) {
                  lastLeftColor = BallColor.Green;
                 lastLeftColorTime = System.currentTimeMillis();
+                if (leftColor.distance < 1.15 && !isSpinning && leftAutoTurn &&!autoTurnTrigger) {
+                    leftAutoTurnThread();
+                }
             } else if (leftColor == BallColor.Purple) {
                 lastLeftColor = BallColor.Purple;
                 lastLeftColorTime = System.currentTimeMillis();
+                if (leftColor.distance < 1.15 && !isSpinning && leftAutoTurn &&!autoTurnTrigger) {
+                    leftAutoTurnThread();
+                }
+
             }
             if (rightColor == BallColor.Green) {
                 lastRightColor = BallColor.Green;
                 lastRightColorTime = System.currentTimeMillis();
+                if (rightColor.distance < 1.15 && !isSpinning && rightAutoTurn &&!autoTurnTrigger) {
+                    rightAutoTurnThread();
+                }
             } else if (rightColor == BallColor.Purple) {
                 lastRightColor = BallColor.Purple;
                 lastRightColorTime = System.currentTimeMillis();
+                if (rightColor.distance < 1.15 && !isSpinning && rightAutoTurn &&!autoTurnTrigger) {
+                    rightAutoTurnThread();
+                }
             }
             if (frontColor == BallColor.Green) {
                 lastFrontColor = BallColor.Green;
                 lastFrontColorTime = System.currentTimeMillis();
-                if (frontColor.distance < 1.15 && !isSpinning && autoTurn && !autoTurnTrigger) {
-                    autoTurnThread();
+                if (frontColor.distance < 1.15 && !isSpinning && frontAutoTurn && !autoTurnTrigger) {
+                    frontAutoTurnThread();
                 }
             } else if (frontColor == BallColor.Purple) {
                 lastFrontColor = BallColor.Purple;
                 lastFrontColorTime = System.currentTimeMillis();
-                if (frontColor.distance < 1.15 && !isSpinning && autoTurn &&!autoTurnTrigger) {
-                    autoTurnThread();
+                if (frontColor.distance < 1.15 && !isSpinning && frontAutoTurn &&!autoTurnTrigger) {
+                    frontAutoTurnThread();
                 }
             }
             if (backColor == BallColor.Green) {

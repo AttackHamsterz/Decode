@@ -39,8 +39,8 @@ public class FieldAutoOpMode extends AutoOpMode {
         final double startPoseX = 10.5;
         final double scorePoseX = 13.5;
         final double lineStartX = 30.0;
-        final double lineEndX = 53.5;
-        final double parkPoseX = 36.0;
+        final double lineEndX = 55;
+        final double parkPoseX = 35.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 20.5, Math.toRadians((color == COLOR.BLUE) ? 110 : 70));
@@ -123,7 +123,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     // Stop the front intake (needed for 9 and 17)
                     if(pathState==9) {
                         intake.frontIntakeStop();
-                        sorter.autoTurnOff();
+                        sorter.frontAutoTurnOff();
                     }
 
                     // Launch (delay lets ball settle from rotation)
@@ -176,7 +176,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 if(!motion.follower.isBusy()){
                     // Start front intake
                     intake.frontIntakeOn();
-                    sorter.autoTurnOn();
+                    sorter.frontAutoTurnOn();
 
                     motion.follower.followPath(thirdLineEndPath, pickupPower, false);
                     incrementPathState();
@@ -203,7 +203,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     } catch (InterruptedException ignore) {}
 
                     intake.frontIntakeStop();
-                    sorter.autoTurnOff();
+                    sorter.frontAutoTurnOff();
 
                     // After end of line delay spinning to color for 1 second (finish intake)
                     delayedColorQueue(colorPattern.get(launchIndex++), 0);
@@ -217,7 +217,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     launcher.setVelocityRPM(0);
 
                     // Drive to park
-                    motion.follower.followPath(scoreToPark, PATH_VELOCITY_PERCENTAGE, true);
+                    motion.follower.followPath(scoreToPark, 0.8, true);
                     incrementPathState();
                 }
                 break;
