@@ -105,7 +105,7 @@ public class Sorter extends RobotPart<SorterMetric>{
                 // Get distance (if too far, then no color)
                 distance = sensor.getDistance(DistanceUnit.CM);
 
-                if(distance <= (isIntakeOn ? MIN_DIST_CM * 3 : MIN_DIST_CM)) {
+                if(distance <= MIN_DIST_CM) {
                     // Get normalized RGB (adjust gain at each competition)
                     NormalizedRGBA colors = sensor.getNormalizedColors();
 
@@ -124,6 +124,8 @@ public class Sorter extends RobotPart<SorterMetric>{
                         else
                             ballColor = BallColor.Green;
                     }
+                    else
+                        ballColor = BallColor.Purple;
                 }
             }
 
@@ -574,9 +576,14 @@ public class Sorter extends RobotPart<SorterMetric>{
             telemetry.addData("rightColor", (rightColor == BallColor.None) ? "None" : (rightColor == BallColor.Green) ? "green" : "purple");
             telemetry.addData("frontColor", (frontColor == BallColor.None) ? "None" : (frontColor == BallColor.Green) ? "green" : "purple");
             telemetry.addData("backColor", (backColor == BallColor.None) ? "None" : (backColor == BallColor.Green) ? "green" : "purple");
-            telemetry.addData("sortMotor Ticks", sortMotor.getCurrentPosition());
+            /*telemetry.addData("sortMotor Ticks", sortMotor.getCurrentPosition());
             telemetry.addData("sortMotor Power", sortMotor.getPower());
             telemetry.addData("isSpinning", isSpinning);
+            */
+            telemetry.addData("leftDistance",leftColor.getDistance());
+            telemetry.addData("rightDistance",rightColor.getDistance());
+            telemetry.addData("frontDistance",frontColor.getDistance());
+            telemetry.addData("backDistance", backColor.getDistance());
             /*
             telemetry.addData("lastLeftColor", lastLeftColor);
             telemetry.addData("lastLeftColorTime", lastLeftColorTime);
