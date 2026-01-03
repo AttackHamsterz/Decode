@@ -90,7 +90,23 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
                 if (ssom.gamepadBuffer.g2RightTrigger <= TRIGGER_THRESH)
                     pressed = false;
             }
+           /* Set a state than add the 'checklist' then once everything is checked off allow
+                    for the ball to be launched.
+                    call rotateGreenToLaunch
+                    if(!motion.follower.isBusy() && sorter.isNotSpinning() && launcher.launchReady() && ballLifter.isReset()){
+                        rotateGreenToLaunch
+                    }
+               Additionally, to start add an if statement if the trigger is pressed.
+           if (!ssom.gamepadBuffer.ignoreGamepad){
+                if (!pressed && ssom.gamepadBuffer.g2LeftTrigger > TRIGGER_THRESH){
+                    pressed = true;
+                }
 
+                if ((ssom.gamepadBuffer.g2LeftTrigger <= TRIGGER_THRESH)){
+                    pressed = false;
+                }
+            }
+*/
             // Color indication
             if(ssom.launcher.launchReady() && ssom.sorter.isNotSpinning() && isReset()){
                 redLED.off();
