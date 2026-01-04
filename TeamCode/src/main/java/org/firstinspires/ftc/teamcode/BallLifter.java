@@ -78,6 +78,10 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     @Override
     public void run() {
         boolean pressed = false;
+        boolean firstAuto = true;
+        Eye.ColorOrder colorOrder = ssom.eye.getColorOrder();;
+        int colorIndex = 0;
+        int autoShootState = 0;
         setRunning();
         while (running) {
             if (!ssom.gamepadBuffer.ignoreGamepad) {
@@ -89,24 +93,62 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
 
                 if (ssom.gamepadBuffer.g2RightTrigger <= TRIGGER_THRESH)
                     pressed = false;
-            }
-           /* Set a state than add the 'checklist' then once everything is checked off allow
-                    for the ball to be launched.
-                    call rotateGreenToLaunch
-                    if(!motion.follower.isBusy() && sorter.isNotSpinning() && launcher.launchReady() && ballLifter.isReset()){
-                        rotateGreenToLaunch
+
+                // Auto fire state machine
+                if(ssom.gamepadBuffer.g2LeftTrigger > TRIGGER_THRESH)
+                {
+                    // First time?  Get color order from eye after init
+                    if(firstAuto){
+                        colorOrder = ssom.eye.getColorOrder();
+                        firstAuto = false;
                     }
-               Additionally, to start add an if statement if the trigger is pressed.
-           if (!ssom.gamepadBuffer.ignoreGamepad){
-                if (!pressed && ssom.gamepadBuffer.g2LeftTrigger > TRIGGER_THRESH){
-                    pressed = true;
+
+                    // Auto shoot FSM (assume they hit the trigger for a reason)
+                    switch (autoShootState){
+                        case 0:
+                            // Lift complete?  Queue up the next ball
+                            if(!ssom.ballLifter.isLifting()){
+                                // Queue up the next correct color in the order
+                                boolean purple = colorOrder.isPurple(colorIndex);
+
+                                // Try purple first
+                                if(purple) {
+                                    if (!ssom.sorter.rotatePurpleToLaunch()) {
+                                        // Queue up green
+                                        if (!ssom.sorter.rotateGreenToLaunch()) {
+                                            // Just rotate clockwise to next slot to clear hopper
+                                            ssom.sorter.rotateClockwise(1);
+                                        }
+                                    }
+                                }
+                                // Try green first
+                                else {
+                                    if (!ssom.sorter.rotateGreenToLaunch()) {
+                                        // Queue up green
+                                        if (!ssom.sorter.rotatePurpleToLaunch()) {
+                                            // Just rotate clockwise to next slot to clear hopper
+                                            ssom.sorter.rotateClockwise(1);
+                                        }
+                                    }
+                                }
+                                autoShootState = 1;
+                            }
+                            break;
+                        case 1:
+                            // Sorter is sorted, launcher is ready, lifter is reset? LIFT!
+                            if(ssom.sorter.isNotSpinning() && ssom.launcher.launchReady() && ssom.ballLifter.isReset()){
+                                ssom.ballLifter.lift();
+                                autoShootState = 0;
+                            }
+                            break;
+                    };
                 }
 
-                if ((ssom.gamepadBuffer.g2LeftTrigger <= TRIGGER_THRESH)){
-                    pressed = false;
-                }
+                // We've released the left button so we're done auto shooting
+                if(ssom.gamepadBuffer.g2LeftTrigger <= TRIGGER_THRESH)
+                    autoShootState = 0;
             }
-*/
+
             // Color indication
             if(ssom.launcher.launchReady() && ssom.sorter.isNotSpinning() && isReset()){
                 redLED.off();

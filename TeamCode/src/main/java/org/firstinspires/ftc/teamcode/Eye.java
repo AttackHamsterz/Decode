@@ -160,10 +160,8 @@ public class Eye extends RobotPart<EyeMetric>{
                     pressed = true;
                     limelight.pipelineSwitch(0);
                     limelight.reloadPipeline();
-                    //if(!limelight.isRunning())
-                    //    limelight.start();
                 }
-                else if (pressed && !ssom.gamepadBuffer.g1RightBumper) {
+                else if (!ssom.gamepadBuffer.g1RightBumper) {
                     disableAimMode();
                 }
                 if(!ssom.gamepadBuffer.g1RightBumper && !ssom.gamepadBuffer.g1Back){
@@ -222,6 +220,23 @@ public class Eye extends RobotPart<EyeMetric>{
         }
         public int getId() {
             return id;
+        }
+
+        /**
+         * Given an index, is the color purple?
+         * @param index index % 3, so [0,1,2]
+         * @return true if the index mod 3 is purple
+         */
+        public boolean isPurple(int index){
+            boolean purple = true;
+            index = index % 3;
+            if((id == 21 && index == 0) || (id == 22 && index == 1) || (id == 23 && index == 2))
+                purple = false;
+            return purple;
+        }
+
+        public int greenIndex(){
+            return (id == 21) ? 0 : (id == 22) ? 1 : 2;
         }
 
         @NonNull
