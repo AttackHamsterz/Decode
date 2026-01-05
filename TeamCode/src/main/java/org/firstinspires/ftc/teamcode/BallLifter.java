@@ -102,6 +102,9 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
                         colorOrder = ssom.eye.getColorOrder();
                         firstAuto = false;
                     }
+                    if(ssom.gamepadBuffer.g2LeftBumper) {
+                        colorIndex = colorOrder.greenIndex();
+                    }
 
                     // Auto shoot FSM (assume they hit the trigger for a reason)
                     switch (autoShootState){
@@ -109,8 +112,8 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
                             // Lift complete?  Queue up the next ball
                             if(!ssom.ballLifter.isLifting()){
                                 // Queue up the next correct color in the order
-                                boolean purple = colorOrder.isPurple(colorIndex);
-
+                                //boolean purple = colorOrder.isPurple(colorIndex);
+                                boolean purple = true;
                                 // Try purple first
                                 if(purple) {
                                     if (!ssom.sorter.rotatePurpleToLaunch()) {
@@ -138,6 +141,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
                             // Sorter is sorted, launcher is ready, lifter is reset? LIFT!
                             if(ssom.sorter.isNotSpinning() && ssom.launcher.launchReady() && ssom.ballLifter.isReset()){
                                 ssom.ballLifter.lift();
+                                colorIndex++;
                                 autoShootState = 0;
                             }
                             break;
