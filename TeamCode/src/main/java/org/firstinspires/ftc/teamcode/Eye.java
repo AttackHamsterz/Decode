@@ -6,13 +6,16 @@ import androidx.annotation.NonNull;
 
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.control.PIDFController;
+import com.pedropathing.math.Vector;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,6 +65,19 @@ public class Eye extends RobotPart<EyeMetric>{
     private double currentDegrees;
     private double shotD;
     private double deltaRPM;
+    private ArrayList<VelocityAngleEntry> deltaAim;
+    double velX;
+
+
+    private class VelocityAngleEntry{
+        public double velocity;
+        public double angle;
+        public VelocityAngleEntry(double velocity, double angle){
+            this.velocity = velocity;
+            this.angle = angle;
+        }
+    };
+
 
     private PIDFController aimController;
 
@@ -76,7 +92,20 @@ public class Eye extends RobotPart<EyeMetric>{
         //Set up PIDF aim controller
         aimController = new PIDFController(new PIDFCoefficients(0.01, 0.0, 1.0, 0.0));
         aimController.setTargetPosition(0.0);
+
+        // Table of distances in meters to RPM
+        deltaAim = new ArrayList<>(List.of(
+                new VelocityAngleEntry(-50.0, 10.0),
+                new VelocityAngleEntry(-23.0, 7.0),
+                new VelocityAngleEntry(-10.0, 5.0),
+                new VelocityAngleEntry(0, 0),
+                new VelocityAngleEntry(10.0, -5.0),
+                new VelocityAngleEntry(23.0, -7.0),
+                new VelocityAngleEntry(50.0, -10.0)
+        ));
     }
+
+
 
     @Override
     public void run() {
@@ -97,6 +126,9 @@ public class Eye extends RobotPart<EyeMetric>{
         boolean g2pressed = false;
         while (running) {
             // Get a result if we're in a mode that needs one
+            Vector vel = ssom.motion.follower.getVelocity();
+            velX = vel.getXComponent();
+
             if (mode == Mode.AIM_POINT) {
                 resultInUse = limelight.getLatestResult();
                 List<LLResultTypes.FiducialResult> fiducials = resultInUse.getFiducialResults();
@@ -306,6 +338,7 @@ public class Eye extends RobotPart<EyeMetric>{
             telemetry.addData("Mode", mode);
             telemetry.addData("Fiducial", fiducialId);
             telemetry.addData("Shot Distance", shotD);
+            telemetry.addData("Velocity", velX);
         }
     }
 

@@ -14,6 +14,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
     private static final double MIN_RPM = 0.0;
     private static final double MAX_RPM = 6000.0;
     private static final double CLOSE_ENOUGH_RPM_PERCENT = 8.0;
+    private static final double CLOSE_ENOUGH_RPM = 100;
     private static final double TPS_TO_RPM = 60.0 / TPR;
     private static final double RPM_TO_TPS = TPR / 60.0;
 
@@ -60,14 +61,22 @@ public class Launcher extends RobotPart<LauncherMetric>{
         distanceRPM = new ArrayList<>(List.of(
                 new RPMEntry(0.0, 0.0),
                 new RPMEntry(1.0, 2520.0),
-                new RPMEntry(1.45, 2870.0),
-                new RPMEntry(1.8, 3120.0),
+                new RPMEntry(1.07, 2620.0),
+                new RPMEntry(1.25, 2790.0),
+                new RPMEntry(1.45, 3010.0),
+                new RPMEntry(1.72, 3240.0),
+                new RPMEntry(2.0, 3360.0),
                 new RPMEntry(2.4, 3620.0),
-                new RPMEntry(3.3, 4260.0),
-                new RPMEntry(4.0, 4620.0),
+                new RPMEntry(2.43, 3670.0),
+                new RPMEntry(2.63, 3860.0),
+                new RPMEntry(3.28,4150),
+                new RPMEntry(3.4, 4210.0),
+                new RPMEntry(3.5,4400),
+                new RPMEntry(3.8,4460),
                 new RPMEntry(5.0, 5620.0)
         ));
         // added 20 to each on 11/23
+        // added new far values 12/16
     }
 
     public void setRPMFromDistance(double distance, double extraRPM){
@@ -85,13 +94,16 @@ public class Launcher extends RobotPart<LauncherMetric>{
         setVelocityRPM(rpm+extraRPM);
     }
 
+    //changing the distance based on the velocity. we need to figure out how fast we are going and in what direction, see the fiducial, and determine the rpm
+
     public void setVelocityRPM(double velocityRPM) {
         targetVelocityRPM = Range.clip(velocityRPM, MIN_RPM, MAX_RPM);
     }
 
     public boolean launchReady(){
-        double closeEnoughRPM = targetVelocityRPM * CLOSE_ENOUGH_RPM_PERCENT / 100.0;
-        return targetVelocityRPM > 0 && Math.abs(deltaRPM) < closeEnoughRPM;
+        //double closeEnoughRPM = targetVelocityRPM * CLOSE_ENOUGH_RPM_PERCENT / 100.0;
+
+        return targetVelocityRPM > 0 && Math.abs(deltaRPM) < CLOSE_ENOUGH_RPM;
     }
 
     @Override
