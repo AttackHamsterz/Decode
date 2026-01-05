@@ -26,7 +26,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double TURN_POWER = 1.0;
     private static final long LAST_COLOR_WAIT_MS = 250;
     private static final long STUCK_TIME_MS = 2000;
-    private static final long FRONT_AUTO_TURN_DELAY_MS = 150;
+    private static final long FRONT_AUTO_TURN_DELAY_MS = 300;
     private static final long LEFT_AUTO_TURN_DELAY_MS = 300;
     private static final long RIGHT_AUTO_TURN_DELAY_MS = 300;
     private static final long TELE_TURN_DELAY_MS = 100;
