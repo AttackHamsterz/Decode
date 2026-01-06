@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
-import androidx.annotation.NonNull;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -86,7 +87,10 @@ public class AutoOpMode extends StandardSetupOpMode {
 
         // When looking at the front of the robot, green should be right, purple back and left
         if (id == 21) {
+
             //GPP
+            colorOrder = Eye.ColorOrder.GPP;
+
             //Counter Clockwise to Green, Clockwise to Purple1, Clockwise to Purple2
             launchPattern.add(-1);
             launchPattern.add(1);
@@ -113,6 +117,8 @@ public class AutoOpMode extends StandardSetupOpMode {
 
         else if (id == 22) {
             //PGP
+            colorOrder = Eye.ColorOrder.PGP;
+
             //Launch Purple1, Counter Clockwise to Green, 2 Clockwise to Purple2
             launchPattern.add(0);
             launchPattern.add(-1);
@@ -139,6 +145,8 @@ public class AutoOpMode extends StandardSetupOpMode {
         // Always provide at least an order
         else{
             //PPG
+            colorOrder = Eye.ColorOrder.PPG;
+
             //Clockwise to Purple2, Counter Clockwise to Purple1, Counter Clockwise to Green
             launchPattern.add(1);
             launchPattern.add(-1);
@@ -162,6 +170,12 @@ public class AutoOpMode extends StandardSetupOpMode {
             colorPattern.add(Sorter.BallColor.Purple);
             colorPattern.add(Sorter.BallColor.Green);
         }
+
+        // Save color order for teleop
+        SharedPreferences prefs = hardwareMap.appContext.getSharedPreferences("DecodeData", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt("colorOrder", colorOrder.getId());
+        editor.apply();
 
         // Voltage sets min power for pickup speed
         double currentVoltage = Double.POSITIVE_INFINITY;

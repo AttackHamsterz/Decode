@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -53,6 +56,9 @@ public class StandardSetupOpMode extends OpMode {
     public Intake intake;
     public Eye eye;
 
+    // Game objects
+    protected Eye.ColorOrder colorOrder;
+
     // Telemetry
     static TelemetryManager telemetryM;
 
@@ -62,6 +68,10 @@ public class StandardSetupOpMode extends OpMode {
 
         // Setup gamepad buffer
         gamepadBuffer = new GamepadBuffer(ignoreGamepad);
+
+        // Pull color order from saved autonomous data
+        SharedPreferences prefs = hardwareMap.appContext.getSharedPreferences("DecodeData", Context.MODE_PRIVATE);
+        colorOrder = Eye.ColorOrder.fromId(prefs.getInt("colorOrder", Eye.ColorOrder.GPP.getId()));
 
         // Setup robot
         motion = new Motion(this);

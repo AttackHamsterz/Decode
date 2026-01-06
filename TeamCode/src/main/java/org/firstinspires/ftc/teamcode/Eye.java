@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static java.lang.Math.tan;
-
 import androidx.annotation.NonNull;
 
 import com.pedropathing.control.PIDFCoefficients;
@@ -13,7 +11,6 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +57,6 @@ public class Eye extends RobotPart<EyeMetric>{
     private final Limelight3A limelight;
     private Eye.Mode mode;
     private LLResult resultInUse;
-    private ColorOrder colorOrder;
     private int fiducialId;
     private double currentDegrees;
     private double shotD;
@@ -297,14 +293,6 @@ public class Eye extends RobotPart<EyeMetric>{
             }
         }
         return -1;
-    }
-
-    public ColorOrder getColorOrder() {
-        return colorOrder;
-    }
-
-    public ColorOrder getColorOrder(int id) {
-        return colorOrder = Eye.ColorOrder.fromId(id);
     }
 
     public void setMode(Mode newMode) {

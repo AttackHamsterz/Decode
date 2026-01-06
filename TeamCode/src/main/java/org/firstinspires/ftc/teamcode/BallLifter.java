@@ -78,8 +78,6 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     @Override
     public void run() {
         boolean pressed = false;
-        boolean firstAuto = true;
-        Eye.ColorOrder colorOrder = ssom.eye.getColorOrder();;
         int colorIndex = 0;
         int autoShootState = 0;
         setRunning();
@@ -97,13 +95,9 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
                 // Auto fire state machine
                 if(ssom.gamepadBuffer.g2LeftTrigger > TRIGGER_THRESH)
                 {
-                    // First time?  Get color order from eye after init
-                    if(firstAuto){
-                        colorOrder = ssom.eye.getColorOrder();
-                        firstAuto = false;
-                    }
+                    // Queue to green if green pressed
                     if(ssom.gamepadBuffer.g2LeftBumper) {
-                        colorIndex = colorOrder.greenIndex();
+                        colorIndex = ssom.colorOrder.greenIndex();
                     }
 
                     // Auto shoot FSM (assume they hit the trigger for a reason)
@@ -112,8 +106,8 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
                             // Lift complete?  Queue up the next ball
                             if(!ssom.ballLifter.isLifting()){
                                 // Queue up the next correct color in the order
-                                //boolean purple = colorOrder.isPurple(colorIndex);
-                                boolean purple = true;
+                                boolean purple = ssom.colorOrder.isPurple(colorIndex);
+
                                 // Try purple first
                                 if(purple) {
                                     if (!ssom.sorter.rotatePurpleToLaunch()) {
