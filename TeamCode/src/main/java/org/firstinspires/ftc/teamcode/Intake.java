@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -12,14 +11,14 @@ public class Intake extends RobotPart<IntakeMetric> {
     private final CRServo leftIntakeServo;
     private final CRServo frontIntakeServo;
     private final CRServo rightIntakeServo;
-    //private final CRServo leftUpperServo;
-    //private final CRServo frontUpperServo;
+    private final CRServo leftUpperServo;
+    private final CRServo frontUpperServo;
     private final CRServo rightUpperServo;
     private double leftIntakeServoPower;
     private double rightIntakeServoPower;
     private double frontIntakeServoPower;
-    // private double leftUpperServoPower;
-    // private double rightUpperServoPower;
+    private double leftUpperServoPower;
+    private double frontUpperServoPower;
     private double rightUpperServoPower;
 
 
@@ -29,22 +28,22 @@ public class Intake extends RobotPart<IntakeMetric> {
         leftIntakeServo = ssom.hardwareMap.get(CRServo.class, "leftIntakeServo"); //need to define channel
         rightIntakeServo = ssom.hardwareMap.get(CRServo.class, "rightIntakeServo"); //need to define channel
         frontIntakeServo = ssom.hardwareMap.get(CRServo.class, "frontIntakeServo");//need to define channel
-        //leftUpperServo = ssom.hardwareMap.get(CRServo.class, "leftUpperServo");
-        //rightUpperServo = ssom.hardwareMap.get(CRServo.class, "rightUpperServo");
+        leftUpperServo = ssom.hardwareMap.get(CRServo.class, "leftUpperServo");
+        frontUpperServo = ssom.hardwareMap.get(CRServo.class, "frontUpperServo");
         rightUpperServo = ssom.hardwareMap.get(CRServo.class, "rightUpperServo");
 
         leftIntakeServo.setDirection(CRServo.Direction.FORWARD);
         rightIntakeServo.setDirection(CRServo.Direction.FORWARD);
         frontIntakeServo.setDirection(CRServo.Direction.FORWARD);
-        //leftUpperServo.setDirection(CRServo.Direction.REVERSE);
-        //rightUpperServo.setDirection(CRServo.Direction.REVERSE);
+        leftUpperServo.setDirection(CRServo.Direction.REVERSE);
+        frontUpperServo.setDirection(CRServo.Direction.REVERSE);
         rightUpperServo.setDirection(CRServo.Direction.REVERSE);
 
         leftIntakeServoPower = 0;
         rightIntakeServoPower = 0;
         frontIntakeServoPower = 0;
-        //leftIntakeServoPower = 0;
-        //rightIntakeServoPower = 0;
+        leftUpperServoPower = 0;
+        frontUpperServoPower = 0;
         rightUpperServoPower = 0;
 
     }
@@ -60,20 +59,20 @@ public class Intake extends RobotPart<IntakeMetric> {
                 // Left intake (outtake wins)
                 if (ssom.gamepadBuffer.g2RightStickX < -ENOUGH_JOYSTICK || ssom.gamepadBuffer.g2RightStickY > ENOUGH_JOYSTICK) {
                     leftIntakeServoPower = -1;
-                    //leftUpperServoPower = -UPPER_SERVO_POWER;
+                    leftUpperServoPower = -UPPER_SERVO_POWER;
                 } else if (ssom.gamepadBuffer.g2LeftStickX < -ENOUGH_JOYSTICK) {
                     leftIntakeServoPower = 1;
-                    //leftUpperServoPower = UPPER_SERVO_POWER;
+                    leftUpperServoPower = UPPER_SERVO_POWER;
                     if(!emptyLeft) {
                         emptyLeft = true;
                         ssom.sorter.emptyLeft();
                     }
                 } else if (ssom.gamepadBuffer.g2LeftStickY > ENOUGH_JOYSTICK) {
                     leftIntakeServoPower = 1;
-                    //leftUpperServoPower = UPPER_SERVO_POWER;
+                    leftUpperServoPower = UPPER_SERVO_POWER;
                 } else {
                     leftIntakeServoPower = 0;
-                    //leftUpperServoPower = 0;
+                    leftUpperServoPower = 0;
                     emptyLeft = false;
                 }
 
@@ -100,11 +99,11 @@ public class Intake extends RobotPart<IntakeMetric> {
                 // Forward intake (outtake wins)
                 if (ssom.gamepadBuffer.g2RightStickY < -ENOUGH_JOYSTICK || ssom.gamepadBuffer.g2RightStickY > ENOUGH_JOYSTICK) {
                     frontIntakeServoPower = -1;
-                    //frontUpperServoPower = -UPPER_SERVO_POWER;
+                    frontUpperServoPower = -UPPER_SERVO_POWER;
                     ssom.sorter.frontAutoTurnOff();
                 } else if (ssom.gamepadBuffer.g2LeftStickY < -ENOUGH_JOYSTICK) {
                     frontIntakeServoPower = 1;
-                    //frontUpperServoPower = UPPER_SERVO_POWER;
+                    frontUpperServoPower = UPPER_SERVO_POWER;
                     if(!emptyFront) {
                         emptyFront = true;
                         ssom.sorter.emptyFront();
@@ -112,11 +111,11 @@ public class Intake extends RobotPart<IntakeMetric> {
                     ssom.sorter.frontAutoTurnOn();
                 } else if (ssom.gamepadBuffer.g2LeftStickY > ENOUGH_JOYSTICK) {
                     frontIntakeServoPower = 1;
-                    //frontUpperServoPower = UPPER_SERVO_POWER;
+                    frontUpperServoPower = UPPER_SERVO_POWER;
                     ssom.sorter.frontAutoTurnOn();
                 } else {
                     frontIntakeServoPower = 0;
-                    //frontUpperServoPower = 0;
+                    frontUpperServoPower = 0;
                     emptyFront = false;
                     ssom.sorter.frontAutoTurnOff();
                 }
@@ -125,9 +124,9 @@ public class Intake extends RobotPart<IntakeMetric> {
             frontIntakeServo.setPower(frontIntakeServoPower);
             rightIntakeServo.setPower(rightIntakeServoPower);
             leftIntakeServo.setPower(leftIntakeServoPower);
-            //frontUpperServo.setPower(frontUpperServoPower);
+            frontUpperServo.setPower(frontUpperServoPower);
             rightUpperServo.setPower(rightUpperServoPower);
-            //leftUpperServo.setPower(leftUpperServoPower);
+            leftUpperServo.setPower(leftUpperServoPower);
 
             // Use traditional sleep to not saturate with this thread
             sleep();
@@ -160,7 +159,7 @@ public class Intake extends RobotPart<IntakeMetric> {
             telemetry.addData("RightServoPower", rightIntakeServoPower);
             telemetry.addData("LeftServoPower", leftIntakeServoPower);
             telemetry.addData("FrontServoPower", frontIntakeServoPower);
-            telemetry.addData("RightUpperServoPower", rightUpperServoPower);
+            //telemetry.addData("RightUpperServoPower", rightUpperServoPower);
             //telemetry.addData("LeftUpperServoPower", leftUpperServoPower);
             //telemetry.addData("FrontUpperServoPower", frontUpperServoPower);
         }
@@ -172,7 +171,7 @@ public class Intake extends RobotPart<IntakeMetric> {
 
     public void leftIntakeOn() {
         leftIntakeServoPower = 1;
-        //leftUpperServoPower = UPPER_SERVO_POWER;
+        leftUpperServoPower = UPPER_SERVO_POWER;
     }
 
     public boolean isLeftIntakeOn() {
@@ -196,7 +195,7 @@ public class Intake extends RobotPart<IntakeMetric> {
      */
     public void frontIntakeOn() {
         frontIntakeServoPower = 1;
-        //frontUpperServoPower = UPPER_SERVO_POWER;
+        frontUpperServoPower = UPPER_SERVO_POWER;
     }
 
     public boolean isFrontIntakeOn() {
@@ -208,7 +207,7 @@ public class Intake extends RobotPart<IntakeMetric> {
      */
     public void leftIntakeReverse(){
         leftIntakeServoPower = -1;
-        //leftUpperServoPower = -UPPER_SERVO_POWER;
+        leftUpperServoPower = -UPPER_SERVO_POWER;
     }
     public void rightIntakeReverse(){
         rightIntakeServoPower = -LOWER_SERVO_POWER;
@@ -216,14 +215,14 @@ public class Intake extends RobotPart<IntakeMetric> {
     }
     public void frontIntakeReverse(){
         frontIntakeServoPower = -1;
-        //frontUpperServoPower = -UPPER_SERVO_POWER;
+        frontUpperServoPower = -UPPER_SERVO_POWER;
     }
     /**
      * Makes intakes stop
      */
     public void leftIntakeStop(){
         leftIntakeServoPower = 0;
-        //leftUpperServoPower = 0;
+        leftUpperServoPower = 0;
     }
     public void rightIntakeStop(){
         rightIntakeServoPower = 0;
@@ -231,7 +230,7 @@ public class Intake extends RobotPart<IntakeMetric> {
     }
     public void frontIntakeStop(){
         frontIntakeServoPower = 0;
-        //frontUpperServoPower = 0;
+        frontUpperServoPower = 0;
     }
 
     // Check the intakes
