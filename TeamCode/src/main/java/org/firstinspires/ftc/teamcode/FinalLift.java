@@ -20,6 +20,10 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     private static final double LIFT_HEIGHT_RIGHT_START_IN = MAX_LIFT_HEIGHT_RIGHT_IN * 0.9;
     private static final double LIFT_POWER_LEFT = 0.97;
     private static final double LIFT_POWER_RIGHT = 1.0;
+    private static final double DRAG_HEIGHT_INCREMENT_LEFT_IN = 0.4;
+    private static final double DRAG_HEIGHT_INCREMENT_RIGHT_IN = 0.4;
+    private static final double HOLD_POWER = 0.1;
+    private static final double TRIGGER_THRESH = 0.05;
 
     private double leftLiftInches = 0;
     private double rightLiftInches = 0;
@@ -77,8 +81,28 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
         int rightPos = (int)Math.round(rightLiftInches/PPM_IN*PPM);
         finalLiftMotorLeft.setTargetPosition(leftPos);
         finalLiftMotorRight.setTargetPosition(rightPos);
-        finalLiftMotorLeft.setPower(0);
-        finalLiftMotorRight.setPower(0);
+        finalLiftMotorLeft.setPower(HOLD_POWER);
+        finalLiftMotorRight.setPower(HOLD_POWER);
+    }
+
+    public void brakeDrop() {
+        leftLiftInches = DRAG_HEIGHT_INCREMENT_LEFT_IN;
+        rightLiftInches = DRAG_HEIGHT_INCREMENT_RIGHT_IN;
+        int leftPos = (int)Math.round(DRAG_HEIGHT_INCREMENT_LEFT_IN/PPM_IN*PPM);
+        int rightPos = (int)Math.round(DRAG_HEIGHT_INCREMENT_RIGHT_IN/PPM_IN*PPM);
+        finalLiftMotorLeft.setTargetPosition(leftPos);
+        finalLiftMotorRight.setTargetPosition(rightPos);
+        finalLiftMotorLeft.setPower(HOLD_POWER);
+        finalLiftMotorRight.setPower(HOLD_POWER);
+    }
+
+    public void initialPosition() {
+        int leftPos = 0;
+        int rightPos = 0;
+        finalLiftMotorLeft.setTargetPosition(leftPos);
+        finalLiftMotorRight.setTargetPosition(rightPos);
+        finalLiftMotorLeft.setPower(HOLD_POWER);
+        finalLiftMotorRight.setPower(HOLD_POWER);
     }
 
     @Override
@@ -86,6 +110,7 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
         if (!ssom.gamepadBuffer.ignoreGamepad) {
             setRunning();
             boolean pressed = false;
+            boolean braked = false;
             while (running){
                 if (ssom.gamepadBuffer.g1Start && !pressed){
                     if(ssom.gamepadBuffer.g1DpadUp) {
@@ -101,6 +126,15 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
                         pressed = true;
                         slightDrop ();
                     }
+                }
+                if (!braked && ssom.gamepadBuffer.g1RightTrigger > TRIGGER_THRESH) {
+                        brakeDrop();
+                        braked = true;
+
+                }
+                if (braked && ssom.gamepadBuffer.g1RightTrigger < TRIGGER_THRESH) {
+                    initialPosition();
+                    braked = false;
                 }
 
                 if(!ssom.gamepadBuffer.g1DpadUp && !ssom.gamepadBuffer.g1DpadDown && !ssom.gamepadBuffer.g1DpadLeft && !ssom.gamepadBuffer.g1DpadRight)
