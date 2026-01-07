@@ -14,7 +14,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
     private static final double MIN_RPM = 0.0;
     private static final double MAX_RPM = 6000.0;
     private static final double CLOSE_ENOUGH_RPM_PERCENT = 8.0;
-    private static final double CLOSE_ENOUGH_RPM = 100;
+    private static final double CLOSE_ENOUGH_RPM = 200;
     private static final double TPS_TO_RPM = 60.0 / TPR;
     private static final double RPM_TO_TPS = TPR / 60.0;
 
