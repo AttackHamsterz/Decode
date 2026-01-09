@@ -62,7 +62,6 @@ public class Eye extends RobotPart<EyeMetric>{
     private double shotD;
     private double deltaRPM;
     private ArrayList<VelocityAngleEntry> deltaAim;
-    double velX;
     private VelocityHelper velocityHelper = new VelocityHelper(5);
 
 
@@ -90,19 +89,19 @@ public class Eye extends RobotPart<EyeMetric>{
         aimController = new PIDFController(new PIDFCoefficients(0.01, 0.0, 1.0, 0.0));
         aimController.setTargetPosition(0.0);
 
-        // Table of distances in meters to RPM
+        // Table of distances for in/s to angle degrees
         deltaAim = new ArrayList<>(List.of(
-                new VelocityAngleEntry(-500.0, 7.0),
+                new VelocityAngleEntry(-200.0, 7.0),
                 new VelocityAngleEntry(-50.0, 7.0),
                 new VelocityAngleEntry(-20.0, 5.0),
                 new VelocityAngleEntry(0, 0),
                 new VelocityAngleEntry(20.0, -5.0),
                 new VelocityAngleEntry(50.0, -7.0),
-                new VelocityAngleEntry(500.0, -7.0)
+                new VelocityAngleEntry(200.0, -7.0)
         ));
     }
 
-    private double velocityY2Angle(double Vy) {
+    private double vYtoAngle(double Vy) {
        double deltaAngle = 0;
         for(int i = 0; i < deltaAim.size()-1; i++){
             if(deltaAim.get(i).velocity < Vy && Vy < deltaAim.get(i+1).velocity){
@@ -150,7 +149,7 @@ public class Eye extends RobotPart<EyeMetric>{
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
-                        currentDegrees += velocityY2Angle(velocityHelper.getVy());
+                        currentDegrees += vYtoAngle(velocityHelper.getVy());
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
 
@@ -165,7 +164,7 @@ public class Eye extends RobotPart<EyeMetric>{
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
-                        currentDegrees += velocityY2Angle(velocityHelper.getVy());
+                        currentDegrees += vYtoAngle(velocityHelper.getVy());
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
                         break;

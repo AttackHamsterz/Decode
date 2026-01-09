@@ -79,7 +79,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
         // added new far values 12/16
     }
 
-    public void setRPMFromDistance(double distance, double extraRPM){
+    public void setRPMFromDistance(double distance, double extraRPM, double VX){
         // Default RPM
         double rpm = 0;
 
