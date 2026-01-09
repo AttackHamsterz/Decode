@@ -63,6 +63,7 @@ public class Eye extends RobotPart<EyeMetric>{
     private double deltaRPM;
     private ArrayList<VelocityAngleEntry> deltaAim;
     double velX;
+    private VelocityHelper velocityHelper = new VelocityHelper(5);
 
 
     private class VelocityAngleEntry{
@@ -91,14 +92,26 @@ public class Eye extends RobotPart<EyeMetric>{
 
         // Table of distances in meters to RPM
         deltaAim = new ArrayList<>(List.of(
-                new VelocityAngleEntry(-50.0, 10.0),
-                new VelocityAngleEntry(-23.0, 7.0),
-                new VelocityAngleEntry(-10.0, 5.0),
+                new VelocityAngleEntry(-500.0, 7.0),
+                new VelocityAngleEntry(-50.0, 7.0),
+                new VelocityAngleEntry(-20.0, 5.0),
                 new VelocityAngleEntry(0, 0),
-                new VelocityAngleEntry(10.0, -5.0),
-                new VelocityAngleEntry(23.0, -7.0),
-                new VelocityAngleEntry(50.0, -10.0)
+                new VelocityAngleEntry(20.0, -5.0),
+                new VelocityAngleEntry(50.0, -7.0),
+                new VelocityAngleEntry(500.0, -7.0)
         ));
+    }
+
+    private double velocityY2Angle(double Vy) {
+       double deltaAngle = 0;
+        for(int i = 0; i < deltaAim.size()-1; i++){
+            if(deltaAim.get(i).velocity < Vy && Vy < deltaAim.get(i+1).velocity){
+                double deltaDistance = deltaAim.get(i+1).velocity - deltaAim.get(i).velocity;
+                double delta = deltaAim.get(i+1).angle - deltaAim.get(i).angle;
+                deltaAngle = deltaAim.get(i).angle + delta * ((Vy - deltaAim.get(i).velocity) / deltaDistance);
+            }
+        }
+        return deltaAngle;
     }
 
 
@@ -122,8 +135,6 @@ public class Eye extends RobotPart<EyeMetric>{
         boolean g2pressed = false;
         while (running) {
             // Get a result if we're in a mode that needs one
-            Vector vel = ssom.motion.follower.getVelocity();
-            velX = vel.getXComponent();
 
             if (mode == Mode.AIM_POINT) {
                 resultInUse = limelight.getLatestResult();
@@ -134,10 +145,12 @@ public class Eye extends RobotPart<EyeMetric>{
                         //launcher speed
                         Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         fiducialId = 20;
+                        velocityHelper.addPosition(pos);
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
+                        currentDegrees += velocityY2Angle(velocityHelper.getVy());
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
 
@@ -147,10 +160,12 @@ public class Eye extends RobotPart<EyeMetric>{
                         //launcher speed
                         Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         fiducialId = 24;
+                        velocityHelper.addPosition(pos);
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
+                        currentDegrees += velocityY2Angle(velocityHelper.getVy());
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
                         break;
@@ -161,9 +176,11 @@ public class Eye extends RobotPart<EyeMetric>{
                         shotD = 0;
                         aimController.reset();
                         ssom.motion.setTurn(0);
+                        velocityHelper.reset();
                     }
                 }
-                ssom.launcher.setRPMFromDistance(shotD,deltaRPM);
+                ssom.launcher.setRPMFromDistance(shotD,deltaRPM, velocityHelper.getVx());
+
             }
             if (mode == Mode.AUTO_START) {
                 /*
@@ -225,7 +242,7 @@ public class Eye extends RobotPart<EyeMetric>{
 
     public void disableAimMode(){
         setMode(Mode.NONE);
-        ssom.launcher.setRPMFromDistance(0, 0);
+        ssom.launcher.setRPMFromDistance(0, 0, 0);
         ssom.motion.setTurn(0);
     }
 
@@ -326,7 +343,9 @@ public class Eye extends RobotPart<EyeMetric>{
             telemetry.addData("Mode", mode);
             telemetry.addData("Fiducial", fiducialId);
             telemetry.addData("Shot Distance", shotD);
-            telemetry.addData("Velocity", velX);
+            telemetry.addData("Velocity X", velocityHelper.getVx());
+            telemetry.addData("Velocity Y", velocityHelper.getVy());
+
         }
     }
 
