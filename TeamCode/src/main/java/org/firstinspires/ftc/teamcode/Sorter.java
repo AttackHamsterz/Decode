@@ -29,7 +29,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final long FRONT_AUTO_TURN_DELAY_MS = 300;
     private static final long LEFT_AUTO_TURN_DELAY_MS = 300;
     private static final long RIGHT_AUTO_TURN_DELAY_MS = 300;
-    private static final long TELE_TURN_DELAY_MS = 100;
+    private static final long TELE_TURN_DELAY_MS = 400;
     private static final double MIN_DIST_CM = 3.0;
 
     private long spinStartTime = 0;
