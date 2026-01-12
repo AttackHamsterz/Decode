@@ -58,7 +58,7 @@ public class VelocityHelper {
         if (lastPosition != null) {
             double deltaX = lastPosition.x - pos.x;
             double deltaY = lastPosition.y - pos.y;
-            double deltaT = (double)(currentTimeMS - lastTimeMS)*1e-3;
+            double deltaT = (double)(currentTimeMS - lastTimeMS)*0.001;
             double VX = deltaX/deltaT;
             double VY = deltaY/deltaT;
 

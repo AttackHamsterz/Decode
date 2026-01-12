@@ -62,7 +62,7 @@ public class Eye extends RobotPart<EyeMetric>{
     private double shotD;
     private double deltaRPM;
     private ArrayList<VelocityAngleEntry> deltaAim;
-    private VelocityHelper velocityHelper = new VelocityHelper(5);
+    public VelocityHelper velocityHelper = new VelocityHelper(5);
 
 
     private class VelocityAngleEntry{
@@ -91,28 +91,31 @@ public class Eye extends RobotPart<EyeMetric>{
 
         // Table of distances for in/s to angle degrees
         deltaAim = new ArrayList<>(List.of(
-                new VelocityAngleEntry(-200.0, 7.0),
                 new VelocityAngleEntry(-50.0, 7.0),
                 new VelocityAngleEntry(-20.0, 5.0),
                 new VelocityAngleEntry(0, 0),
                 new VelocityAngleEntry(20.0, -5.0),
-                new VelocityAngleEntry(50.0, -7.0),
-                new VelocityAngleEntry(200.0, -7.0)
+                new VelocityAngleEntry(50.0, -7.0)
         ));
     }
 
-    private double vYtoAngle(double Vy) {
+    private double vtoAngle(double V) {
        double deltaAngle = 0;
         for(int i = 0; i < deltaAim.size()-1; i++){
-            if(deltaAim.get(i).velocity < Vy && Vy < deltaAim.get(i+1).velocity){
+            if (V < deltaAim.get(0).velocity)
+                deltaAngle = deltaAim.get(0).angle;
+            else if (V >= deltaAim.get(deltaAim.size()-1).velocity)
+                deltaAngle = deltaAim.get(deltaAim.size()-1).angle;
+            else if(deltaAim.get(i).velocity < V && V < deltaAim.get(i+1).velocity){
                 double deltaDistance = deltaAim.get(i+1).velocity - deltaAim.get(i).velocity;
                 double delta = deltaAim.get(i+1).angle - deltaAim.get(i).angle;
-                deltaAngle = deltaAim.get(i).angle + delta * ((Vy - deltaAim.get(i).velocity) / deltaDistance);
+                deltaAngle = deltaAim.get(i).angle + delta * ((V - deltaAim.get(i).velocity) / deltaDistance);
             }
         }
         return deltaAngle;
     }
 
+    private Position pos = new Position();
 
 
     @Override
@@ -142,14 +145,14 @@ public class Eye extends RobotPart<EyeMetric>{
                 {
                     if(fiducial.getFiducialId() == 20 && ssom.color == StandardSetupOpMode.COLOR.BLUE){
                         //launcher speed
-                        Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
+                        pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         fiducialId = 20;
                         velocityHelper.addPosition(pos);
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
-                        currentDegrees += vYtoAngle(velocityHelper.getVy());
+                        currentDegrees += vtoAngle(velocityHelper.getVx());
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
 
@@ -164,7 +167,7 @@ public class Eye extends RobotPart<EyeMetric>{
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
-                        currentDegrees += vYtoAngle(velocityHelper.getVy());
+                        currentDegrees += vtoAngle(velocityHelper.getVx());
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
                         break;
@@ -178,7 +181,7 @@ public class Eye extends RobotPart<EyeMetric>{
                         velocityHelper.reset();
                     }
                 }
-                ssom.launcher.setRPMFromDistance(shotD,deltaRPM, velocityHelper.getVx());
+                ssom.launcher.setRPMFromDistance(shotD,deltaRPM, velocityHelper.getVy());
 
             }
             if (mode == Mode.AUTO_START) {
@@ -344,7 +347,8 @@ public class Eye extends RobotPart<EyeMetric>{
             telemetry.addData("Shot Distance", shotD);
             telemetry.addData("Velocity X", velocityHelper.getVx());
             telemetry.addData("Velocity Y", velocityHelper.getVy());
-
+            telemetry.addData("pos x", pos.x);
+            telemetry.addData("pos y", pos.y);
         }
     }
 
