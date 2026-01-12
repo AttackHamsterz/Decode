@@ -20,8 +20,8 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     private static final double LIFT_HEIGHT_RIGHT_START_IN = MAX_LIFT_HEIGHT_RIGHT_IN * 0.9;
     private static final double LIFT_POWER_LEFT = 0.97;
     private static final double LIFT_POWER_RIGHT = 1.0;
-    private static final double DRAG_HEIGHT_INCREMENT_LEFT_IN = 0.4;
-    private static final double DRAG_HEIGHT_INCREMENT_RIGHT_IN = 0.4;
+    private static final double DRAG_HEIGHT_INCREMENT_LEFT_IN = 0.45;
+    private static final double DRAG_HEIGHT_INCREMENT_RIGHT_IN = 0.45;
     private static final double HOLD_POWER = 0.1;
     private static final double TRIGGER_THRESH = 0.05;
 
@@ -92,8 +92,8 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
         int rightPos = (int)Math.round(DRAG_HEIGHT_INCREMENT_RIGHT_IN/PPM_IN*PPM);
         finalLiftMotorLeft.setTargetPosition(leftPos);
         finalLiftMotorRight.setTargetPosition(rightPos);
-        finalLiftMotorLeft.setPower(HOLD_POWER);
-        finalLiftMotorRight.setPower(HOLD_POWER);
+        finalLiftMotorLeft.setPower(LIFT_POWER_LEFT);
+        finalLiftMotorRight.setPower(LIFT_POWER_RIGHT);
     }
 
     public void initialPosition() {
