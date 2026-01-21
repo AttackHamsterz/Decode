@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 import java.util.Collections;
@@ -18,6 +19,9 @@ public class VelocityHelper {
     private Position lastPosition;
     private long lastTimeMS;
 
+    private static double MIN_DELTA_T = 0.001;
+
+    public Telemetry tele = null;
     /**
      * Velocity helper constructor
      * @param numAverage The samples to average over for velocity
@@ -55,10 +59,12 @@ public class VelocityHelper {
      */
     public void addPosition(Position pos) {
         long currentTimeMS = System.currentTimeMillis();
+        double deltaT = (double)(currentTimeMS - lastTimeMS)*0.001;
+        if(deltaT < MIN_DELTA_T) return;
+
         if (lastPosition != null) {
             double deltaX = lastPosition.x - pos.x;
             double deltaY = lastPosition.y - pos.y;
-            double deltaT = (double)(currentTimeMS - lastTimeMS)*0.001;
             double VX = deltaX/deltaT;
             double VY = deltaY/deltaT;
 
@@ -74,6 +80,19 @@ public class VelocityHelper {
 
             if(numAverage<VelX.size())
                 numAverage++;
+
+            if(tele != null)
+            {
+                tele.addData("deltaX",deltaX);
+                tele.addData("deltaY",deltaY);
+                tele.addData("deltaT",deltaT);
+                tele.addData("VX",VX);
+                tele.addData("VY",VY);
+                tele.addData("velocityXTotal",velocityXTotal);
+                tele.addData("velocityYTotal",velocityYTotal);
+                tele.addData("numAverage",numAverage);
+                tele.update();
+            }
         }
         lastPosition = pos;
         lastTimeMS = currentTimeMS;

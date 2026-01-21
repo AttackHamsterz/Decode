@@ -95,6 +95,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
         double vxrpm = 0;
 
         // Locate closest two points
+        /*
         for(int i = 0; i < velocityRPM.size()-1; i++) {
             if (V < velocityRPM.get(0).value)
                 vxrpm = velocityRPM.get(0).rpm;
@@ -106,6 +107,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
                 vxrpm = velocityRPM.get(i).rpm + deltaRPM * ((V - velocityRPM.get(i).value) / deltaX);
             }
         }
+         */
 
         // Locate closest two points
         for(int i = 0; i < distanceRPM.size()-1; i++) {

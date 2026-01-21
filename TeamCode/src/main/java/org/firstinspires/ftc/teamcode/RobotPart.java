@@ -19,7 +19,7 @@ public abstract class RobotPart<T> extends Thread{
     //    32 - Ball lifter
     //    64 - Final Lift
     //   So to dump Motion, Sorter and Intake: 0b00011001 -or- 1+8+16
-    public static final int DEBUG = 4;
+    public static final int DEBUG = 0;
 
     // Motor overload protection
     protected static final long SAFE_CHECK_PERIOD_MS = 100;  // Check 10 times a second

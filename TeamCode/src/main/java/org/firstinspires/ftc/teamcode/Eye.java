@@ -62,7 +62,7 @@ public class Eye extends RobotPart<EyeMetric>{
     private double shotD;
     private double deltaRPM;
     private ArrayList<VelocityAngleEntry> deltaAim;
-    public VelocityHelper velocityHelper = new VelocityHelper(5);
+    public VelocityHelper velocityHelper = new VelocityHelper(71);
 
 
     private class VelocityAngleEntry{
@@ -97,6 +97,9 @@ public class Eye extends RobotPart<EyeMetric>{
                 new VelocityAngleEntry(20.0, -5.0),
                 new VelocityAngleEntry(50.0, -7.0)
         ));
+
+        //velocityHelper.tele = ssom.telemetry;
+
     }
 
     private double vtoAngle(double V) {
@@ -147,7 +150,7 @@ public class Eye extends RobotPart<EyeMetric>{
                         //launcher speed
                         pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         fiducialId = 20;
-                        velocityHelper.addPosition(pos);
+                        //velocityHelper.addPosition(pos);
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
 
                         //auto aiming
