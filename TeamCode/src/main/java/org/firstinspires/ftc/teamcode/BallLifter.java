@@ -70,6 +70,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
             }
             ballLiftServo.setPower(STALL_POWER);
             lifting = false;
+            ssom.sorter.clearBackPosition();
         });
         thread.start();
 
@@ -139,7 +140,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
                                 autoShootState = 0;
                             }
                             break;
-                    };
+                    }
                 }
 
                 // We've released the left button so we're done auto shooting
