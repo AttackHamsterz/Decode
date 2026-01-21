@@ -664,10 +664,11 @@ public class Sorter extends RobotPart<SorterMetric>{
             telemetry.addData("backColor", (backColor == BallColor.None) ? "None" : (backColor == BallColor.Green) ? "green" : "purple");
 
             // Position tracking telemetry
-            telemetry.addData("frontPosition", ballPositions[0]);
-            telemetry.addData("leftPosition", ballPositions[1]);
-            telemetry.addData("rightPosition", ballPositions[2]);
-            telemetry.addData("backPosition", ballPositions[3]);
+            telemetry.addLine("=== Position Array ===");
+            telemetry.addData("ballPositions[0] (Front)", ballPositions[0]);
+            telemetry.addData("ballPositions[1] (Left)", ballPositions[1]);
+            telemetry.addData("ballPositions[2] (Right)", ballPositions[2]);
+            telemetry.addData("ballPositions[3] (Back)", ballPositions[3]);
 
             telemetry.addData("leftDistance",leftColor.getDistance());
             telemetry.addData("rightDistance",rightColor.getDistance());
