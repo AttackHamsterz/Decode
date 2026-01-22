@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.control.PIDFController;
-import com.pedropathing.math.Vector;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -61,11 +60,13 @@ public class Eye extends RobotPart<EyeMetric>{
     private double currentDegrees;
     private double shotD;
     private double deltaRPM;
-    private ArrayList<VelocityAngleEntry> deltaAim;
-    public VelocityHelper velocityHelper = new VelocityHelper(71);
+    private final ArrayList<VelocityAngleEntry> deltaAim;
 
+    private Position pos = new Position();
+    private double vx;
+    private double vy;
 
-    private class VelocityAngleEntry{
+    private static class VelocityAngleEntry{
         public double velocity;
         public double angle;
         public VelocityAngleEntry(double velocity, double angle){
@@ -75,7 +76,7 @@ public class Eye extends RobotPart<EyeMetric>{
     };
 
 
-    private PIDFController aimController;
+    private final PIDFController aimController;
 
     public Eye(StandardSetupOpMode ssom){
         this.ssom = ssom;
@@ -118,9 +119,6 @@ public class Eye extends RobotPart<EyeMetric>{
         return deltaAngle;
     }
 
-    private Position pos = new Position();
-
-
     @Override
     public void run() {
         // Sanity
@@ -147,44 +145,59 @@ public class Eye extends RobotPart<EyeMetric>{
                 for(LLResultTypes.FiducialResult fiducial : fiducials)
                 {
                     if(fiducial.getFiducialId() == 20 && ssom.color == StandardSetupOpMode.COLOR.BLUE){
-                        //launcher speed
+                        // Update velocities
+                        double v = ssom.motion.follower.getVelocity().getMagnitude();
+                        double lx = ssom.gamepadBuffer.g1LeftStickX;
+                        double ly = ssom.gamepadBuffer.g1LeftStickY;
+                        double tot = Math.sqrt(lx*lx+ly*ly);
+                        vx = v * lx / tot;
+                        vy = v * ly / tot;
+
+                        // Robot position
                         pos = fiducial.getRobotPoseTargetSpace().getPosition();
-                        fiducialId = 20;
-                        //velocityHelper.addPosition(pos);
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+                        fiducialId = 20;
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
-                        currentDegrees += vtoAngle(velocityHelper.getVx());
+                        currentDegrees += vtoAngle(vx);
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
 
                         break;
                     }
                     else if (fiducial.getFiducialId() == 24 && ssom.color == StandardSetupOpMode.COLOR.RED){
-                        //launcher speed
-                        Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
-                        fiducialId = 24;
-                        velocityHelper.addPosition(pos);
+                        // Update velocities
+                        double v = ssom.motion.follower.getVelocity().getMagnitude();
+                        double lx = ssom.gamepadBuffer.g1LeftStickX;
+                        double ly = ssom.gamepadBuffer.g1LeftStickY;
+                        double tot = Math.sqrt(lx*lx+ly*ly);
+                        vx = v * lx / tot;
+                        vy = v * ly / tot;
+
+                        // Robot position
+                        pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+                        fiducialId = 24;
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
-                        currentDegrees += vtoAngle(velocityHelper.getVx());
+                        currentDegrees += vtoAngle(vx);
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
                         break;
                     }
                     else{
+                        vx = 0;
+                        vy = 0;
                         currentDegrees = 180.0;
                         fiducialId = -1;
                         shotD = 0;
                         aimController.reset();
                         ssom.motion.setTurn(0);
-                        velocityHelper.reset();
                     }
                 }
-                ssom.launcher.setRPMFromDistance(shotD,deltaRPM, velocityHelper.getVy());
+                ssom.launcher.setRPMFromDistance(shotD,deltaRPM, vy);
 
             }
             if (mode == Mode.AUTO_START) {
@@ -348,8 +361,8 @@ public class Eye extends RobotPart<EyeMetric>{
             telemetry.addData("Mode", mode);
             telemetry.addData("Fiducial", fiducialId);
             telemetry.addData("Shot Distance", shotD);
-            telemetry.addData("Velocity X", velocityHelper.getVx());
-            telemetry.addData("Velocity Y", velocityHelper.getVy());
+            telemetry.addData("Velocity X", vx);
+            telemetry.addData("Velocity Y", vy);
             telemetry.addData("pos x", pos.x);
             telemetry.addData("pos y", pos.y);
         }

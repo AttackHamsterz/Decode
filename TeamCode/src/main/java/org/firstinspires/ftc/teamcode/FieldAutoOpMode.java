@@ -126,7 +126,7 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 12:
             case 14:
                 boolean ready = !motion.follower.isBusy() && sorter.isNotSpinning() && ballLifter.isReset();
-                if(pathState <3)
+                if(pathState == 1 || pathState == 10)
                     ready  = ready && launcher.launchReady();
                 if(ready) {
                     // Stop the front intake (needed for 9 and 17)
