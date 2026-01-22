@@ -26,10 +26,11 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double TURN_POWER = 1.0;
     private static final long LAST_COLOR_WAIT_MS = 250;
     private static final long STUCK_TIME_MS = 2000;
-    private static final long FRONT_AUTO_TURN_DELAY_MS = 150;
+    private static final long FRONT_AUTO_TURN_DELAY_MS = 300;
     private static final long LEFT_AUTO_TURN_DELAY_MS = 300;
     private static final long RIGHT_AUTO_TURN_DELAY_MS = 300;
-    private static final long TELE_TURN_DELAY_MS = 100;
+    private static final long TELE_TURN_DELAY_MS = 400;
+    private static final double MIN_DIST_CM = 3.0;
 
     private long spinStartTime = 0;
     private boolean frontAutoTurn = false;
@@ -37,35 +38,36 @@ public class Sorter extends RobotPart<SorterMetric>{
     private boolean rightAutoTurn = false;
     private boolean autoTurnTrigger = false;
 
+    // Position tracking array: Index 0=front, 1=left, 2=right, 3=back
+    private final BallColor[] ballPositions = new BallColor[4];
+    private int pendingQuarterTurns = 0;
+
     public enum BallColor{
         None(0),
         Green(1),
         Purple(2);
 
         private final String color;
-        private final int id;
         private double distance;
-        private float[] hsv;
+        private final float[] hsv;
         private long time;
 
-        private static final double MIN_DIST_CM = 3.0;
         private static final float PURPLE_HUE_MIN = 190;
         private static final float VALUE_MIN = 0.09f;
 
         BallColor(int id) {
             if(id < 1 || id > 2) id = 0;
-            this.id = id;
             this.color = (id == 1) ? "Green" : (id == 2) ? "Purple" : "None";
             this.hsv = new float[3];
             this.distance = 0;
             this.time = 0;
         }
 
-        public void setHSV(float[] hsv){
-            if(hsv.length > 2) {
-                this.hsv[0] = hsv[0];
-                this.hsv[1] = hsv[1];
-                this.hsv[2] = hsv[2];
+        public void setHSV(float[] newHsv){
+            if(newHsv.length > 2) {
+                this.hsv[0] = newHsv[0];
+                this.hsv[1] = newHsv[1];
+                this.hsv[2] = newHsv[2];
             }
         }
 
@@ -75,10 +77,6 @@ public class Sorter extends RobotPart<SorterMetric>{
 
         public void setTime(long time){
             this.time = time;
-        }
-
-        public int getId() {
-            return id;
         }
 
         public long getTime(){
@@ -104,6 +102,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             if(sensor != null){
                 // Get distance (if too far, then no color)
                 distance = sensor.getDistance(DistanceUnit.CM);
+
                 if(distance <= MIN_DIST_CM) {
                     // Get normalized RGB (adjust gain at each competition)
                     NormalizedRGBA colors = sensor.getNormalizedColors();
@@ -123,6 +122,8 @@ public class Sorter extends RobotPart<SorterMetric>{
                         else
                             ballColor = BallColor.Green;
                     }
+                    else
+                        ballColor = BallColor.Purple;
                 }
             }
 
@@ -195,6 +196,12 @@ public class Sorter extends RobotPart<SorterMetric>{
 
         // Setup variables
         targetPosition = 0;
+
+        // Initialize ball position tracking array to None
+        ballPositions[0] = BallColor.None; // front
+        ballPositions[1] = BallColor.None; // left
+        ballPositions[2] = BallColor.None; // right
+        ballPositions[3] = BallColor.None; // back
 
         // Debug
         boolean error = false;
@@ -280,9 +287,28 @@ public class Sorter extends RobotPart<SorterMetric>{
         scheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
     }
 
+    // Rotate ball positions when physical rotation completes
+    // Clockwise rotation: front→right, right→back, back→left, left→front
+    private void rotateBallPositions(int quarterTurns) {
+        // Normalize quarter turns to 0-3 range
+        quarterTurns = quarterTurns % 4;
+        if(quarterTurns < 0) quarterTurns += 4;
 
+        // Rotate the array for each quarter turn
+        for(int i = 0; i < quarterTurns; i++) {
+            BallColor temp = ballPositions[0]; // save front
+            ballPositions[0] = ballPositions[1]; // left → front
+            ballPositions[1] = ballPositions[3]; // back → left
+            ballPositions[3] = ballPositions[2]; // right → back
+            ballPositions[2] = temp; // front → right
+        }
+    }
 
-
+    // Method for BallLifter to call when a ball is launched
+    public void clearBackPosition() {
+        ballPositions[3] = BallColor.None;
+        lastBackColor = BallColor.None;
+    }
 
     @Override
     public void run() {
@@ -295,67 +321,98 @@ public class Sorter extends RobotPart<SorterMetric>{
             frontColor = BallColor.fromSensor(frontSensor);
             backColor = BallColor.fromSensor(backSensor);
 
+            // Update position tracking when sensors detect balls
+            // Sensors are trusted - if they see a ball, update the position
+            if (leftColor != BallColor.None) {
+                ballPositions[1] = leftColor;
+            }
+            if (rightColor != BallColor.None) {
+                ballPositions[2] = rightColor;
+            }
+            if (frontColor != BallColor.None) {
+                ballPositions[0] = frontColor;
+            }
+            if (backColor != BallColor.None) {
+                ballPositions[3] = backColor;
+            }
+
             if (leftColor == BallColor.Green) {
-                 lastLeftColor = BallColor.Green;
-                lastLeftColorTime = System.currentTimeMillis();
-                if (leftColor.distance < 1.15 && !isSpinning && leftAutoTurn &&!autoTurnTrigger) {
+                lastLeftColor = BallColor.Green;
+                lastLeftColorTime = ssom.intake.isLeftIntakeOn() ? stopTime : leftColor.getTime();
+                if (leftColor.distance <= MIN_DIST_CM && !isSpinning && leftAutoTurn &&!autoTurnTrigger) {
                     leftAutoTurnThread();
                 }
             } else if (leftColor == BallColor.Purple) {
                 lastLeftColor = BallColor.Purple;
-                lastLeftColorTime = System.currentTimeMillis();
-                if (leftColor.distance < 1.15 && !isSpinning && leftAutoTurn &&!autoTurnTrigger) {
+                lastLeftColorTime = ssom.intake.isLeftIntakeOn() ? stopTime : leftColor.getTime();
+                if (leftColor.distance <= MIN_DIST_CM && !isSpinning && leftAutoTurn &&!autoTurnTrigger) {
                     leftAutoTurnThread();
                 }
 
             }
             if (rightColor == BallColor.Green) {
                 lastRightColor = BallColor.Green;
-                lastRightColorTime = System.currentTimeMillis();
-                if (rightColor.distance < 1.15 && !isSpinning && rightAutoTurn &&!autoTurnTrigger) {
+                lastRightColorTime = ssom.intake.isRightIntakeOn() ? stopTime : rightColor.getTime();
+                if (rightColor.distance <= MIN_DIST_CM && !isSpinning && rightAutoTurn &&!autoTurnTrigger) {
                     rightAutoTurnThread();
                 }
             } else if (rightColor == BallColor.Purple) {
                 lastRightColor = BallColor.Purple;
-                lastRightColorTime = System.currentTimeMillis();
-                if (rightColor.distance < 1.15 && !isSpinning && rightAutoTurn &&!autoTurnTrigger) {
+                lastRightColorTime = ssom.intake.isRightIntakeOn() ? stopTime : rightColor.getTime();
+                if (rightColor.distance <= MIN_DIST_CM && !isSpinning && rightAutoTurn &&!autoTurnTrigger) {
                     rightAutoTurnThread();
                 }
             }
             if (frontColor == BallColor.Green) {
                 lastFrontColor = BallColor.Green;
-                lastFrontColorTime = System.currentTimeMillis();
-                if (frontColor.distance < 1.15 && !isSpinning && frontAutoTurn && !autoTurnTrigger) {
+                lastFrontColorTime = ssom.intake.isFrontIntakeOn() ? stopTime : frontColor.getTime();
+                if (frontColor.distance <= MIN_DIST_CM && !isSpinning && frontAutoTurn && !autoTurnTrigger) {
                     frontAutoTurnThread();
                 }
             } else if (frontColor == BallColor.Purple) {
                 lastFrontColor = BallColor.Purple;
-                lastFrontColorTime = System.currentTimeMillis();
-                if (frontColor.distance < 1.15 && !isSpinning && frontAutoTurn &&!autoTurnTrigger) {
+                lastFrontColorTime = ssom.intake.isFrontIntakeOn() ? stopTime : frontColor.getTime();
+                if (frontColor.distance <= MIN_DIST_CM && !isSpinning && frontAutoTurn &&!autoTurnTrigger) {
                     frontAutoTurnThread();
                 }
             }
             if (backColor == BallColor.Green) {
                 lastBackColor = BallColor.Green;
-                lastBackColorTime = System.currentTimeMillis();
+                lastBackColorTime = backColor.getTime();
             } else if (backColor == BallColor.Purple) {
                 lastBackColor = BallColor.Purple;
-                lastBackColorTime = System.currentTimeMillis();
+                lastBackColorTime = backColor.getTime();
             }
 
             // Listen for key presses
             if (!ssom.gamepadBuffer.ignoreGamepad) {
+                // Since we are usually behind the robot, the following makes sense:
+                //   x rotates left quad to launcher
+                //   y rotates front quad to launcher
+                //   b rotates right quad to launcher
+                //   a rotates closest anything to launcher
                 if (!pressed && ssom.gamepadBuffer.g2b) {
-                    pressed = true;
-                    targetPosition -= QUARTER_TURN;
-                }
-                else if (!pressed && ssom.gamepadBuffer.g2x) {
                     pressed = true;
                     targetPosition += QUARTER_TURN;
                 }
-                else if (!pressed && ssom.gamepadBuffer.g2a) {
+                else if (!pressed && ssom.gamepadBuffer.g2x) {
+                    pressed = true;
+                    targetPosition -= QUARTER_TURN;
+                }
+                else if (!pressed && ssom.gamepadBuffer.g2y) {
                     pressed = true;
                     targetPosition += HALF_TURN;
+                }
+                else if (!pressed && ssom.gamepadBuffer.g2a) {
+                    pressed = true;
+                    if(!backOccupied()) {
+                        if (rightOccupied())
+                            targetPosition += QUARTER_TURN;
+                        else if (leftOccupied())
+                            targetPosition -= QUARTER_TURN;
+                        else if (frontOccupied())
+                            targetPosition += HALF_TURN;
+                    }
                 }
                 // Logic to nudge sorter for alignment
                 else if (!pressed && ssom.gamepadBuffer.g2DpadLeft) {
@@ -366,7 +423,7 @@ public class Sorter extends RobotPart<SorterMetric>{
                     pressed = true;
                     targetPosition -= 2.0 * ONE_DEGREE_TURN;
                 }
-                //Logic to move a selected color to the launcher
+                // Logic to move a selected color to the launcher (left->green, right->purple)
                 else if(!pressed && ssom.gamepadBuffer.g2LeftBumper){
                     pressed = true;
                     rotateGreenToLaunch();
@@ -375,26 +432,34 @@ public class Sorter extends RobotPart<SorterMetric>{
                     pressed = true;
                     rotatePurpleToLaunch();
                 }
-                if (!ssom.gamepadBuffer.g2x && !ssom.gamepadBuffer.g2b && !ssom.gamepadBuffer.g2a &&
+                if (!ssom.gamepadBuffer.g2x && !ssom.gamepadBuffer.g2y && !ssom.gamepadBuffer.g2a && !ssom.gamepadBuffer.g2b &&
                         !ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight &&
                         !ssom.gamepadBuffer.g2LeftBumper && !ssom.gamepadBuffer.g2RightBumper) {
-                   pressed = false;
+                    pressed = false;
                 }
             }
 
             // Are we close enough
             if(Math.abs(sortMotor.getCurrentPosition() - (int)Math.round(targetPosition)) < CLOSE_ENOUGH_TICKS) {
                 sortMotor.setPower(HOLD_POWER);
+                // Detect rotation completion and update ball positions
+                if(isSpinning) {
+                    rotateBallPositions(pendingQuarterTurns);
+                    pendingQuarterTurns = 0;
+                }
                 isSpinning = false;
                 stopTime = System.currentTimeMillis();
                 spinStartTime = 0;
             }
-            // Are we stuck
+            // Are we stuck - adjust pendingQuarterTurns when reversing direction
             else if(spinStartTime > 0 && System.currentTimeMillis() - spinStartTime > STUCK_TIME_MS){
-                if(targetPosition > sortMotor.getCurrentPosition())
+                if(targetPosition > sortMotor.getCurrentPosition()) {
                     targetPosition -= QUARTER_TURN;
-                else
+                    pendingQuarterTurns -= 1;  // We're reversing one quarter turn
+                } else {
                     targetPosition += QUARTER_TURN;
+                    pendingQuarterTurns += 1;  // We're reversing one quarter turn
+                }
                 spinStartTime = 0;
             }
             // Spin to target position if not lifting
@@ -423,22 +488,27 @@ public class Sorter extends RobotPart<SorterMetric>{
         boolean colorFound = false;
         long recent = stopTime - LAST_COLOR_WAIT_MS;
 
-        if (backColor == BallColor.Green ||
-            (lastBackColor == BallColor.Green && lastBackColorTime > recent)) {
+        // Check position tracking array and sensor readings
+        if (ballPositions[3] == BallColor.Green ||
+                backColor == BallColor.Green ||
+                (lastBackColor == BallColor.Green && lastBackColorTime > recent)) {
             // Don't do anything.
             colorFound = true;
         }
-        else if(leftColor == BallColor.Green ||
+        else if(ballPositions[1] == BallColor.Green ||
+                leftColor == BallColor.Green ||
                 (lastLeftColor == BallColor.Green && lastLeftColorTime > recent)){
             colorFound = true;
             rotateClockwise(-1);
         }
-        else if(rightColor == BallColor.Green ||
+        else if(ballPositions[2] == BallColor.Green ||
+                rightColor == BallColor.Green ||
                 (lastRightColor == BallColor.Green && lastRightColorTime > recent)){
             colorFound = true;
-                rotateClockwise(1);
+            rotateClockwise(1);
         }
-        else if(frontColor == BallColor.Green ||
+        else if(ballPositions[0] == BallColor.Green ||
+                frontColor == BallColor.Green ||
                 (lastFrontColor == BallColor.Green && lastFrontColorTime > recent)){
             colorFound = true;
             rotateClockwise(-2);
@@ -454,22 +524,27 @@ public class Sorter extends RobotPart<SorterMetric>{
         boolean colorFound = false;
         long recent = stopTime - LAST_COLOR_WAIT_MS;
 
-        if (backColor == BallColor.Purple ||
+        // Check position tracking array and sensor readings
+        if (ballPositions[3] == BallColor.Purple ||
+                backColor == BallColor.Purple ||
                 (lastBackColor == BallColor.Purple && lastBackColorTime > recent)) {
-           // Don't do anything.
+            // Don't do anything.
             colorFound = true;
         }
-        else if(leftColor == BallColor.Purple||
+        else if(ballPositions[1] == BallColor.Purple||
+                leftColor == BallColor.Purple||
                 (lastLeftColor == BallColor.Purple && lastLeftColorTime > recent)) {
             rotateClockwise(-1);
             colorFound = true;
         }
-        else if(rightColor == BallColor.Purple ||
+        else if(ballPositions[2] == BallColor.Purple ||
+                rightColor == BallColor.Purple ||
                 (lastRightColor == BallColor.Purple && lastRightColorTime > recent)){
             rotateClockwise(1);
             colorFound = true;
         }
-        else if(frontColor == BallColor.Purple ||
+        else if(ballPositions[0] == BallColor.Purple ||
+                frontColor == BallColor.Purple ||
                 (lastFrontColor == BallColor.Purple && lastFrontColorTime > recent)){
             rotateClockwise(-2);
             colorFound = true;
@@ -477,21 +552,34 @@ public class Sorter extends RobotPart<SorterMetric>{
         return colorFound;
     }
 
+    // Occupied methods check both sensor AND position tracking
     public boolean frontOccupied(){
         long recent = stopTime - LAST_COLOR_WAIT_MS;
-        return frontColor != BallColor.None || (lastFrontColor != BallColor.None && lastFrontColorTime > recent);
+        // Trust sensor if it sees something, otherwise trust position tracking
+        return frontColor != BallColor.None ||
+                (lastFrontColor != BallColor.None && lastFrontColorTime > recent) ||
+                ballPositions[0] != BallColor.None;
     }
+
     public boolean leftOccupied(){
         long recent = stopTime - LAST_COLOR_WAIT_MS;
-        return leftColor != BallColor.None || (lastLeftColor != BallColor.None && lastLeftColorTime > recent);
+        return leftColor != BallColor.None ||
+                (lastLeftColor != BallColor.None && lastLeftColorTime > recent) ||
+                ballPositions[1] != BallColor.None;
     }
+
     public boolean rightOccupied(){
         long recent = stopTime - LAST_COLOR_WAIT_MS;
-        return rightColor != BallColor.None || (lastRightColor != BallColor.None && lastRightColorTime > recent);
+        return rightColor != BallColor.None ||
+                (lastRightColor != BallColor.None && lastRightColorTime > recent) ||
+                ballPositions[2] != BallColor.None;
     }
+
     public boolean backOccupied(){
         long recent = stopTime - LAST_COLOR_WAIT_MS;
-        return backColor != BallColor.None || (lastBackColor != BallColor.None && lastBackColorTime > recent);
+        return backColor != BallColor.None ||
+                (lastBackColor != BallColor.None && lastBackColorTime > recent) ||
+                ballPositions[3] != BallColor.None;
     }
 
     public int getBallCount(){
@@ -547,6 +635,8 @@ public class Sorter extends RobotPart<SorterMetric>{
     public void rotateClockwise(int quarterTurns) {
         isSpinning = true;
         targetPosition += quarterTurns*QUARTER_TURN;
+        // Track pending quarter turns for position array rotation
+        pendingQuarterTurns += quarterTurns;
     }
 
     @Override
@@ -568,26 +658,22 @@ public class Sorter extends RobotPart<SorterMetric>{
     public void getTelemetry(Telemetry telemetry) {
         if((DEBUG & 8) != 0) {
             // I2C calls in telemetry can be very slow (only for debugging)
-            //telemetry.addData("leftDistance", leftSensor.getDistance(DistanceUnit.CM));
             telemetry.addData("leftColor", (leftColor == BallColor.None) ? "None" : (leftColor == BallColor.Green) ? "green" : "purple");
             telemetry.addData("rightColor", (rightColor == BallColor.None) ? "None" : (rightColor == BallColor.Green) ? "green" : "purple");
             telemetry.addData("frontColor", (frontColor == BallColor.None) ? "None" : (frontColor == BallColor.Green) ? "green" : "purple");
             telemetry.addData("backColor", (backColor == BallColor.None) ? "None" : (backColor == BallColor.Green) ? "green" : "purple");
-            telemetry.addData("sortMotor Ticks", sortMotor.getCurrentPosition());
-            telemetry.addData("sortMotor Power", sortMotor.getPower());
-            telemetry.addData("isSpinning", isSpinning);
-            /*
-            telemetry.addData("lastLeftColor", lastLeftColor);
-            telemetry.addData("lastLeftColorTime", lastLeftColorTime);
-            telemetry.addData("lastRightColor", lastRightColor);
-            telemetry.addData("lastRightColorTime", lastRightColorTime);
-            telemetry.addData("lastFrontColor", lastFrontColor);
-            telemetry.addData("lastFrontColorTime", lastFrontColorTime);
-            telemetry.addData("lastBackColor", lastBackColor);
-            telemetry.addData("lastBackColorTime", lastBackColorTime);
-            telemetry.addData("stopTime", stopTime);
-             */
+
+            // Position tracking telemetry
+            telemetry.addLine("=== Position Array ===");
+            telemetry.addData("ballPositions[0] (Front)", ballPositions[0]);
+            telemetry.addData("ballPositions[1] (Left)", ballPositions[1]);
+            telemetry.addData("ballPositions[2] (Right)", ballPositions[2]);
+            telemetry.addData("ballPositions[3] (Back)", ballPositions[3]);
+
+            telemetry.addData("leftDistance",leftColor.getDistance());
+            telemetry.addData("rightDistance",rightColor.getDistance());
+            telemetry.addData("frontDistance",frontColor.getDistance());
+            telemetry.addData("backDistance", backColor.getDistance());
         }
     }
 }
-

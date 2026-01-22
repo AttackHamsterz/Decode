@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
-import static java.lang.Math.tan;
-
 import androidx.annotation.NonNull;
 
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.control.PIDFController;
+import com.pedropathing.math.Vector;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -13,6 +12,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -57,11 +57,23 @@ public class Eye extends RobotPart<EyeMetric>{
     private final Limelight3A limelight;
     private Eye.Mode mode;
     private LLResult resultInUse;
-    private ColorOrder colorOrder;
     private int fiducialId;
     private double currentDegrees;
     private double shotD;
     private double deltaRPM;
+    private ArrayList<VelocityAngleEntry> deltaAim;
+    public VelocityHelper velocityHelper = new VelocityHelper(71);
+
+
+    private class VelocityAngleEntry{
+        public double velocity;
+        public double angle;
+        public VelocityAngleEntry(double velocity, double angle){
+            this.velocity = velocity;
+            this.angle = angle;
+        }
+    };
+
 
     private PIDFController aimController;
 
@@ -76,7 +88,38 @@ public class Eye extends RobotPart<EyeMetric>{
         //Set up PIDF aim controller
         aimController = new PIDFController(new PIDFCoefficients(0.01, 0.0, 1.0, 0.0));
         aimController.setTargetPosition(0.0);
+
+        // Table of distances for in/s to angle degrees
+        deltaAim = new ArrayList<>(List.of(
+                new VelocityAngleEntry(-50.0, 7.0),
+                new VelocityAngleEntry(-20.0, 5.0),
+                new VelocityAngleEntry(0, 0),
+                new VelocityAngleEntry(20.0, -5.0),
+                new VelocityAngleEntry(50.0, -7.0)
+        ));
+
+        //velocityHelper.tele = ssom.telemetry;
+
     }
+
+    private double vtoAngle(double V) {
+       double deltaAngle = 0;
+        for(int i = 0; i < deltaAim.size()-1; i++){
+            if (V < deltaAim.get(0).velocity)
+                deltaAngle = deltaAim.get(0).angle;
+            else if (V >= deltaAim.get(deltaAim.size()-1).velocity)
+                deltaAngle = deltaAim.get(deltaAim.size()-1).angle;
+            else if(deltaAim.get(i).velocity < V && V < deltaAim.get(i+1).velocity){
+                double deltaDistance = deltaAim.get(i+1).velocity - deltaAim.get(i).velocity;
+                double delta = deltaAim.get(i+1).angle - deltaAim.get(i).angle;
+                deltaAngle = deltaAim.get(i).angle + delta * ((V - deltaAim.get(i).velocity) / deltaDistance);
+            }
+        }
+        return deltaAngle;
+    }
+
+    private Position pos = new Position();
+
 
     @Override
     public void run() {
@@ -97,6 +140,7 @@ public class Eye extends RobotPart<EyeMetric>{
         boolean g2pressed = false;
         while (running) {
             // Get a result if we're in a mode that needs one
+
             if (mode == Mode.AIM_POINT) {
                 resultInUse = limelight.getLatestResult();
                 List<LLResultTypes.FiducialResult> fiducials = resultInUse.getFiducialResults();
@@ -104,12 +148,14 @@ public class Eye extends RobotPart<EyeMetric>{
                 {
                     if(fiducial.getFiducialId() == 20 && ssom.color == StandardSetupOpMode.COLOR.BLUE){
                         //launcher speed
-                        Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
+                        pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         fiducialId = 20;
+                        //velocityHelper.addPosition(pos);
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
+                        currentDegrees += vtoAngle(velocityHelper.getVx());
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
 
@@ -119,10 +165,12 @@ public class Eye extends RobotPart<EyeMetric>{
                         //launcher speed
                         Position pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         fiducialId = 24;
+                        velocityHelper.addPosition(pos);
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
 
                         //auto aiming
                         currentDegrees = fiducial.getTargetXDegrees();
+                        currentDegrees += vtoAngle(velocityHelper.getVx());
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
                         break;
@@ -133,9 +181,11 @@ public class Eye extends RobotPart<EyeMetric>{
                         shotD = 0;
                         aimController.reset();
                         ssom.motion.setTurn(0);
+                        velocityHelper.reset();
                     }
                 }
-                ssom.launcher.setRPMFromDistance(shotD,deltaRPM);
+                ssom.launcher.setRPMFromDistance(shotD,deltaRPM, velocityHelper.getVy());
+
             }
             if (mode == Mode.AUTO_START) {
                 /*
@@ -160,10 +210,8 @@ public class Eye extends RobotPart<EyeMetric>{
                     pressed = true;
                     limelight.pipelineSwitch(0);
                     limelight.reloadPipeline();
-                    //if(!limelight.isRunning())
-                    //    limelight.start();
                 }
-                else if (pressed && !ssom.gamepadBuffer.g1RightBumper) {
+                else if (!ssom.gamepadBuffer.g1RightBumper) {
                     disableAimMode();
                 }
                 if(!ssom.gamepadBuffer.g1RightBumper && !ssom.gamepadBuffer.g1Back){
@@ -199,7 +247,7 @@ public class Eye extends RobotPart<EyeMetric>{
 
     public void disableAimMode(){
         setMode(Mode.NONE);
-        ssom.launcher.setRPMFromDistance(0, 0);
+        ssom.launcher.setRPMFromDistance(0, 0, 0);
         ssom.motion.setTurn(0);
     }
 
@@ -222,6 +270,23 @@ public class Eye extends RobotPart<EyeMetric>{
         }
         public int getId() {
             return id;
+        }
+
+        /**
+         * Given an index, is the color purple?
+         * @param index index % 3, so [0,1,2]
+         * @return true if the index mod 3 is purple
+         */
+        public boolean isPurple(int index){
+            boolean purple = true;
+            index = index % 3;
+            if((id == 21 && index == 0) || (id == 22 && index == 1) || (id == 23 && index == 2))
+                purple = false;
+            return purple;
+        }
+
+        public int greenIndex(){
+            return (id == 21) ? 0 : (id == 22) ? 1 : 2;
         }
 
         @NonNull
@@ -250,14 +315,6 @@ public class Eye extends RobotPart<EyeMetric>{
             }
         }
         return -1;
-    }
-
-    public ColorOrder getColorOrder() {
-        return colorOrder;
-    }
-
-    public ColorOrder getColorOrder(int id) {
-        return colorOrder = Eye.ColorOrder.fromId(id);
     }
 
     public void setMode(Mode newMode) {
@@ -291,6 +348,10 @@ public class Eye extends RobotPart<EyeMetric>{
             telemetry.addData("Mode", mode);
             telemetry.addData("Fiducial", fiducialId);
             telemetry.addData("Shot Distance", shotD);
+            telemetry.addData("Velocity X", velocityHelper.getVx());
+            telemetry.addData("Velocity Y", velocityHelper.getVy());
+            telemetry.addData("pos x", pos.x);
+            telemetry.addData("pos y", pos.y);
         }
     }
 

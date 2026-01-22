@@ -14,6 +14,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
     private static final double MIN_RPM = 0.0;
     private static final double MAX_RPM = 6000.0;
     private static final double CLOSE_ENOUGH_RPM_PERCENT = 8.0;
+    private static final double CLOSE_ENOUGH_RPM = 200;
     private static final double TPS_TO_RPM = 60.0 / TPR;
     private static final double RPM_TO_TPS = TPR / 60.0;
 
@@ -28,12 +29,14 @@ public class Launcher extends RobotPart<LauncherMetric>{
     private double deltaRPM;
 
     private ArrayList<RPMEntry> distanceRPM;
+    private ArrayList<RPMEntry> velocityRPM;
+
 
     private class RPMEntry{
-        public double distance;
+        public double value;
         public double rpm;
-        public RPMEntry(double distance, double rpm){
-            this.distance = distance;
+        public RPMEntry(double value, double rpm){
+            this.value = value;
             this.rpm = rpm;
         }
     };
@@ -56,42 +59,81 @@ public class Launcher extends RobotPart<LauncherMetric>{
         currentVelocityRPM = 0;
         deltaRPM = 0;
 
+        velocityRPM = new ArrayList<>(List.of(
+                new RPMEntry(-50,200),
+                new RPMEntry(0,0),
+                new RPMEntry(50,-200)
+
+        ));
+
+
         // Table of distances in meters to RPM
         distanceRPM = new ArrayList<>(List.of(
                 new RPMEntry(0.0, 0.0),
                 new RPMEntry(1.0, 2520.0),
-                new RPMEntry(1.45, 2870.0),
-                new RPMEntry(1.8, 3120.0),
+                new RPMEntry(1.07, 2620.0),
+                new RPMEntry(1.25, 2790.0),
+                new RPMEntry(1.45, 3010.0),
+                new RPMEntry(1.72, 3240.0),
+                new RPMEntry(2.0, 3360.0),
                 new RPMEntry(2.4, 3620.0),
-                new RPMEntry(3.3, 4220.0),
-                new RPMEntry(4.0, 4520.0),
+                new RPMEntry(2.43, 3670.0),
+                new RPMEntry(2.63, 3860.0),
+                new RPMEntry(3.28,4150),
+                new RPMEntry(3.4, 4210.0),
+                new RPMEntry(3.5,4400),
+                new RPMEntry(3.8,4460),
                 new RPMEntry(5.0, 5620.0)
         ));
         // added 20 to each on 11/23
+        // added new far values 12/16
     }
 
-    public void setRPMFromDistance(double distance, double extraRPM){
+    public void setRPMFromDistance(double distance, double extraRPM, double V){
         // Default RPM
         double rpm = 0;
+        double vxrpm = 0;
 
         // Locate closest two points
-        for(int i = 0; i < distanceRPM.size()-1; i++){
-            if(distanceRPM.get(i).distance < distance && distance < distanceRPM.get(i+1).distance){
-                double deltaDistance = distanceRPM.get(i+1).distance - distanceRPM.get(i).distance;
-                double deltaRPM = distanceRPM.get(i+1).rpm - distanceRPM.get(i).rpm;
-                rpm = distanceRPM.get(i).rpm + deltaRPM * ((distance - distanceRPM.get(i).distance) / deltaDistance);
+        /*
+        for(int i = 0; i < velocityRPM.size()-1; i++) {
+            if (V < velocityRPM.get(0).value)
+                vxrpm = velocityRPM.get(0).rpm;
+            else if (V >= velocityRPM.get(velocityRPM.size()-1).value)
+                vxrpm = velocityRPM.get(velocityRPM.size()-1).rpm;
+            else if(velocityRPM.get(i).value < V && V < velocityRPM.get(i+1).value){
+                double deltaX = velocityRPM.get(i+1).value - velocityRPM.get(i).value;
+                double deltaRPM = velocityRPM.get(i+1).rpm - velocityRPM.get(i).rpm;
+                vxrpm = velocityRPM.get(i).rpm + deltaRPM * ((V - velocityRPM.get(i).value) / deltaX);
             }
         }
-        setVelocityRPM(rpm+extraRPM);
+         */
+
+        // Locate closest two points
+        for(int i = 0; i < distanceRPM.size()-1; i++) {
+            if (distance < distanceRPM.get(0).value)
+                rpm = distanceRPM.get(0).rpm;
+            else if (distance >= distanceRPM.get(distanceRPM.size()-1).value)
+                rpm = distanceRPM.get(distanceRPM.size()-1).rpm;
+            else if(distanceRPM.get(i).value < distance && distance < distanceRPM.get(i+1).value){
+                double deltaDistance = distanceRPM.get(i+1).value - distanceRPM.get(i).value;
+                double deltaRPM = distanceRPM.get(i+1).rpm - distanceRPM.get(i).rpm;
+                rpm = distanceRPM.get(i).rpm + deltaRPM * ((distance - distanceRPM.get(i).value) / deltaDistance);
+            }
+        }
+        setVelocityRPM(rpm+extraRPM+vxrpm);
     }
+
+    //changing the distance based on the velocity. we need to figure out how fast we are going and in what direction, see the fiducial, and determine the rpm
 
     public void setVelocityRPM(double velocityRPM) {
         targetVelocityRPM = Range.clip(velocityRPM, MIN_RPM, MAX_RPM);
     }
 
     public boolean launchReady(){
-        double closeEnoughRPM = targetVelocityRPM * CLOSE_ENOUGH_RPM_PERCENT / 100.0;
-        return targetVelocityRPM > 0 && Math.abs(deltaRPM) < closeEnoughRPM;
+        //double closeEnoughRPM = targetVelocityRPM * CLOSE_ENOUGH_RPM_PERCENT / 100.0;
+
+        return targetVelocityRPM > 0 && Math.abs(deltaRPM) < CLOSE_ENOUGH_RPM;
     }
 
     @Override

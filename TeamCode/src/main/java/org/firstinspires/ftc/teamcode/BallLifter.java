@@ -70,6 +70,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
             }
             ballLiftServo.setPower(STALL_POWER);
             lifting = false;
+            ssom.sorter.clearBackPosition();
         });
         thread.start();
 
@@ -78,6 +79,8 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     @Override
     public void run() {
         boolean pressed = false;
+        int colorIndex = 0;
+        int autoShootState = 0;
         setRunning();
         while (running) {
             if (!ssom.gamepadBuffer.ignoreGamepad) {
@@ -89,6 +92,60 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
 
                 if (ssom.gamepadBuffer.g2RightTrigger <= TRIGGER_THRESH)
                     pressed = false;
+
+                // Auto fire state machine
+                if(ssom.gamepadBuffer.g2LeftTrigger > TRIGGER_THRESH)
+                {
+                    // Queue to green if green pressed
+                    if(ssom.gamepadBuffer.g2LeftBumper) {
+                        colorIndex = ssom.colorOrder.greenIndex();
+                    }
+
+                    // Auto shoot FSM (assume they hit the trigger for a reason)
+                    switch (autoShootState){
+                        case 0:
+                            // Lift complete?  Queue up the next ball
+                            if(!ssom.ballLifter.isLifting()){
+                                // Queue up the next correct color in the order
+                                boolean purple = ssom.colorOrder.isPurple(colorIndex);
+
+                                // Try purple first
+                                if(purple) {
+                                    if (!ssom.sorter.rotatePurpleToLaunch()) {
+                                        // Queue up green
+                                        if (!ssom.sorter.rotateGreenToLaunch()) {
+                                            // Just rotate clockwise to next slot to clear hopper
+                                            ssom.sorter.rotateClockwise(1);
+                                        }
+                                    }
+                                }
+                                // Try green first
+                                else {
+                                    if (!ssom.sorter.rotateGreenToLaunch()) {
+                                        // Queue up green
+                                        if (!ssom.sorter.rotatePurpleToLaunch()) {
+                                            // Just rotate clockwise to next slot to clear hopper
+                                            ssom.sorter.rotateClockwise(1);
+                                        }
+                                    }
+                                }
+                                autoShootState = 1;
+                            }
+                            break;
+                        case 1:
+                            // Sorter is sorted, launcher is ready, lifter is reset? LIFT!
+                            if(ssom.sorter.isNotSpinning() && ssom.launcher.launchReady() && ssom.ballLifter.isReset()){
+                                ssom.ballLifter.lift();
+                                colorIndex++;
+                                autoShootState = 0;
+                            }
+                            break;
+                    }
+                }
+
+                // We've released the left button so we're done auto shooting
+                if(ssom.gamepadBuffer.g2LeftTrigger <= TRIGGER_THRESH)
+                    autoShootState = 0;
             }
 
             // Color indication
