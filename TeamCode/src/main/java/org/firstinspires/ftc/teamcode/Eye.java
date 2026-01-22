@@ -63,8 +63,8 @@ public class Eye extends RobotPart<EyeMetric>{
     private final ArrayList<VelocityAngleEntry> deltaAim;
 
     private Position pos = new Position();
-    private double vx;
-    private double vy;
+    private double vx = 0;
+    private double vy = 0;
 
     private static class VelocityAngleEntry{
         public double velocity;
@@ -150,8 +150,11 @@ public class Eye extends RobotPart<EyeMetric>{
                         double lx = ssom.gamepadBuffer.g1LeftStickX;
                         double ly = ssom.gamepadBuffer.g1LeftStickY;
                         double tot = Math.sqrt(lx*lx+ly*ly);
-                        vx = v * lx / tot;
-                        vy = v * ly / tot;
+                        vx = vy = 0;
+                        if(tot>1e-4) {
+                            vx = v * lx / tot;
+                            vy = v * ly / tot;
+                        }
 
                         // Robot position
                         pos = fiducial.getRobotPoseTargetSpace().getPosition();
@@ -172,8 +175,11 @@ public class Eye extends RobotPart<EyeMetric>{
                         double lx = ssom.gamepadBuffer.g1LeftStickX;
                         double ly = ssom.gamepadBuffer.g1LeftStickY;
                         double tot = Math.sqrt(lx*lx+ly*ly);
-                        vx = v * lx / tot;
-                        vy = v * ly / tot;
+                        vx = vy = 0;
+                        if(tot>1e-4) {
+                            vx = v * lx / tot;
+                            vy = v * ly / tot;
+                        }
 
                         // Robot position
                         pos = fiducial.getRobotPoseTargetSpace().getPosition();

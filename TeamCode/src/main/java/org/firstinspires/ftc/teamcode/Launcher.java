@@ -60,9 +60,9 @@ public class Launcher extends RobotPart<LauncherMetric>{
         deltaRPM = 0;
 
         velocityRPM = new ArrayList<>(List.of(
-                new RPMEntry(-50,200),
+                new RPMEntry(-50,-200),
                 new RPMEntry(0,0),
-                new RPMEntry(50,-200)
+                new RPMEntry(50,200)
 
         ));
 
