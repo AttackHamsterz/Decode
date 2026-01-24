@@ -323,18 +323,21 @@ public class Sorter extends RobotPart<SorterMetric>{
 
             // Update position tracking when sensors detect balls
             // Sensors are trusted - if they see a ball, update the position
-            if (leftColor != BallColor.None) {
-                ballPositions[1] = leftColor;
+            if (!isSpinning){
+                if (leftColor != BallColor.None) {
+                    ballPositions[1] = leftColor;
+                }
+                if (rightColor != BallColor.None) {
+                    ballPositions[2] = rightColor;
+                }
+                if (frontColor != BallColor.None) {
+                    ballPositions[0] = frontColor;
+                }
+                if (backColor != BallColor.None) {
+                    ballPositions[3] = backColor;
+                }
             }
-            if (rightColor != BallColor.None) {
-                ballPositions[2] = rightColor;
-            }
-            if (frontColor != BallColor.None) {
-                ballPositions[0] = frontColor;
-            }
-            if (backColor != BallColor.None) {
-                ballPositions[3] = backColor;
-            }
+
 
             if (leftColor == BallColor.Green) {
                 lastLeftColor = BallColor.Green;
@@ -637,6 +640,7 @@ public class Sorter extends RobotPart<SorterMetric>{
         targetPosition += quarterTurns*QUARTER_TURN;
         // Track pending quarter turns for position array rotation
         pendingQuarterTurns += quarterTurns;
+        rotateBallPositions(quarterTurns);
     }
 
     @Override
