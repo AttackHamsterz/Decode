@@ -50,8 +50,8 @@ public class FieldAutoOpMode extends AutoOpMode {
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 20.5, Math.toRadians((color == COLOR.BLUE) ? 112 : 68));
-        thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 35, Math.toRadians(90));
-        thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 35, Math.toRadians(90));
+        thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 33, Math.toRadians(90));
+        thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 33, Math.toRadians(90));
         parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 12.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         super.init();
 
@@ -143,7 +143,12 @@ public class FieldAutoOpMode extends AutoOpMode {
                     if (!(pathState>5 && sorter.getBallCount()<1)){
                         ballLifter.lift();
                     }
-                    incrementPathState();
+                    if(pathState == 5 && endEarly) {
+                        pathState = 15;
+                    }
+                    else {
+                        incrementPathState();
+                    }
                 }
                 break;
             case 2:
@@ -166,12 +171,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                         if(!sorter.rotatePurpleToLaunch())
                             sorter.rotateGreenToLaunch();
                     }
-                    if(endEarly) {
-                        pathState = 15;
-                    }
-                    else {
-                        incrementPathState();
-                    }
+                    incrementPathState();
                 }
                 break;
             case 6:
