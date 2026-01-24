@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class FieldAutoOpMode extends AutoOpMode {
     protected final double PICKUP_VELOCITY_PERCENTAGE = 0.18;
     private static final double FIRST_LAUNCH_RPM = 4150.00;
-    private static final double SECOND_LAUNCH_RPM = 4200.00;
+    private static final double SECOND_LAUNCH_RPM = 4150.00;
     private static final int SHOT_DELAY_MS = 50; // Ball settle time
     private static final int LINE_END_DELAY_MS = 1000;
     private Pose startPose;
@@ -45,13 +45,13 @@ public class FieldAutoOpMode extends AutoOpMode {
         final double startPoseX = 10.5;
         final double scorePoseX = 13.5;
         final double lineStartX = 30.0;
-        final double lineEndX = 55;
+        final double lineEndX = 60.0;
         final double parkPoseX = 35.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 20.5, Math.toRadians((color == COLOR.BLUE) ? 112 : 68));
-        thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
-        thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 35, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
+        thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 35, Math.toRadians(90));
+        thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 35, Math.toRadians(90));
         parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 12.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         super.init();
 
@@ -189,8 +189,14 @@ public class FieldAutoOpMode extends AutoOpMode {
                 // Pick up balls
                 if(!motion.follower.isBusy()){
                     // Start front intake
-                    intake.frontIntakeOn();
-                    sorter.frontAutoTurnOn();
+                    if(color == COLOR.BLUE) {
+                        intake.leftIntakeOn();
+                        sorter.leftAutoTurnOn();
+                    }
+                    else{
+                        intake.rightIntakeOn();
+                        sorter.rightAutoTurnOn();
+                    }
 
                     motion.follower.followPath(thirdLineEndPath, pickupPower, false);
                     incrementPathState();
@@ -216,8 +222,13 @@ public class FieldAutoOpMode extends AutoOpMode {
                         Thread.sleep(250);
                     } catch (InterruptedException ignore) {}
 
-                    intake.frontIntakeStop();
-                    sorter.frontAutoTurnOff();
+                    if(color == COLOR.BLUE) {
+                        intake.leftIntakeStop();
+                        sorter.leftAutoTurnOff();
+                    }else {
+                        intake.rightIntakeStop();
+                        sorter.rightAutoTurnOff();
+                    }
 
                     // After end of line delay spinning to color for 1 second (finish intake)
                     delayedColorQueue(colorPattern.get(launchIndex++), 0);
