@@ -65,6 +65,7 @@ public class Eye extends RobotPart<EyeMetric>{
     private Position pos = new Position();
     private double vx = 0;
     private double vy = 0;
+    private double deltaDegrees = 0;
 
     private static class VelocityAngleEntry{
         public double velocity;
@@ -162,8 +163,8 @@ public class Eye extends RobotPart<EyeMetric>{
                         fiducialId = 20;
 
                         //auto aiming
-                        currentDegrees = fiducial.getTargetXDegrees();
-                        currentDegrees += vtoAngle(vx);
+                        deltaDegrees = vtoAngle(vx);
+                        currentDegrees = fiducial.getTargetXDegrees() + deltaDegrees;
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
 
@@ -187,8 +188,8 @@ public class Eye extends RobotPart<EyeMetric>{
                         fiducialId = 24;
 
                         //auto aiming
-                        currentDegrees = fiducial.getTargetXDegrees();
-                        currentDegrees += vtoAngle(vx);
+                        deltaDegrees = vtoAngle(vx);
+                        currentDegrees = fiducial.getTargetXDegrees() + deltaDegrees;
                         aimController.updateError(currentDegrees);
                         ssom.motion.setTurn(aimController.run());
                         break;
@@ -197,6 +198,7 @@ public class Eye extends RobotPart<EyeMetric>{
                         vx = 0;
                         vy = 0;
                         currentDegrees = 180.0;
+                        deltaDegrees = 0;
                         fiducialId = -1;
                         shotD = 0;
                         aimController.reset();
@@ -369,6 +371,7 @@ public class Eye extends RobotPart<EyeMetric>{
             telemetry.addData("Shot Distance", shotD);
             telemetry.addData("Velocity X", vx);
             telemetry.addData("Velocity Y", vy);
+            telemetry.addData("delta degrees", deltaDegrees);
             telemetry.addData("pos x", pos.x);
             telemetry.addData("pos y", pos.y);
         }
