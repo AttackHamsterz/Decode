@@ -288,25 +288,60 @@ public class Sorter extends RobotPart<SorterMetric>{
     }
 
     // Rotate ball positions when physical rotation completes
-    // Clockwise rotation: front→right, right→back, back→left, left→front
+    // Positive quarterTurns: left→front, back→left, right→back, front→right
+    // Negative quarterTurns: front→left, left→back, back→right, right→front
     private void rotateBallPositions(int quarterTurns) {
-        // Normalize quarter turns to 0-3 range
         quarterTurns = quarterTurns % 4;
-        if(quarterTurns < 0) quarterTurns += 4;
 
-        // Rotate the array for each quarter turn
-        for(int i = 0; i < quarterTurns; i++) {
-            BallColor temp = ballPositions[0]; // save front
-            ballPositions[0] = ballPositions[1]; // left → front
-            ballPositions[1] = ballPositions[3]; // back → left
-            ballPositions[3] = ballPositions[2]; // right → back
-            ballPositions[2] = temp; // front → right
+        if (quarterTurns > 0) {
+            // Positive quarter turns (left → front direction)
+            for (int i = 0; i < quarterTurns; i++) {
+                // Clear positions if sensor doesn't see a ball (ball may have fallen out)
+                if (frontColor == BallColor.None) ballPositions[0] = BallColor.None;
+                if (leftColor == BallColor.None) ballPositions[1] = BallColor.None;
+                if (rightColor == BallColor.None) ballPositions[2] = BallColor.None;
+                if (backColor == BallColor.None) ballPositions[3] = BallColor.None;
+
+                BallColor temp = ballPositions[0];
+                ballPositions[0] = ballPositions[1]; // left → front
+                ballPositions[1] = ballPositions[3]; // back → left
+                ballPositions[3] = ballPositions[2]; // right → back
+                ballPositions[2] = temp;             // front → right
+            }
+        } else if (quarterTurns < 0) {
+            // Negative quarter turns (front → left direction)
+            for (int i = 0; i < -quarterTurns; i++) {
+                // Clear positions if sensor doesn't see a ball (ball may have fallen out)
+                if (frontColor == BallColor.None) ballPositions[0] = BallColor.None;
+                if (leftColor == BallColor.None) ballPositions[1] = BallColor.None;
+                if (rightColor == BallColor.None) ballPositions[2] = BallColor.None;
+                if (backColor == BallColor.None) ballPositions[3] = BallColor.None;
+
+                BallColor temp = ballPositions[0];
+                ballPositions[0] = ballPositions[2]; // right → front
+                ballPositions[2] = ballPositions[3]; // back → right
+                ballPositions[3] = ballPositions[1]; // left → back
+                ballPositions[1] = temp;             // front → left
+            }
         }
     }
 
     // Method for BallLifter to call when a ball is launched
     public void clearBackPosition() {
-        ballPositions[3] = BallColor.None;
+        // Calculate which current index will be at back after pending rotation completes
+        // We need to find which index will END UP at position 3 (back)
+        int normalizedTurns = pendingQuarterTurns % 4;
+        if (normalizedTurns < 0) normalizedTurns += 4;
+
+        // After N positive quarter turns, position 3 (back) will contain what's currently at:
+        // 0 turns: index 3 (back)
+        // 1 turn:  index 2 (right)
+        // 2 turns: index 0 (front)
+        // 3 turns: index 1 (left)
+        int[] backSourceIndex = {3, 2, 0, 1};
+        int indexToClear = backSourceIndex[normalizedTurns];
+
+        ballPositions[indexToClear] = BallColor.None;
         lastBackColor = BallColor.None;
     }
 
@@ -633,14 +668,14 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     /**
      * Rotate the current position by the specified number of quarter turns
-     * @param quarterTurns number of clockwise quarter turns
+     * @param quarterTurns number of quarter turns (positive = left→front, negative = front→left)
      */
     public void rotateClockwise(int quarterTurns) {
         isSpinning = true;
-        targetPosition += quarterTurns*QUARTER_TURN;
+        targetPosition += quarterTurns * QUARTER_TURN;
         // Track pending quarter turns for position array rotation
         pendingQuarterTurns += quarterTurns;
-        rotateBallPositions(quarterTurns);
+        // NOTE: Do NOT call rotateBallPositions() here - it happens in run() when motor completes
     }
 
     @Override
