@@ -93,15 +93,12 @@ public class Eye extends RobotPart<EyeMetric>{
 
         // Table of distances for in/s to angle degrees
         deltaAim = new ArrayList<>(List.of(
-                new VelocityAngleEntry(-50.0, 7.0),
-                new VelocityAngleEntry(-20.0, 5.0),
+                new VelocityAngleEntry(-30.0, 15.0),
+                new VelocityAngleEntry(-10.0, 10.0),
                 new VelocityAngleEntry(0, 0),
-                new VelocityAngleEntry(20.0, -5.0),
-                new VelocityAngleEntry(50.0, -7.0)
+                new VelocityAngleEntry(10.0, -10.0),
+                new VelocityAngleEntry(30.0, -15.0)
         ));
-
-        //velocityHelper.tele = ssom.telemetry;
-
     }
 
     private double vtoAngle(double V) {
