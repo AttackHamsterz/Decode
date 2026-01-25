@@ -387,7 +387,7 @@ public class Sorter extends RobotPart<SorterMetric>{
                 if(targetPosition > sortMotor.getCurrentPosition()) {
                     rotateClockwise(-1);
                 } else {
-                    rotateClockwise(-1);
+                    rotateClockwise(1);
                 }
                 spinStartTime = 0;
             }
