@@ -30,11 +30,14 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final long TELE_TURN_DELAY_MS = 350;
     private static final double MIN_DIST_CM = 3.0;
 
+    // Start trusting sensors when within 25 degrees of target (converted to ticks)
+    private static final int SENSOR_TRUST_TICKS = (int)Math.ceil(25.0 * ONE_DEGREE_TURN);
+
     private long spinStartTime = 0;
     private boolean frontAutoTurn = false;
     private boolean leftAutoTurn = false;
     private boolean rightAutoTurn = false;
-    private boolean autoTurnTrigger = false;
+    private volatile boolean autoTurnTrigger = false;
 
     // Position tracking array
     private final BallColor[] ballPositions = new BallColor[4];
@@ -321,24 +324,31 @@ public class Sorter extends RobotPart<SorterMetric>{
             // Update backIndex for use by other methods
             backIndex = backObservedSpot;
 
-            // Store colors in the Spots each sensor actually observed
-            if (leftColor != BallColor.None) {
-                ballPositions[leftObservedSpot] = leftColor;
-                if (leftColor.distance <= MIN_DIST_CM && !isSpinning && leftAutoTurn && !autoTurnTrigger)
-                    leftAutoTurnThread();
-            }
-            if (rightColor != BallColor.None) {
-                ballPositions[rightObservedSpot] = rightColor;
-                if (rightColor.distance <= MIN_DIST_CM && !isSpinning && rightAutoTurn && !autoTurnTrigger)
-                    rightAutoTurnThread();
-            }
-            if (frontColor != BallColor.None) {
-                ballPositions[frontObservedSpot] = frontColor;
-                if (frontColor.distance <= MIN_DIST_CM && !isSpinning && frontAutoTurn && !autoTurnTrigger)
-                    frontAutoTurnThread();
-            }
-            if (backColor != BallColor.None) {
-                ballPositions[backObservedSpot] = backColor;
+            // Only trust sensor readings when:
+            // 1. Not spinning at all, OR
+            // 2. Within 25 degrees of the final target position
+            boolean nearTarget = Math.abs(backMotorPos - (int)Math.round(targetPosition)) < SENSOR_TRUST_TICKS;
+            boolean trustSensors = !isSpinning || nearTarget;
+
+            if (trustSensors) {
+                if (leftColor != BallColor.None) {
+                    ballPositions[leftObservedSpot] = leftColor;
+                    if (leftColor.distance <= MIN_DIST_CM && !isSpinning && leftAutoTurn && !autoTurnTrigger)
+                        leftAutoTurnThread();
+                }
+                if (rightColor != BallColor.None) {
+                    ballPositions[rightObservedSpot] = rightColor;
+                    if (rightColor.distance <= MIN_DIST_CM && !isSpinning && rightAutoTurn && !autoTurnTrigger)
+                        rightAutoTurnThread();
+                }
+                if (frontColor != BallColor.None) {
+                    ballPositions[frontObservedSpot] = frontColor;
+                    if (frontColor.distance <= MIN_DIST_CM && !isSpinning && frontAutoTurn && !autoTurnTrigger)
+                        frontAutoTurnThread();
+                }
+                if (backColor != BallColor.None) {
+                    ballPositions[backObservedSpot] = backColor;
+                }
             }
 
             // Listen for key presses
