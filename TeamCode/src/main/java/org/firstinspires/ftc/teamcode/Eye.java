@@ -88,16 +88,18 @@ public class Eye extends RobotPart<EyeMetric>{
         limelight.setPollRateHz(150); // This sets how often we ask Limelight for data (100 times per second)
 
         //Set up PIDF aim controller
-        aimController = new PIDFController(new PIDFCoefficients(0.01, 0.0, 1.0, 0.0));
+        aimController = new PIDFController(new PIDFCoefficients(0.01, 0.0, 1.0, 0.02));
         aimController.setTargetPosition(0.0);
 
         // Table of distances for in/s to angle degrees
         deltaAim = new ArrayList<>(List.of(
-                new VelocityAngleEntry(-30.0, 15.0),
-                new VelocityAngleEntry(-10.0, 10.0),
+                new VelocityAngleEntry(-50.0, 50.0),
+                new VelocityAngleEntry(-15.0, 15.0),
+                new VelocityAngleEntry(-5.0, 10.0),
                 new VelocityAngleEntry(0, 0),
-                new VelocityAngleEntry(10.0, -10.0),
-                new VelocityAngleEntry(30.0, -15.0)
+                new VelocityAngleEntry(5.0, -10.0),
+                new VelocityAngleEntry(15.0, -15.0),
+                new VelocityAngleEntry(50.0, -45.0)
         ));
     }
 
