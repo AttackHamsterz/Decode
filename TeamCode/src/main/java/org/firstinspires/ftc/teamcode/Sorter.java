@@ -283,17 +283,17 @@ public class Sorter extends RobotPart<SorterMetric>{
         return index;
     }
 
-    // Given a motor position and sensor location, returns which slot (0-3) that sensor was observing
-    private int getObservedSlot(int motorPosition, int sensorOffset) {
+    // Given a motor position and sensor location, returns which spot (0-3) that sensor was observing
+    private int getObservedPos(int motorPosition, int sensorOffset) {
 
         double fractionalPosition = (double) motorPosition / QUARTER_TURN;
-        int backSlot = (int) Math.round(fractionalPosition) % 4;
-        if (backSlot < 0) backSlot += 4;
+        int backSpot = (int) Math.round(fractionalPosition) % 4;
+        if (backSpot < 0) backSpot += 4;
 
-        // Then offset to get the slot this sensor is looking at
-        int slot = (backSlot + sensorOffset) % 4;
-        if (slot < 0) slot += 4;
-        return slot;
+        // Then offset to get the Spot this sensor is looking at
+        int spot = (backSpot + sensorOffset) % 4;
+        if (spot < 0) spot += 4;
+        return spot;
     }
 
     @Override
@@ -304,41 +304,41 @@ public class Sorter extends RobotPart<SorterMetric>{
         while (running) {
             int leftMotorPos = sortMotor.getCurrentPosition();
             BallColor leftColor = BallColor.fromSensor(leftSensor);
-            int leftObservedSlot = getObservedSlot(leftMotorPos, -1);
+            int leftObservedSpot = getObservedPos(leftMotorPos, -1);
 
             int rightMotorPos = sortMotor.getCurrentPosition();
             BallColor rightColor = BallColor.fromSensor(rightSensor);
-            int rightObservedSlot = getObservedSlot(rightMotorPos, +1);
+            int rightObservedSpot = getObservedPos(rightMotorPos, +1);
 
             int frontMotorPos = sortMotor.getCurrentPosition();
             BallColor frontColor = BallColor.fromSensor(frontSensor);
-            int frontObservedSlot = getObservedSlot(frontMotorPos, +2);
+            int frontObservedSpot = getObservedPos(frontMotorPos, +2);
 
             int backMotorPos = sortMotor.getCurrentPosition();
             BallColor backColor = BallColor.fromSensor(backSensor);
-            int backObservedSlot = getObservedSlot(backMotorPos, 0);
+            int backObservedSpot = getObservedPos(backMotorPos, 0);
 
             // Update backIndex for use by other methods
-            backIndex = backObservedSlot;
+            backIndex = backObservedSpot;
 
-            // Store colors in the slots each sensor actually observed
+            // Store colors in the Spots each sensor actually observed
             if (leftColor != BallColor.None) {
-                ballPositions[leftObservedSlot] = leftColor;
+                ballPositions[leftObservedSpot] = leftColor;
                 if (leftColor.distance <= MIN_DIST_CM && !isSpinning && leftAutoTurn && !autoTurnTrigger)
                     leftAutoTurnThread();
             }
             if (rightColor != BallColor.None) {
-                ballPositions[rightObservedSlot] = rightColor;
+                ballPositions[rightObservedSpot] = rightColor;
                 if (rightColor.distance <= MIN_DIST_CM && !isSpinning && rightAutoTurn && !autoTurnTrigger)
                     rightAutoTurnThread();
             }
             if (frontColor != BallColor.None) {
-                ballPositions[frontObservedSlot] = frontColor;
+                ballPositions[frontObservedSpot] = frontColor;
                 if (frontColor.distance <= MIN_DIST_CM && !isSpinning && frontAutoTurn && !autoTurnTrigger)
                     frontAutoTurnThread();
             }
             if (backColor != BallColor.None) {
-                ballPositions[backObservedSlot] = backColor;
+                ballPositions[backObservedSpot] = backColor;
             }
 
             // Listen for key presses
