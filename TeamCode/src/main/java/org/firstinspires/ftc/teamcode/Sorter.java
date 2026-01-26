@@ -419,6 +419,7 @@ public class Sorter extends RobotPart<SorterMetric>{
                 sortMotor.setTargetPosition((int)Math.round(targetPosition));
                 sortMotor.setPower(TURN_POWER);
             }
+            super.sleep();
         }
 
         // Cleanup
