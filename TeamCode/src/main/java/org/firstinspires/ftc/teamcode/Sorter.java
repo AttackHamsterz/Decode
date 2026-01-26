@@ -77,13 +77,16 @@ public class Sorter extends RobotPart<SorterMetric>{
             this.time = time;
         }
 
+        /* These aren't used
         public long getTime(){
             return time;
         }
 
+
         public double getDistance(){
             return distance;
         }
+        */
 
         @NonNull
         public String toString() {
@@ -280,45 +283,62 @@ public class Sorter extends RobotPart<SorterMetric>{
         return index;
     }
 
+    // Given a motor position and sensor location, returns which spot (0-3) that sensor was observing
+    private int getObservedPos(int motorPosition, int sensorOffset) {
+
+        double fractionalPosition = (double) motorPosition / QUARTER_TURN;
+        int backSpot = (int) Math.round(fractionalPosition) % 4;
+        if (backSpot < 0) backSpot += 4;
+
+        // Then offset to get the Spot this sensor is looking at
+        int spot = (backSpot + sensorOffset) % 4;
+        if (spot < 0) spot += 4;
+        return spot;
+    }
+
     @Override
     public void run() {
         boolean pressed = false;
         setRunning();
+
         while (running) {
-            int currentPosition = sortMotor.getCurrentPosition();
-            // Getting the color value from the HSV code in BallColor.
+            int leftMotorPos = sortMotor.getCurrentPosition();
             BallColor leftColor = BallColor.fromSensor(leftSensor);
+            int leftObservedSpot = getObservedPos(leftMotorPos, -1);
+
+            int rightMotorPos = sortMotor.getCurrentPosition();
             BallColor rightColor = BallColor.fromSensor(rightSensor);
+            int rightObservedSpot = getObservedPos(rightMotorPos, +1);
+
+            int frontMotorPos = sortMotor.getCurrentPosition();
             BallColor frontColor = BallColor.fromSensor(frontSensor);
+            int frontObservedSpot = getObservedPos(frontMotorPos, +2);
+
+            int backMotorPos = sortMotor.getCurrentPosition();
             BallColor backColor = BallColor.fromSensor(backSensor);
+            int backObservedSpot = getObservedPos(backMotorPos, 0);
 
-            // Update the current back index (closest in real time)
-            double fractionalPosition = (double)currentPosition / QUARTER_TURN;
-            int newBackIndex = (int)Math.round(fractionalPosition) % 4;
-            if(newBackIndex<0) newBackIndex += 4;
-            backIndex = newBackIndex;
+            // Update backIndex for use by other methods
+            backIndex = backObservedSpot;
 
-            // Always update the color if we saw something at anytime
-            if(leftColor != BallColor.None){
-                int leftIndex = safeIndex(-1);
-                ballPositions[leftIndex] = leftColor;
-                if (leftColor.distance <= MIN_DIST_CM && !isSpinning && leftAutoTurn &&!autoTurnTrigger)
+            // Store colors in the Spots each sensor actually observed
+            if (leftColor != BallColor.None) {
+                ballPositions[leftObservedSpot] = leftColor;
+                if (leftColor.distance <= MIN_DIST_CM && !isSpinning && leftAutoTurn && !autoTurnTrigger)
                     leftAutoTurnThread();
             }
-            if(rightColor != BallColor.None){
-                int rightIndex = safeIndex(1);
-                ballPositions[rightIndex] = rightColor;
-                if (rightColor.distance <= MIN_DIST_CM && !isSpinning && rightAutoTurn &&!autoTurnTrigger)
+            if (rightColor != BallColor.None) {
+                ballPositions[rightObservedSpot] = rightColor;
+                if (rightColor.distance <= MIN_DIST_CM && !isSpinning && rightAutoTurn && !autoTurnTrigger)
                     rightAutoTurnThread();
             }
-            if(frontColor != BallColor.None){
-                int frontIndex = safeIndex(2);
-                ballPositions[frontIndex] = frontColor;
+            if (frontColor != BallColor.None) {
+                ballPositions[frontObservedSpot] = frontColor;
                 if (frontColor.distance <= MIN_DIST_CM && !isSpinning && frontAutoTurn && !autoTurnTrigger)
                     frontAutoTurnThread();
             }
-            if(backColor != BallColor.None){
-                ballPositions[backIndex] = backColor;
+            if (backColor != BallColor.None) {
+                ballPositions[backObservedSpot] = backColor;
             }
 
             // Listen for key presses
@@ -377,7 +397,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             }
 
             // Are we close enough
-            if(Math.abs(currentPosition - (int)Math.round(targetPosition)) < CLOSE_ENOUGH_TICKS) {
+            if(Math.abs(backMotorPos - (int)Math.round(targetPosition)) < CLOSE_ENOUGH_TICKS) {
                 sortMotor.setPower(HOLD_POWER);
                 isSpinning = false;
                 spinStartTime = 0;
