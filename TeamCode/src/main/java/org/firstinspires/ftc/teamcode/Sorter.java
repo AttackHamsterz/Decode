@@ -285,6 +285,7 @@ public class Sorter extends RobotPart<SorterMetric>{
         boolean pressed = false;
         setRunning();
         while (running) {
+            int currentPosition = sortMotor.getCurrentPosition();
             // Getting the color value from the HSV code in BallColor.
             BallColor leftColor = BallColor.fromSensor(leftSensor);
             BallColor rightColor = BallColor.fromSensor(rightSensor);
@@ -292,7 +293,6 @@ public class Sorter extends RobotPart<SorterMetric>{
             BallColor backColor = BallColor.fromSensor(backSensor);
 
             // Update the current back index (closest in real time)
-            int currentPosition = sortMotor.getCurrentPosition();
             double fractionalPosition = (double)currentPosition / QUARTER_TURN;
             int newBackIndex = (int)Math.round(fractionalPosition) % 4;
             if(newBackIndex<0) newBackIndex += 4;
@@ -563,14 +563,15 @@ public class Sorter extends RobotPart<SorterMetric>{
     public void getTelemetry(Telemetry telemetry) {
         if((DEBUG & 8) != 0) {
             // Position tracking telemetry
+            int backIndex = this.backIndex;
             int leftIndex = safeIndex(-1);
             int rightIndex = safeIndex(1);
             int frontIndex = safeIndex(2);
             telemetry.addLine("=== Position Array ===");
-            telemetry.addData("ballPositions[0] (Front)", ballPositions[frontIndex]);
-            telemetry.addData("ballPositions[1] (Left)", ballPositions[leftIndex]);
-            telemetry.addData("ballPositions[2] (Right)", ballPositions[rightIndex]);
-            telemetry.addData("ballPositions[3] (Back)", ballPositions[backIndex]);
+            telemetry.addData("ballPositions (Front)", ballPositions[frontIndex]);
+            telemetry.addData("ballPositions (Left)", ballPositions[leftIndex]);
+            telemetry.addData("ballPositions (Back)", ballPositions[backIndex]);
+            telemetry.addData("ballPositions (Right)", ballPositions[rightIndex]);
             telemetry.addData("backIndex", backIndex);
         }
     }
