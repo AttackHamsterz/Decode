@@ -22,7 +22,7 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     private static final double LIFT_POWER_RIGHT = 1.0;
     private static final double DRAG_HEIGHT_INCREMENT_LEFT_IN = 0.45;
     private static final double DRAG_HEIGHT_INCREMENT_RIGHT_IN = 0.45;
-    private static final double HOLD_POWER = 0.1;
+    private static final double HOLD_POWER = 0.08;
     private static final double TRIGGER_THRESH = 0.05;
 
     private double leftLiftInches = 0;
