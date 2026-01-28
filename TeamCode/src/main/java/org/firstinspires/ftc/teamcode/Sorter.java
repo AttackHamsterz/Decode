@@ -43,6 +43,9 @@ public class Sorter extends RobotPart<SorterMetric>{
     private final BallColor[] ballPositions = new BallColor[4];
     private int backIndex = 0;
 
+    // Single shared executor for all auto-turn operations (prevents thread leak)
+    private final ScheduledExecutorService autoTurnScheduler = Executors.newSingleThreadScheduledExecutor();
+
     public enum BallColor{
         None(0),
         Green(1),
@@ -199,8 +202,11 @@ public class Sorter extends RobotPart<SorterMetric>{
     }
 
     public void frontAutoTurnThread(){
+        // Guard: Don't schedule if one is already pending
+        if (autoTurnTrigger) {
+            return;
+        }
         autoTurnTrigger = true;
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
             // Only do the auto rotation if we're not intaking on the sides
             if(ssom.intake.isLeftOff() && ssom.intake.isRightOff())
@@ -208,7 +214,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             autoTurnTrigger = false;
         };
         long turnDelay = ssom.gamepadBuffer.ignoreGamepad? FRONT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
-        scheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
+        autoTurnScheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
     }
 
     public void leftAutoTurnOn(){
@@ -219,8 +225,11 @@ public class Sorter extends RobotPart<SorterMetric>{
     }
 
     public void leftAutoTurnThread(){
+        // Guard: Don't schedule if one is already pending
+        if (autoTurnTrigger) {
+            return;
+        }
         autoTurnTrigger = true;
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
             // Only do the auto rotation if we're not intaking on the sides
             if(ssom.intake.isFrontOff() && ssom.intake.isRightOff())
@@ -228,7 +237,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             autoTurnTrigger = false;
         };
         long turnDelay = ssom.gamepadBuffer.ignoreGamepad? LEFT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
-        scheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
+        autoTurnScheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
     }
 
     public void rightAutoTurnOn(){
@@ -239,8 +248,11 @@ public class Sorter extends RobotPart<SorterMetric>{
     }
 
     public void rightAutoTurnThread(){
+        // Guard: Don't schedule if one is already pending
+        if (autoTurnTrigger) {
+            return;
+        }
         autoTurnTrigger = true;
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
             // Only do the auto rotation if we're not intaking on the sides
             if(ssom.intake.isLeftOff() && ssom.intake.isFrontOff())
@@ -248,7 +260,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             autoTurnTrigger = false;
         };
         long turnDelay = ssom.gamepadBuffer.ignoreGamepad? RIGHT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
-        scheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
+        autoTurnScheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
     }
 
     // Method for BallLifter to call when a ball is launched (only method that clears color values)
@@ -415,6 +427,7 @@ public class Sorter extends RobotPart<SorterMetric>{
 
         // Cleanup
         sortMotor.setPower(0);
+        autoTurnScheduler.shutdownNow();
     }
 
     public boolean isNotSpinning(){
