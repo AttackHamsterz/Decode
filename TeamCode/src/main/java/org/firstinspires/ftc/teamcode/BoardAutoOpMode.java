@@ -50,7 +50,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double midLinePoseX = 25.0;
         final double midLinePoseY = 100.0;
         final double firstlineStartX = 28.5;
-        final double secondLineStartX = 31;
+        final double secondLineStartX = 30;
         final double firstLineStartY = 84.5;
         final double secondLineStartY = 62.0;
         final double firstlineEndX = 54;
@@ -328,7 +328,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                     // Stop the launcher
                     launcher.setVelocityRPM(0);
 
-                    if (opmodeTimer.getElapsedTimeSeconds() >27) {
+                    if (opmodeTimer.getElapsedTimeSeconds() >28) {
                         setPathState(-1);
                         break;
                     }
