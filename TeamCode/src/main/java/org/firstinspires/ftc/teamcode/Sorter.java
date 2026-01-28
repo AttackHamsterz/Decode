@@ -29,6 +29,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final long RIGHT_AUTO_TURN_DELAY_MS = 300;
     private static final long TELE_TURN_DELAY_MS = 350;
     private static final double MIN_DIST_CM = 3.0;
+
     // Start trusting sensors when within 25 degrees of target (converted to ticks)
     private static final int SENSOR_TRUST_TICKS = (int)Math.ceil(25.0 * ONE_DEGREE_TURN);
 
@@ -41,9 +42,6 @@ public class Sorter extends RobotPart<SorterMetric>{
     // Position tracking array
     private final BallColor[] ballPositions = new BallColor[4];
     private int backIndex = 0;
-
-    // NEW: Single shared executor for all auto-turn operations
-    private final ScheduledExecutorService autoTurnScheduler = Executors.newSingleThreadScheduledExecutor();
 
     public enum BallColor{
         None(0),
@@ -74,11 +72,18 @@ public class Sorter extends RobotPart<SorterMetric>{
             }
         }
 
-        public void setDistance(double distance){ this.distance = distance; }
-        public void setTime(long time){ this.time = time; }
+        public void setDistance(double distance){
+            this.distance = distance;
+        }
+
+        public void setTime(long time){
+            this.time = time;
+        }
 
         @NonNull
-        public String toString() { return color; }
+        public String toString() {
+            return color;
+        }
 
         public static BallColor fromSensor(RevColorSensorV3 sensor) {
             BallColor ballColor = BallColor.None;
@@ -86,11 +91,16 @@ public class Sorter extends RobotPart<SorterMetric>{
             long time = System.currentTimeMillis();
             double distance = 0;
 
+            // Sanity
             if(sensor != null){
+                // Get distance (if too far, then no color)
                 distance = sensor.getDistance(DistanceUnit.CM);
 
                 if(distance <= MIN_DIST_CM) {
+                    // Get normalized RGB (adjust gain at each competition)
                     NormalizedRGBA colors = sensor.getNormalizedColors();
+
+                    // Convert to HSV
                     Color.RGBToHSV(
                             (int) (colors.red * 255),
                             (int) (colors.green * 255),
@@ -98,6 +108,7 @@ public class Sorter extends RobotPart<SorterMetric>{
                             hsv
                     );
 
+                    //Checking the brightness to see if it's high enough to be a color value.
                     if (hsv[2] >= VALUE_MIN) {
                         if (hsv[0] >= PURPLE_HUE_MIN)
                             ballColor = BallColor.Purple;
@@ -109,13 +120,13 @@ public class Sorter extends RobotPart<SorterMetric>{
                 }
             }
 
+            // Set hsv and time and return
             ballColor.setDistance(distance);
             ballColor.setHSV(hsv);
             ballColor.setTime(time);
             return ballColor;
         }
     }
-
     private final DcMotor sortMotor;
     private final RevColorSensorV3 leftSensor;
     private final RevColorSensorV3 rightSensor;
@@ -127,11 +138,11 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     public Sorter(StandardSetupOpMode ssom){
         this.ssom = ssom;
-        sortMotor = ssom.hardwareMap.get(DcMotor.class, "sortMotor");
-        leftSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "leftSensor");
-        rightSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "rightSensor");
-        frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor");
-        backSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "backSensor");
+        sortMotor = ssom.hardwareMap.get(DcMotor.class, "sortMotor"); //need to define channel
+        leftSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "leftSensor"); // ic2 bus
+        rightSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "rightSensor"); // ic2 bus
+        frontSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "frontSensor"); // ic2 bus
+        backSensor = ssom.hardwareMap.get(RevColorSensorV3.class, "backSensor"); // ic2 bus
 
         leftSensor.setGain(20.0f);
         rightSensor.setGain(20.0f);
@@ -174,63 +185,70 @@ public class Sorter extends RobotPart<SorterMetric>{
             ssom.telemetry.addLine("Error: Back color sensor light is not on!");
             error= true;
         }
-        if(error) {
+        if(error)
+        {
             ssom.telemetry.update();
         }
     }
 
-    public void frontAutoTurnOn(){ frontAutoTurn = true; }
-    public void frontAutoTurnOff(){ frontAutoTurn = false; }
+    public void frontAutoTurnOn(){
+        frontAutoTurn = true;
+    }
+    public void frontAutoTurnOff(){
+        frontAutoTurn = false;
+    }
 
-    // REFACTORED: Use shared scheduler instead of creating new one each time
-    // Only do the auto rotation if we're not intaking on the sides
     public void frontAutoTurnThread(){
-        if (autoTurnTrigger) return;  // Guard against duplicate scheduling
         autoTurnTrigger = true;
-
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
+            // Only do the auto rotation if we're not intaking on the sides
             if(ssom.intake.isLeftOff() && ssom.intake.isRightOff())
                 rotateClockwise(-1);
             autoTurnTrigger = false;
         };
-        long turnDelay = ssom.gamepadBuffer.ignoreGamepad ? FRONT_AUTO_TURN_DELAY_MS : TELE_TURN_DELAY_MS;
-        autoTurnScheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
+        long turnDelay = ssom.gamepadBuffer.ignoreGamepad? FRONT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
+        scheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
     }
 
-    public void leftAutoTurnOn(){ leftAutoTurn = true; }
-    public void leftAutoTurnOff(){ leftAutoTurn = false; }
+    public void leftAutoTurnOn(){
+        leftAutoTurn = true;
+    }
+    public void leftAutoTurnOff(){
+        leftAutoTurn = false;
+    }
 
-    // REFACTORED: Use shared scheduler
-    // Only do the auto rotation if we're not intaking on the sides
     public void leftAutoTurnThread(){
-        if (autoTurnTrigger) return;
         autoTurnTrigger = true;
-
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
+            // Only do the auto rotation if we're not intaking on the sides
             if(ssom.intake.isFrontOff() && ssom.intake.isRightOff())
                 rotateClockwise(-1);
             autoTurnTrigger = false;
         };
-        long turnDelay = ssom.gamepadBuffer.ignoreGamepad ? LEFT_AUTO_TURN_DELAY_MS : TELE_TURN_DELAY_MS;
-        autoTurnScheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
+        long turnDelay = ssom.gamepadBuffer.ignoreGamepad? LEFT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
+        scheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
     }
 
-    public void rightAutoTurnOn(){ rightAutoTurn = true; }
-    public void rightAutoTurnOff(){ rightAutoTurn = false; }
+    public void rightAutoTurnOn(){
+        rightAutoTurn = true;
+    }
+    public void rightAutoTurnOff(){
+        rightAutoTurn = false;
+    }
 
-    // REFACTORED: Use shared scheduler
-    // Only do the auto rotation if we're not intaking on the sides
     public void rightAutoTurnThread(){
-        if (autoTurnTrigger) return;
         autoTurnTrigger = true;
-
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         Runnable task = () -> {
+            // Only do the auto rotation if we're not intaking on the sides
             if(ssom.intake.isLeftOff() && ssom.intake.isFrontOff())
                 rotateClockwise(-1);
             autoTurnTrigger = false;
         };
-        long turnDelay = ssom.gamepadBuffer.ignoreGamepad ? RIGHT_AUTO_TURN_DELAY_MS : TELE_TURN_DELAY_MS;
-        autoTurnScheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
+        long turnDelay = ssom.gamepadBuffer.ignoreGamepad? RIGHT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
+        scheduler.schedule(task, turnDelay, TimeUnit.MILLISECONDS);
     }
 
     // Method for BallLifter to call when a ball is launched (only method that clears color values)
@@ -240,12 +258,14 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     private int safeIndex(int delta){
         int index = (backIndex + delta) % 4;
-        if(index < 0) index += 4;
+        if(index < 0)
+            index += 4;
         return index;
     }
 
     // Given a motor position and sensor location, returns which spot (0-3) that sensor was observing
     private int getObservedPos(int motorPosition, int sensorOffset) {
+
         double fractionalPosition = (double) motorPosition / QUARTER_TURN;
         int backSpot = (int) Math.round(fractionalPosition) % 4;
         if (backSpot < 0) backSpot += 4;
@@ -393,20 +413,13 @@ public class Sorter extends RobotPart<SorterMetric>{
             }
         }
 
-        // CLEANUP: Shutdown the scheduler properly
+        // Cleanup
         sortMotor.setPower(0);
-        autoTurnScheduler.shutdown();
-        try {
-            if (!autoTurnScheduler.awaitTermination(500, TimeUnit.MILLISECONDS)) {
-                autoTurnScheduler.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            autoTurnScheduler.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
     }
 
-    public boolean isNotSpinning(){ return !isSpinning; }
+    public boolean isNotSpinning(){
+        return !isSpinning;
+    }
 
     /**
      * Find the closest green and rotate it to the launcher
@@ -490,34 +503,47 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     public int getBallCount(){
         int count = 0;
-        if(frontOccupied()) count++;
-        if(leftOccupied()) count++;
-        if(rightOccupied()) count++;
-        if(backOccupied()) count++;
+        if(frontOccupied())
+            count++;
+        if(leftOccupied())
+            count++;
+        if(rightOccupied())
+            count++;
+        if(backOccupied())
+            count++;
         return count;
     }
 
     public void emptyFront(){
         if(frontOccupied()){
-            if(!rightOccupied()) rotateClockwise(-1);
-            else if(!leftOccupied()) rotateClockwise(1);
-            else if(!backOccupied()) rotateClockwise(-2);
+            if(!rightOccupied())
+                rotateClockwise(-1);
+            else if(!leftOccupied())
+                rotateClockwise(1);
+            else if(!backOccupied())
+                rotateClockwise(-2);
         }
     }
 
     public void emptyLeft(){
         if(leftOccupied()){
-            if(!frontOccupied()) rotateClockwise(-1);
-            else if(!backOccupied()) rotateClockwise(1);
-            else if(!rightOccupied()) rotateClockwise(-2);
+            if(!frontOccupied())
+                rotateClockwise(-1);
+            else if(!backOccupied())
+                rotateClockwise(1);
+            else if(!rightOccupied())
+                rotateClockwise(-2);
         }
     }
 
     public void emptyRight(){
         if(rightOccupied()){
-            if(!backOccupied()) rotateClockwise(-1);
-            else if(!frontOccupied()) rotateClockwise(1);
-            else if(!leftOccupied()) rotateClockwise(-2);
+            if(!backOccupied())
+                rotateClockwise(-1);
+            else if(!frontOccupied())
+                rotateClockwise(1);
+            else if(!leftOccupied())
+                rotateClockwise(-2);
         }
     }
 
@@ -531,17 +557,24 @@ public class Sorter extends RobotPart<SorterMetric>{
     }
 
     @Override
-    protected void setTo(SorterMetric metric) { }
+    protected void setTo(SorterMetric metric) {
+
+    }
 
     @Override
-    public void safeHold() { }
+    public void safeHold() {
+
+    }
 
     @Override
-    protected boolean closeEnough(SorterMetric metric) { return false; }
+    protected boolean closeEnough(SorterMetric metric) {
+        return false;
+    }
 
     @Override
     public void getTelemetry(Telemetry telemetry) {
         if((DEBUG & 8) != 0) {
+            // Position tracking telemetry
             int backIndex = this.backIndex;
             int leftIndex = safeIndex(-1);
             int rightIndex = safeIndex(1);
