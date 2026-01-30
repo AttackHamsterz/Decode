@@ -52,7 +52,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double firstlineStartX = 28.5;
         final double secondLineStartX = 30;
         final double firstLineStartY = 84.5;
-        final double secondLineStartY = 62.0;
+        final double secondLineStartY = 61.5;
         final double firstlineEndX = 54;
         final double secondlineEndX = 52;
         final double parkX = 47.5;
