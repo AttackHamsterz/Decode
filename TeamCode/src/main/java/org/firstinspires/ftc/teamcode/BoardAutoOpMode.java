@@ -237,7 +237,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 if(!motion.follower.isBusy()){
 
                     // Spin up launcher
-                    launcher.setVelocityRPM(SECOND_LAUNCH_RPM);
+                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
 
                     // Drive to score
                     motion.follower.followPath(firstLineEndToScore, PATH_VELOCITY_PERCENTAGE, true);
@@ -316,7 +316,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 if(!motion.follower.isBusy()){
 
                     // Spin up launcher
-                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
+                    launcher.setVelocityRPM(SECOND_LAUNCH_RPM);
 
                     // Drive to score
                     motion.follower.followPath(secondLineEndToScore, PATH_VELOCITY_PERCENTAGE, true);
