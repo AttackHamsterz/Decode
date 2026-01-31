@@ -55,8 +55,6 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
 
         // Lifting thread
         Thread thread = new Thread(() -> {
-            // TODO - Make sure sorter isn't moving
-
             // Start the lift
             lifting = true;
             ballLiftServo.setPower(LIFT_POWER);
@@ -89,8 +87,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
         setRunning();
         while (running) {
             if (!ssom.gamepadBuffer.ignoreGamepad) {
-                //if (!pressed && ssom.sorter.isNotSpinning() && ssom.gamepadBuffer.g2RightTrigger > TRIGGER_THRESH) {
-                if (!pressed && ssom.gamepadBuffer.g2RightTrigger > TRIGGER_THRESH) {
+                if (!pressed && ssom.sorter.isNotSpinning() && ssom.gamepadBuffer.g2RightTrigger > TRIGGER_THRESH) {
                     pressed = true;
                     lift();
                 }
