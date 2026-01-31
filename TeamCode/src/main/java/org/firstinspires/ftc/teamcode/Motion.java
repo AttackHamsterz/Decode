@@ -51,7 +51,7 @@ public class Motion extends RobotPart<MotionMetric>{
             setRunning();
             while (running) {
                 // Scale the speed
-                float scale = 1.0f;
+                float scale = ssom.gamepadBuffer.g1RightBumper ? 0.75f : 1.0f;
                 if(ssom.gamepadBuffer.g1LeftBumper)
                     scale = 0.5f;
                 else if(ssom.gamepadBuffer.g1LeftTrigger > 0.05)

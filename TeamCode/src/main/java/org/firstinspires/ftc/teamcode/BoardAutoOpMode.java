@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class BoardAutoOpMode extends AutoOpMode{
     protected final double PICKUP_VELOCITY_PERCENTAGE = 0.20;
     private static final double FIRST_LAUNCH_RPM = 2500.00; // Launcher speed
+    private static final double SECOND_LAUNCH_RPM = 2600.00; // Launcher speed
     private static final int SHOT_DELAY_MS = 70;            // Ball settle time
     private static final int LINE_END_DELAY_MS = 250;      // Wait after line to rotate to color
 
@@ -45,7 +46,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double startPoseY = 113.5;
         final double initialScorePoseX = 44.22;
         final double initialScorePoseY = 113.0;
-        final double secondScorePoseX = 36;
+        final double secondScorePoseX = 35;
         final double secondScorePoseY = 123;
         final double midLinePoseX = 25.0;
         final double midLinePoseY = 100.0;
@@ -236,7 +237,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 if(!motion.follower.isBusy()){
 
                     // Spin up launcher
-                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
+                    launcher.setVelocityRPM(SECOND_LAUNCH_RPM);
 
                     // Drive to score
                     motion.follower.followPath(firstLineEndToScore, PATH_VELOCITY_PERCENTAGE, true);
