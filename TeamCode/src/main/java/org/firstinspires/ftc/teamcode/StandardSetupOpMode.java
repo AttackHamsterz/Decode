@@ -64,7 +64,7 @@ public class StandardSetupOpMode extends OpMode {
 
     @Override public void init() {
         // Setup telemetry
-        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        //telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         // Setup gamepad buffer
         gamepadBuffer = new GamepadBuffer(ignoreGamepad);

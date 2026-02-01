@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
     protected final double PICKUP_VELOCITY_PERCENTAGE = 0.18;
-    private static final double FIRST_LAUNCH_RPM = 4150.00;
-    private static final double SECOND_LAUNCH_RPM = 4150.00;
+    private static final double FIRST_LAUNCH_RPM = 4050.00;
+    private static final double SECOND_LAUNCH_RPM = 4100.00;
     private static final int SHOT_DELAY_MS = 50; // Ball settle time
     private static final int LINE_END_DELAY_MS = 1000;
     private Pose startPose;
@@ -49,7 +49,7 @@ public class FieldAutoOpMode extends AutoOpMode {
         final double parkPoseX = 35.0;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
-        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 20.5, Math.toRadians((color == COLOR.BLUE) ? 112 : 68));
+        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 20.5, Math.toRadians((color == COLOR.BLUE) ? 113 : 67));
         thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 33, Math.toRadians(90));
         thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 33, Math.toRadians(90));
         parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 12.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
@@ -126,7 +126,7 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 12:
             case 14:
                 boolean ready = !motion.follower.isBusy() && sorter.isNotSpinning() && ballLifter.isReset();
-                if(pathState == 1 || pathState == 10)
+                //if(pathState == 1 || pathState == 10 )
                     ready  = ready && launcher.launchReady();
                 if(ready) {
                     // Stop the front intake (needed for 9 and 17)

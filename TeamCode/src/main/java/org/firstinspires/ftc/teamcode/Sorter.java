@@ -423,6 +423,9 @@ public class Sorter extends RobotPart<SorterMetric>{
             if (backColor != BallColor.None && trustBack) {
                 ballPositions[backObservedSpot] = backColor;
             }
+
+            // Don't saturate
+            sleep();
         }
 
         // Cleanup

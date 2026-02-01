@@ -27,7 +27,7 @@ public class Motion extends RobotPart<MotionMetric>{
      */
     public Motion(StandardSetupOpMode ssom){
         this.ssom = ssom;
-        PanelsConfigurables.INSTANCE.refreshClass(this);
+      //  PanelsConfigurables.INSTANCE.refreshClass(this);
         follower = Constants.createFollower(ssom.hardwareMap);
         follower.activateAllPIDFs();
         externalTurn = 0;
