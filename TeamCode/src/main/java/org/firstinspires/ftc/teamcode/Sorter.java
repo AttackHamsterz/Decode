@@ -424,8 +424,9 @@ public class Sorter extends RobotPart<SorterMetric>{
                 ballPositions[backObservedSpot] = backColor;
             }
 
-            // Don't saturate
-            sleep();
+            // Don't saturate while driving
+            if (!ssom.gamepadBuffer.ignoreGamepad)
+                sleep();
         }
 
         // Cleanup
