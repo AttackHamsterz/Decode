@@ -12,7 +12,7 @@ public class BatteryOptimizationOpMode extends StandardSetupOpMode {
     private static final long VOLTAGE_STABILIZATION_MS = 1000;
     private static final long VOLTAGE_CHECK_INTERVAL_MS = 10 * 1000; // 10 seconds
     private static final long COMPONENT_STAGGER_MS = 500;
-    private static final double LAUNCHER_RPM = 4000.0;
+    private static final double LAUNCHER_RPM = 3000.0;
     private static final double WIGGLE_POWER = 0.15;
     private static final long WIGGLE_DURATION_MS = 200;
     private static final long WIGGLE_INTERVAL_MS = 2000; // Time between wiggles
