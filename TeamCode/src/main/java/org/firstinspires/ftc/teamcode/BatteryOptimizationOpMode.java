@@ -15,9 +15,8 @@ public class BatteryOptimizationOpMode extends StandardSetupOpMode {
     private static final double LAUNCHER_RPM = 3000.0;
     private static final double WIGGLE_POWER = 0.15;
     private static final long WIGGLE_DURATION_MS = 200;
-    private static final long WIGGLE_INTERVAL_MS = 2000; // Time between wiggles
-    private static final int SORTER_QUARTER_TURNS = 2; // Rotate this many quarter turns each cycle
-    private static final long SORTER_COMMAND_INTERVAL_MS = 1000; // Time between sorter commands
+    private static final int SORTER_QUARTER_TURNS = 2;
+    private static final long SORTER_COMMAND_INTERVAL_MS = 1000;
 
     private enum Status {
         STARTING("Starting components..."),
@@ -33,8 +32,9 @@ public class BatteryOptimizationOpMode extends StandardSetupOpMode {
 
     private volatile Status currentStatus = Status.STARTING;
     private long lastCheckTime = 0;
-    private long lastWiggleTime = 0;
     private long lastSorterCommandTime = 0;
+    private long lastWiggleFlipTime = 0;
+    private boolean wiggleDirection = true;
     private volatile double currentVoltage = 0;
     private volatile boolean componentsRunning = false;
     private Thread optimizationThread;
@@ -73,8 +73,8 @@ public class BatteryOptimizationOpMode extends StandardSetupOpMode {
 
     @Override
     public void loop() {
-        // Update follower for wiggle movements
-        motion.follower.update();
+        // Note: follower.update() is called by the optimization thread only
+        // to avoid concurrent access from two threads
 
         double elapsedSeconds = opmodeTimer.getElapsedTimeSeconds();
         int minutes = (int) (elapsedSeconds / 60);
@@ -147,24 +147,27 @@ public class BatteryOptimizationOpMode extends StandardSetupOpMode {
                     startAllComponents();
                     componentsRunning = true;
                     lastCheckTime = System.currentTimeMillis();
-                    lastWiggleTime = System.currentTimeMillis();
                     lastSorterCommandTime = System.currentTimeMillis();
+                    lastWiggleFlipTime = System.currentTimeMillis();
                 }
 
                 currentStatus = Status.DRAINING;
 
                 long now = System.currentTimeMillis();
 
-                // Perform wheel wiggle periodically
-                if (now - lastWiggleTime >= WIGGLE_INTERVAL_MS) {
-                    performWheelWiggle();
-                    lastWiggleTime = System.currentTimeMillis();
+                // Non-blocking wiggle: flip direction every WIGGLE_DURATION_MS
+                if (now - lastWiggleFlipTime >= WIGGLE_DURATION_MS) {
+                    wiggleDirection = !wiggleDirection;
+                    lastWiggleFlipTime = now;
                 }
+                double turn = wiggleDirection ? WIGGLE_POWER : -WIGGLE_POWER;
+                motion.follower.setTeleOpDrive(0, 0, turn, true);
+                motion.follower.update();
 
                 // Keep sorter spinning by sending new rotation commands
                 if (now - lastSorterCommandTime >= SORTER_COMMAND_INTERVAL_MS) {
                     sorter.rotateClockwise(SORTER_QUARTER_TURNS);
-                    lastSorterCommandTime = System.currentTimeMillis();
+                    lastSorterCommandTime = now;
                 }
 
                 // Check if it's time to measure voltage
@@ -231,29 +234,6 @@ public class BatteryOptimizationOpMode extends StandardSetupOpMode {
         // Stop wheel movement
         motion.follower.setTeleOpDrive(0, 0, 0, true);
         motion.follower.update();
-
-        // Note: Sorter will coast to its current target position
-        // This is acceptable for voltage checking
-    }
-
-    private void performWheelWiggle() {
-        // Small rotation in place to warm up drive motors
-        try {
-            motion.follower.setTeleOpDrive(0, 0, WIGGLE_POWER, true);
-            motion.follower.update();
-            Thread.sleep(WIGGLE_DURATION_MS);
-
-            motion.follower.setTeleOpDrive(0, 0, -WIGGLE_POWER, true);
-            motion.follower.update();
-            Thread.sleep(WIGGLE_DURATION_MS);
-
-            motion.follower.setTeleOpDrive(0, 0, 0, true);
-            motion.follower.update();
-        } catch (InterruptedException e) {
-            motion.follower.setTeleOpDrive(0, 0, 0, true);
-            motion.follower.update();
-            Thread.currentThread().interrupt();
-        }
     }
 
     private double readVoltage() {
