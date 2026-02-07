@@ -19,7 +19,9 @@ public class BoardAutoOpMode extends AutoOpMode{
     private static final double FIRST_LAUNCH_RPM = 2500.00; // Launcher speed
     private static final double SECOND_LAUNCH_RPM = 2600.00; // Launcher speed
     private static final int SHOT_DELAY_MS = 70;            // Ball settle time
-    private static final int LINE_END_DELAY_MS = 250;      // Wait after line to rotate to color
+    private static final int LINE_END_DELAY_MS = 0;      // Wait after line to rotate to color
+
+    private static final int BOARD_DELAY_MS = 0;      // Coming to the board to intake to shoot
 
     private Pose startPose;
     private Pose initialScorePose;
@@ -267,7 +269,7 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 18:
                 if(!motion.follower.isBusy()){
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(BOARD_DELAY_MS);
                     } catch (InterruptedException ignore) {}
 
                     intake.frontIntakeStop();
