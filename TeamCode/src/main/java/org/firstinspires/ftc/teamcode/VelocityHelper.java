@@ -20,8 +20,10 @@ public class VelocityHelper {
     //not used, but would keep track of the summed y velocities
     private double distanceTotal;
     //summed distances
-    private int index;
-    //keeps track of the position to add new values at
+    private int velIndex;
+    //keeps track of the position to add new velocity values at
+    private int distIndex;
+    //keeps track of the position to add new distance values at
 
     private Vector<Double> VelX = null;
     private Vector<Double> VelY = null;
@@ -43,7 +45,8 @@ public class VelocityHelper {
         this.numAverage = 0;
         velocityXTotal = 0;
         velocityYTotal = 0;
-        index = 0;
+        velIndex = 0;
+        distIndex = 0;
         VelX = new Vector<>(Collections.nCopies(numAverage, 0.0));
         VelY = new Vector<>(Collections.nCopies(numAverage, 0.0));
         lastPosition = null;
@@ -64,7 +67,8 @@ public class VelocityHelper {
         this.eye = eye;
 
         distanceTotal = 0;
-        index = 0;
+        velIndex = 0;
+        distIndex = 0;
 
         distances = new Vector<>(Collections.nCopies(numAverage, 0.0));
 
@@ -97,7 +101,8 @@ public class VelocityHelper {
     }
 
     public double getCurrentDistance() {
-        int previousIndex = (index - 1 + distances.size()) % distances.size();
+        if (distances == null) return 0;
+        int previousIndex = (distIndex - 1 + distances.size()) % distances.size();
         return distances.get(previousIndex);
     }
 
@@ -105,12 +110,12 @@ public class VelocityHelper {
      * it gets the distace from the eye and stores it using a circular queue averaging buffer (<- mark's fancy word)
      */
     public void addDistance() {
-        if (eye == null) {return;}
+        if (eye == null || distances == null) {return;}
         double distance = eye.getShotDistance();
-        distanceTotal -= distances.get(index);
+        distanceTotal -= distances.get(distIndex);
         distanceTotal += distance;
-        distances.set(index, distance);
-        index = (index + 1) % distances.size();
+        distances.set(distIndex, distance);
+        distIndex = (distIndex + 1) % distances.size();
         if(numAverage<distances.size()) {
             numAverage++;
         }
@@ -130,11 +135,11 @@ public class VelocityHelper {
      * @param distance its the distance lol
      */
     public void addDistance(double distance) {
-        if (eye == null) {return;}
-        distanceTotal -= distances.get(index);
+        if (distances == null) {return;}
+        distanceTotal -= distances.get(distIndex);
         distanceTotal += distance;
-        distances.set(index, distance);
-        index = (index + 1) % distances.size();
+        distances.set(distIndex, distance);
+        distIndex = (distIndex + 1) % distances.size();
         if(numAverage<distances.size()) {
             numAverage++;
         }
@@ -158,6 +163,7 @@ public class VelocityHelper {
      */
 
     public void addPosition(Position pos) {
+        if (VelX == null || VelY == null) return;
         long currentTimeMS = System.currentTimeMillis();
         double deltaT = (double)(currentTimeMS - lastTimeMS)*0.001;
         if(deltaT < MIN_DELTA_T) return;
@@ -168,15 +174,15 @@ public class VelocityHelper {
             double VX = deltaX/deltaT;
             double VY = deltaY/deltaT;
 
-            velocityXTotal-=VelX.get(index);
+            velocityXTotal-=VelX.get(velIndex);
             velocityXTotal+=VX;
-            VelX.set(index, VX);
+            VelX.set(velIndex, VX);
 
-            velocityYTotal-=VelY.get(index);
+            velocityYTotal-=VelY.get(velIndex);
             velocityYTotal+=VY;
-            VelY.set(index, VY);
+            VelY.set(velIndex, VY);
 
-            index = (index+1)%VelX.size();
+            velIndex=(velIndex+1)%VelX.size();
 
             if(numAverage<VelX.size())
                 numAverage++;
@@ -204,13 +210,18 @@ public class VelocityHelper {
      * Reset the helper when measurements are stale
      */
     public void reset() {
-        //Collections.fill(VelX, 0.0);
-        //Collections.fill(VelY, 0.0);
-        //velocityXTotal = 0;
-        //velocityYTotal = 0;
         numAverage = 0;
-        distanceTotal = 0;
-        Collections.fill(distances, 0.0);
-
+        if (VelX != null) {
+            Collections.fill(VelX, 0.0);
+            velocityXTotal = 0;
+        }
+        if (VelY != null) {
+            Collections.fill(VelY, 0.0);
+            velocityYTotal = 0;
+        }
+        if (distances != null) {
+            Collections.fill(distances, 0.0);
+            distanceTotal = 0;
+        }
     }
 }
