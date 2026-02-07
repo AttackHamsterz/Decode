@@ -19,15 +19,20 @@ public class Launcher extends RobotPart<LauncherMetric>{
     private static final double TPS_TO_RPM = 60.0 / TPR;
     private static final double RPM_TO_TPS = TPR / 60.0;
 
-    private static final double kP = 50.0;  // Get to target quickly, little overshoot
-    private static final double kI = 1.0;   // Doesn't reach target
-    private static final double kD = 0.0;   // To reduce overshoot or oscillations
-    private static final double kF = 32767.0 / (MAX_RPM * RPM_TO_TPS);   // Feed forward
+    private static final double kP = 50.0;
+    private static final double kI = 1.0;
+    private static final double kD = 0.0;
+    private static final double kF = 32767.0 / (MAX_RPM * RPM_TO_TPS);
+
+    // Slew rate: max RPM change per loop tick (~100ms).
+    // 1500 RPM/tick means 0→4000 RPM ramps over ~270ms (roughly 3 ticks).
+    // This limits inrush current while keeping spin-up fast enough for gameplay.
+    private static final double SLEW_UP_RPM_PER_TICK = 1500.0;
 
     private final DcMotorEx launchMotor;
-    private double targetVelocityRPM;
+    private volatile double targetVelocityRPM;  // What callers request
+    private double interimVelocityRPM;           // Slewed value actually sent to motor
     private double currentVelocityRPM;
-    private double deltaRPM;
 
     private ArrayList<RPMEntry> distanceRPM;
     private ArrayList<RPMEntry> velocityRPM;
@@ -47,7 +52,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
 
     public Launcher(StandardSetupOpMode ssom){
         this.ssom = ssom;
-        launchMotor = ssom.hardwareMap.get(DcMotorEx.class, "launchMotor"); //need to define channel
+        launchMotor = ssom.hardwareMap.get(DcMotorEx.class, "launchMotor");
 
         // Setup PID and motor
         launchMotor.setVelocityPIDFCoefficients(kP, kI, kD, kF);
@@ -57,8 +62,8 @@ public class Launcher extends RobotPart<LauncherMetric>{
 
         // Initial Motor speeds
         targetVelocityRPM = 0;
+        interimVelocityRPM = 0;
         currentVelocityRPM = 0;
-        deltaRPM = 0;
 
         velocityRPM = new ArrayList<>(List.of(
                 new RPMEntry(-50,-1500),
@@ -69,7 +74,6 @@ public class Launcher extends RobotPart<LauncherMetric>{
                 new RPMEntry(40,1200),
                 new RPMEntry(50,1500)
         ));
-
 
         // Table of distances in meters to RPM
         distanceRPM = new ArrayList<>(List.of(
@@ -89,16 +93,12 @@ public class Launcher extends RobotPart<LauncherMetric>{
                 new RPMEntry(3.8,4460),
                 new RPMEntry(5.0, 5620.0)
         ));
-        // added 20 to each on 11/23
-        // added new far values 12/16
     }
 
     public void setRPMFromDistance(double distance, double extraRPM, double V){
-        // Default RPM
         double rpm = 0;
         double vxrpm = 0;
 
-        // Locate closest two points
         for(int i = 0; i < velocityRPM.size()-1; i++) {
             if (V < velocityRPM.get(0).value)
                 vxrpm = velocityRPM.get(0).rpm;
@@ -111,7 +111,6 @@ public class Launcher extends RobotPart<LauncherMetric>{
             }
         }
 
-        // Locate closest two points
         for(int i = 0; i < distanceRPM.size()-1; i++) {
             if (distance < distanceRPM.get(0).value)
                 rpm = distanceRPM.get(0).rpm;
@@ -126,30 +125,30 @@ public class Launcher extends RobotPart<LauncherMetric>{
         setVelocityRPM(rpm+extraRPM+vxrpm);
     }
 
-    //changing the distance based on the velocity. we need to figure out how fast we are going and in what direction, see the fiducial, and determine the rpm
-
     public void setVelocityRPM(double velocityRPM) {
         targetVelocityRPM = Range.clip(velocityRPM, MIN_RPM, MAX_RPM);
     }
 
     public boolean launchReady(){
-        //double closeEnoughRPM = targetVelocityRPM * CLOSE_ENOUGH_RPM_PERCENT / 100.0;
-
-        return targetVelocityRPM > MIN_LAUNCH_VALUE_RPM && Math.abs(deltaRPM) < CLOSE_ENOUGH_RPM;
+        // Check target (not slewed) RPM so we don't report ready mid-ramp
+        return targetVelocityRPM > MIN_LAUNCH_VALUE_RPM && Math.abs(targetVelocityRPM - currentVelocityRPM) < CLOSE_ENOUGH_RPM;
     }
 
     @Override
     public void run() {
         setRunning();
         while (running) {
-            // Task a target velocity
-            //if (!ssom.gamepadBuffer.ignoreGamepad)
-            //    targetVelocityRPM = ssom.gamepadBuffer.g2LeftTrigger * TRIGGER_MAX_RPM;
+            // Slew interimVelocityRPM toward targetVelocityRPM
+            // Ramp UP gradually to limit inrush current; ramp DOWN instantly
+            if (interimVelocityRPM < targetVelocityRPM) {
+                interimVelocityRPM = Math.min(targetVelocityRPM, interimVelocityRPM + SLEW_UP_RPM_PER_TICK);
+            } else {
+                interimVelocityRPM = targetVelocityRPM;
+            }
 
-            // Launch motor rpm
-            launchMotor.setVelocity(targetVelocityRPM * RPM_TO_TPS);
+            // Send slewed velocity to motor
+            launchMotor.setVelocity(interimVelocityRPM * RPM_TO_TPS);
             currentVelocityRPM = launchMotor.getVelocity() * TPS_TO_RPM;
-            deltaRPM = targetVelocityRPM - currentVelocityRPM;
 
             // Don't saturate the thread
             sleep();
@@ -158,8 +157,8 @@ public class Launcher extends RobotPart<LauncherMetric>{
         // Stop everything
         launchMotor.setVelocity(0);
         targetVelocityRPM = 0;
+        interimVelocityRPM = 0;
         currentVelocityRPM = 0;
-        deltaRPM = 0;
     }
 
     @Override
@@ -173,8 +172,6 @@ public class Launcher extends RobotPart<LauncherMetric>{
     }
 
     @Override
-    
-    
     protected boolean closeEnough(LauncherMetric metric) {
         return false;
     }
@@ -183,6 +180,7 @@ public class Launcher extends RobotPart<LauncherMetric>{
     public void getTelemetry(Telemetry telemetry) {
         if((DEBUG & 2) != 0) {
             telemetry.addData("launchTargetVelocity", targetVelocityRPM);
+            telemetry.addData("launchInterimVelocity", interimVelocityRPM);
             telemetry.addData("launchCurrentVelocity", currentVelocityRPM);
         }
     }
