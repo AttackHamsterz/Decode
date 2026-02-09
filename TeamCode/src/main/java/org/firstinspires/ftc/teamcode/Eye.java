@@ -66,6 +66,7 @@ public class Eye extends RobotPart<EyeMetric>{
     private double vx = 0;
     private double vy = 0;
     private double deltaDegrees = 0;
+    private DistanceHelper distHelper = new DistanceHelper(8);
 
     private static class VelocityAngleEntry{
         public double velocity;
@@ -159,6 +160,7 @@ public class Eye extends RobotPart<EyeMetric>{
                         // Robot position
                         pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+                        distHelper.addDistance(shotD);
                         fiducialId = 20;
 
                         //auto aiming
@@ -184,6 +186,7 @@ public class Eye extends RobotPart<EyeMetric>{
                         // Robot position
                         pos = fiducial.getRobotPoseTargetSpace().getPosition();
                         shotD = Math.sqrt(pos.x*pos.x+pos.y*pos.y+pos.z*pos.z);
+                        distHelper.addDistance(shotD);
                         fiducialId = 24;
 
                         //auto aiming
@@ -200,11 +203,12 @@ public class Eye extends RobotPart<EyeMetric>{
                         deltaDegrees = 0;
                         fiducialId = -1;
                         shotD = 0;
+                        distHelper.reset();
                         aimController.reset();
                         ssom.motion.setTurn(0);
                     }
                 }
-                ssom.launcher.setRPMFromDistance(shotD,deltaRPM, vy);
+                ssom.launcher.setRPMFromDistance(distHelper.getAverageDistance(),deltaRPM, vy);
 
             }
             if (mode == Mode.AUTO_START) {
