@@ -19,9 +19,10 @@ public class BoardAutoOpMode extends AutoOpMode{
     private static final double FIRST_LAUNCH_RPM = 2500.00; // Launcher speed
     private static final double SECOND_LAUNCH_RPM = 2600.00; // Launcher speed
     private static final int SHOT_DELAY_MS = 70;            // Ball settle time
-    private static final int LINE_END_DELAY_MS = 0;      // Wait after line to rotate to color
-
+    private static final int LINE_END_DELAY_MS = 200;      // Wait after line to rotate to color
     private static final int BOARD_DELAY_MS = 0;      // Coming to the board to intake to shoot
+    private static final int STOP_LAST_SHOT_DELAY_MS = 250;      // Wait after line to rotate to color
+
 
     private Pose startPose;
     private Pose initialScorePose;
@@ -206,14 +207,23 @@ public class BoardAutoOpMode extends AutoOpMode{
                 break;
             case 6:
                 // Are we done lifting?
-                if(!ballLifter.isLifting()){
-                    // Slow down the launcher
-                    launcher.setVelocityRPM(0);
+                //if(!ballLifter.isLifting()){
+
+                // Up RPM to account for movement
+                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM+100);
 
                     // Drive to pick up first line of balls
                     motion.follower.followPath(scoreToFirstLinePath, PATH_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
-                }
+
+                    try {
+                        Thread.sleep(STOP_LAST_SHOT_DELAY_MS);
+                    } catch (InterruptedException ignore) {}
+
+                    // Slow down the launcher
+                    launcher.setVelocityRPM(0);
+
+                //}
                 break;
             case 7:
                 // Pick up balls
@@ -287,14 +297,23 @@ public class BoardAutoOpMode extends AutoOpMode{
                 break;
             case 15:
                 // Are we done lifting?
-                if(!ballLifter.isLifting()){
-                    // Slow down the launcher
-                    launcher.setVelocityRPM(0);
+                //if(!ballLifter.isLifting()){
 
-                    // Drive to pick up first line of balls
-                    motion.follower.followPath(scoreToSecondLine, PATH_VELOCITY_PERCENTAGE, false);
-                    incrementPathState();
-                }
+                // Up RPM to account for movement
+                launcher.setVelocityRPM(SECOND_LAUNCH_RPM+100);
+
+                // Drive to pick up first line of balls
+                motion.follower.followPath(scoreToSecondLine, PATH_VELOCITY_PERCENTAGE, false);
+                incrementPathState();
+
+                try {
+                    Thread.sleep(STOP_LAST_SHOT_DELAY_MS);
+                } catch (InterruptedException ignore) {}
+
+                // Slow down the launcher
+                launcher.setVelocityRPM(0);
+
+                //}
                 break;
             case 16:
                 //Pick up balls
