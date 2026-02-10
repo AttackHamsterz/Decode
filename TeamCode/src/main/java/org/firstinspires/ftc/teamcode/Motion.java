@@ -41,6 +41,14 @@ public class Motion extends RobotPart<MotionMetric>{
         externalTurn = turn;
     }
 
+    private double alpha = 0.08;
+    private double targetF = 0;
+    private double targetS = 0;
+    private double targetT = 0;
+    private double f = 0;
+    private double s = 0;
+    private double t = 0;
+
     @Override
     public void run() {
 
@@ -57,8 +65,16 @@ public class Motion extends RobotPart<MotionMetric>{
                 else if(ssom.gamepadBuffer.g1LeftTrigger > 0.05)
                     scale = 1.0f - ssom.gamepadBuffer.g1LeftTrigger * 0.75f;
 
+                // Ramp stick inputs to avoid brownout (low-pass filter on stick inputs)
+                targetF = -ssom.gamepadBuffer.g1LeftStickY*scale;
+                targetS = -ssom.gamepadBuffer.g1LeftStickX*scale;
+                targetT = (-externalTurn-ssom.gamepadBuffer.g1RightStickX*scale);
+                f = f + (targetF - f) * alpha;
+                s = s + (targetS - s) * alpha;
+                t = t + (targetT - t) * alpha;
+
                 // Update Pedro to move the robot based on stick input:
-                follower.setTeleOpDrive(-ssom.gamepadBuffer.g1LeftStickY*scale, -ssom.gamepadBuffer.g1LeftStickX*scale, (-externalTurn-ssom.gamepadBuffer.g1RightStickX*scale), true);
+                follower.setTeleOpDrive(f, s, t, true);
                 follower.update();
 
                 // Short sleep to keep this loop from saturating
