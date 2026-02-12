@@ -146,8 +146,8 @@ public class Eye extends RobotPart<EyeMetric>{
                 for(LLResultTypes.FiducialResult fiducial : fiducials)
                 {
                     if(fiducial.getFiducialId() == 20 && ssom.color == StandardSetupOpMode.COLOR.BLUE){
-                        // Update velocities
-                        double v = ssom.motion.follower.getVelocity().getMagnitude();
+                        // Update velocities - The Pose Tracker hasn't been thread safe so we go straight to the velocity source
+                        double v = ssom.motion.follower.poseTracker.getLocalizer().getVelocity().getAsVector().getMagnitude();
                         double lx = ssom.gamepadBuffer.g1LeftStickX;
                         double ly = ssom.gamepadBuffer.g1LeftStickY;
                         double tot = Math.sqrt(lx*lx+ly*ly);
@@ -172,8 +172,8 @@ public class Eye extends RobotPart<EyeMetric>{
                         break;
                     }
                     else if (fiducial.getFiducialId() == 24 && ssom.color == StandardSetupOpMode.COLOR.RED){
-                        // Update velocities
-                        double v = ssom.motion.follower.getVelocity().getMagnitude();
+                        // Update velocities - The Pose Tracker hasn't been thread safe so we go straight to the velocity source
+                        double v = ssom.motion.follower.poseTracker.getLocalizer().getVelocity().getAsVector().getMagnitude();
                         double lx = ssom.gamepadBuffer.g1LeftStickX;
                         double ly = ssom.gamepadBuffer.g1LeftStickY;
                         double tot = Math.sqrt(lx*lx+ly*ly);

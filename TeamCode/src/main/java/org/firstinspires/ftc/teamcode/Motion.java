@@ -41,7 +41,7 @@ public class Motion extends RobotPart<MotionMetric>{
         externalTurn = turn;
     }
 
-    private double alpha = 0.08;
+    private double alpha = 1.0;
     private double targetF = 0;
     private double targetS = 0;
     private double targetT = 0;
