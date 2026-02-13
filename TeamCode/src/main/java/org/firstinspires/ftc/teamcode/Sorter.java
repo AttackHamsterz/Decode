@@ -425,8 +425,8 @@ public class Sorter extends RobotPart<SorterMetric>{
             }
 
             // Don't saturate while driving
-            if (!ssom.gamepadBuffer.ignoreGamepad)
-                sleep();
+            //if (!ssom.gamepadBuffer.ignoreGamepad)
+            //    sleep();
         }
 
         // Cleanup
