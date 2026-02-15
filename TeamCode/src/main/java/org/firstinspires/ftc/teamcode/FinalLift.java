@@ -24,9 +24,12 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
     private static final double DRAG_HEIGHT_INCREMENT_RIGHT_IN = 0.45;
     private static final double HOLD_POWER = 0.08;
     private static final double TRIGGER_THRESH = 0.05;
+    private static final double PPM_CLOSE = 50;
 
     private double leftLiftInches = 0;
     private double rightLiftInches = 0;
+    private int leftPos = 0;
+    private int rightPos = 0;
 
     public FinalLift(StandardSetupOpMode ssom){
         this.ssom = ssom;
@@ -43,66 +46,11 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
         finalLiftMotorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-    public void lift() {
-        leftLiftInches = LIFT_HEIGHT_LEFT_START_IN;
-        rightLiftInches = LIFT_HEIGHT_RIGHT_START_IN;
-        int leftPos = (int)Math.round(LIFT_HEIGHT_LEFT_START_IN/PPM_IN*PPM);
-        int rightPos = (int)Math.round(LIFT_HEIGHT_RIGHT_START_IN/PPM_IN*PPM);
-        finalLiftMotorLeft.setTargetPosition(leftPos);
-        finalLiftMotorRight.setTargetPosition(rightPos);
-        finalLiftMotorLeft.setPower(LIFT_POWER_LEFT);
-        finalLiftMotorRight.setPower(LIFT_POWER_RIGHT);
-    }
-
-    public void drop() {
-        leftLiftInches = 0;
-        rightLiftInches = 0;
-        finalLiftMotorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        finalLiftMotorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        finalLiftMotorLeft.setPower(0);
-        finalLiftMotorRight.setPower(0);
-    }
-
-    public void slightLift() {
-        leftLiftInches = Range.clip(leftLiftInches + LIFT_HEIGHT_INCREMENT_LEFT_IN, 0, MAX_LIFT_HEIGHT_LEFT_IN);
-        rightLiftInches = Range.clip(rightLiftInches + LIFT_HEIGHT_INCREMENT_RIGHT_IN, 0, MAX_LIFT_HEIGHT_RIGHT_IN);
-        int leftPos = (int)Math.round(leftLiftInches/PPM_IN*PPM);
-        int rightPos = (int)Math.round(rightLiftInches/PPM_IN*PPM);
-        finalLiftMotorLeft.setTargetPosition(leftPos);
-        finalLiftMotorRight.setTargetPosition(rightPos);
-        finalLiftMotorLeft.setPower(LIFT_POWER_LEFT);
-        finalLiftMotorRight.setPower(LIFT_POWER_RIGHT);
-    }
-
-    public void slightDrop() {
-        leftLiftInches = Range.clip(leftLiftInches - LIFT_HEIGHT_INCREMENT_LEFT_IN, 0, MAX_LIFT_HEIGHT_LEFT_IN);
-        rightLiftInches = Range.clip(rightLiftInches - LIFT_HEIGHT_INCREMENT_RIGHT_IN, 0, MAX_LIFT_HEIGHT_RIGHT_IN);
-        int leftPos = (int)Math.round(leftLiftInches/PPM_IN*PPM);
-        int rightPos = (int)Math.round(rightLiftInches/PPM_IN*PPM);
-        finalLiftMotorLeft.setTargetPosition(leftPos);
-        finalLiftMotorRight.setTargetPosition(rightPos);
-        finalLiftMotorLeft.setPower(HOLD_POWER);
-        finalLiftMotorRight.setPower(HOLD_POWER);
-    }
-
-    public void brakeDrop() {
-        leftLiftInches = DRAG_HEIGHT_INCREMENT_LEFT_IN;
-        rightLiftInches = DRAG_HEIGHT_INCREMENT_RIGHT_IN;
-        int leftPos = (int)Math.round(DRAG_HEIGHT_INCREMENT_LEFT_IN/PPM_IN*PPM);
-        int rightPos = (int)Math.round(DRAG_HEIGHT_INCREMENT_RIGHT_IN/PPM_IN*PPM);
-        finalLiftMotorLeft.setTargetPosition(leftPos);
-        finalLiftMotorRight.setTargetPosition(rightPos);
-        finalLiftMotorLeft.setPower(LIFT_POWER_LEFT);
-        finalLiftMotorRight.setPower(LIFT_POWER_RIGHT);
-    }
-
-    public void initialPosition() {
-        int leftPos = 0;
-        int rightPos = 0;
-        finalLiftMotorLeft.setTargetPosition(leftPos);
-        finalLiftMotorRight.setTargetPosition(rightPos);
-        finalLiftMotorLeft.setPower(HOLD_POWER);
-        finalLiftMotorRight.setPower(HOLD_POWER);
+    private void setHeight(double leftInches, double rightInches){
+        leftLiftInches = Range.clip(leftInches, 0, MAX_LIFT_HEIGHT_LEFT_IN);
+        rightLiftInches = Range.clip(rightInches, 0, MAX_LIFT_HEIGHT_RIGHT_IN);
+        leftPos = (int)Math.round(leftLiftInches/PPM_IN*PPM);
+        rightPos = (int)Math.round(rightLiftInches/PPM_IN*PPM);
     }
 
     @Override
@@ -115,30 +63,40 @@ public class FinalLift extends RobotPart<FinalLiftMetric>{
                 if (ssom.gamepadBuffer.g1Start && !pressed){
                     if(ssom.gamepadBuffer.g1DpadUp) {
                         pressed = true;
-                        lift();
+                        setHeight(LIFT_HEIGHT_LEFT_START_IN, LIFT_HEIGHT_RIGHT_START_IN);
                     } else if (ssom.gamepadBuffer.g1DpadDown) {
                         pressed = true;
-                        drop();
+                        //setHeight(0, 0);
                     } else if (ssom.gamepadBuffer.g1DpadRight){
                         pressed = true;
-                        slightLift ();
+                        setHeight(leftLiftInches + LIFT_HEIGHT_INCREMENT_LEFT_IN, rightLiftInches + LIFT_HEIGHT_INCREMENT_RIGHT_IN);
                     } else if (ssom.gamepadBuffer.g1DpadLeft){
                         pressed = true;
-                        slightDrop ();
+                        //setHeight(leftLiftInches - LIFT_HEIGHT_INCREMENT_LEFT_IN, rightLiftInches - LIFT_HEIGHT_INCREMENT_RIGHT_IN);
                     }
                 }
                 if (!braked && ssom.gamepadBuffer.g1RightTrigger > TRIGGER_THRESH) {
-                        brakeDrop();
-                        braked = true;
-
+                    setHeight(DRAG_HEIGHT_INCREMENT_LEFT_IN, DRAG_HEIGHT_INCREMENT_RIGHT_IN);
+                    braked = true;
                 }
                 if (braked && ssom.gamepadBuffer.g1RightTrigger < TRIGGER_THRESH) {
-                    initialPosition();
+                    setHeight(0, 0);
                     braked = false;
                 }
 
                 if(!ssom.gamepadBuffer.g1DpadUp && !ssom.gamepadBuffer.g1DpadDown && !ssom.gamepadBuffer.g1DpadLeft && !ssom.gamepadBuffer.g1DpadRight)
                     pressed = false;
+
+                if(leftPos == 0 && Math.abs(finalLiftMotorLeft.getCurrentPosition()) < PPM_CLOSE){
+                    finalLiftMotorLeft.setPower(HOLD_POWER);
+                    finalLiftMotorRight.setPower(HOLD_POWER);
+                }
+                else{
+                    finalLiftMotorLeft.setTargetPosition(leftPos);
+                    finalLiftMotorRight.setTargetPosition(rightPos);
+                    finalLiftMotorLeft.setPower(LIFT_POWER_LEFT);
+                    finalLiftMotorRight.setPower(LIFT_POWER_RIGHT);
+                }
 
                 // Short sleep to keep this loop from saturating
                 sleep();

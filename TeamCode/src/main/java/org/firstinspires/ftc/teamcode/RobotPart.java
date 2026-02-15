@@ -11,6 +11,7 @@ public abstract class RobotPart<T> extends Thread{
 
     // DEBUG drives telemetry output
     // Set bit positions to enable disable outputs
+    //     0 - No Telemetry
     //     1 - Motion
     //     2 - Launcher
     //     4 - Eye
@@ -18,7 +19,7 @@ public abstract class RobotPart<T> extends Thread{
     //    16 - Intake
     //    32 - Ball lifter
     //    64 - Final Lift
-    //   So to dump Motion, Sorter and Intake: 0b00011001 -or- 1+8+16
+    //   So to dump Motion, Sorter and Intake: 0b00011001 -or- 1+8+16=25
     public static final int DEBUG = 0;
 
     // Motor overload protection

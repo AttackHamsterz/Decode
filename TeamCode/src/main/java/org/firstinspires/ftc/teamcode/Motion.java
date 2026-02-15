@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.bylazar.configurables.PanelsConfigurables;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 
@@ -14,9 +13,6 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class Motion extends RobotPart<MotionMetric>{
 
     public Follower follower;
-    protected static final double CLOSE_X_IN = 1.0;
-    protected static final double CLOSE_Y_IN = 1.0;
-    protected static final double CLOSE_ANG_RAD = Math.toRadians(5.0);
 
     // Allow the eye to control the robot yaw
     private double externalTurn;
@@ -41,14 +37,6 @@ public class Motion extends RobotPart<MotionMetric>{
         externalTurn = turn;
     }
 
-    private double alpha = 1.0;
-    private double targetF = 0;
-    private double targetS = 0;
-    private double targetT = 0;
-    private double f = 0;
-    private double s = 0;
-    private double t = 0;
-
     @Override
     public void run() {
 
@@ -66,12 +54,9 @@ public class Motion extends RobotPart<MotionMetric>{
                     scale = 1.0f - ssom.gamepadBuffer.g1LeftTrigger * 0.75f;
 
                 // Ramp stick inputs to avoid brownout (low-pass filter on stick inputs)
-                targetF = -ssom.gamepadBuffer.g1LeftStickY*scale;
-                targetS = -ssom.gamepadBuffer.g1LeftStickX*scale;
-                targetT = (-externalTurn-ssom.gamepadBuffer.g1RightStickX*scale);
-                f = f + (targetF - f) * alpha;
-                s = s + (targetS - s) * alpha;
-                t = t + (targetT - t) * alpha;
+                double f = -ssom.gamepadBuffer.g1LeftStickY*scale;
+                double s = -ssom.gamepadBuffer.g1LeftStickX*scale;
+                double t = -externalTurn-ssom.gamepadBuffer.g1RightStickX*scale;
 
                 // Update Pedro to move the robot based on stick input:
                 follower.setTeleOpDrive(f, s, t, true);

@@ -66,7 +66,7 @@ public class Eye extends RobotPart<EyeMetric>{
     private double vx = 0;
     private double vy = 0;
     private double deltaDegrees = 0;
-    private DistanceHelper distHelper = new DistanceHelper(8);
+    private final DistanceHelper distHelper = new DistanceHelper(8);
 
     private static class VelocityAngleEntry{
         public double velocity;

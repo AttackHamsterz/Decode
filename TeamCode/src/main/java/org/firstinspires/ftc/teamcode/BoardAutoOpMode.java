@@ -19,7 +19,7 @@ public class BoardAutoOpMode extends AutoOpMode{
     private static final double FIRST_LAUNCH_RPM = 2500.00; // Launcher speed
     private static final double SECOND_LAUNCH_RPM = 2600.00; // Launcher speed
     private static final int SHOT_DELAY_MS = 70;            // Ball settle time
-    private static final int LINE_END_DELAY_MS = 200;      // Wait after line to rotate to color
+    private static final int LINE_END_DELAY_MS = 250;      // Wait after line to rotate to color
     private static final int BOARD_DELAY_MS = 0;      // Coming to the board to intake to shoot
     private static final int STOP_LAST_SHOT_DELAY_MS = 250;      // Wait after line to rotate to color
 
@@ -33,6 +33,7 @@ public class BoardAutoOpMode extends AutoOpMode{
     private Pose parkPose;
     private Pose secondLineStart;
     private Pose secondLineEnd;
+    private Pose secondLineEndShort;
 
     private Path boardToScorePath;
     private PathChain scoreToFirstLinePath;
@@ -41,6 +42,7 @@ public class BoardAutoOpMode extends AutoOpMode{
     private PathChain scoreToPark;
     private PathChain scoreToSecondLine;
     private PathChain secondLineEndPath;
+    private PathChain secondLineEndShortPath;
     private PathChain secondLineEndToScore;
 
     @Override public void init() {
@@ -59,23 +61,20 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double secondLineStartY = 61.5;
         final double firstlineEndX = 54;
         final double secondlineEndX = 52;
+        final double secondlineEndShortX = 48;
         final double parkX = 47.5;
         final double parkY = 69;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, startPoseY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, initialScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 132 : 48));
         secondScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-secondScorePoseX :centerLineX+secondScorePoseX, secondScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 152 : 28));
-        //midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, midLinePoseY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, midLinePoseY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
-        //firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineStartX :centerLineX+firstlineStartX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineStartX :centerLineX+firstlineStartX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
-        //firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineEndX :centerLineX+firstlineEndX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineEndX :centerLineX+firstlineEndX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
         parkPose = new Pose( (color == COLOR.BLUE) ? centerLineX-parkX :centerLineX+parkX, parkY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
-        //secondLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-secondLineStartX :centerLineX+secondLineStartX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         secondLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-secondLineStartX :centerLineX+secondLineStartX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
-        //secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-secondlineEndX :centerLineX+secondlineEndX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 180 : 0));
         secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-secondlineEndX :centerLineX+secondlineEndX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
+        secondLineEndShort = new Pose((color == COLOR.BLUE) ? centerLineX-secondlineEndX :centerLineX+secondlineEndShortX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
 
         // Setup and build paths
         super.init();
@@ -110,6 +109,10 @@ public class BoardAutoOpMode extends AutoOpMode{
         secondLineEndPath = motion.follower.pathBuilder()
                 .addPath(new BezierLine(motion.follower::getPose, secondLineEnd))
                 .setLinearHeadingInterpolation(secondLineStart.getHeading(), secondLineEnd.getHeading())
+                .build();
+        secondLineEndShortPath = motion.follower.pathBuilder()
+                .addPath(new BezierLine(motion.follower::getPose, secondLineEndShort))
+                .setLinearHeadingInterpolation(secondLineStart.getHeading(), secondLineEndShort.getHeading())
                 .build();
         secondLineEndToScore = motion.follower.pathBuilder()
                 .addPath(new BezierCurve(secondLineEnd, midLinePose, secondScorePose))
@@ -327,8 +330,10 @@ public class BoardAutoOpMode extends AutoOpMode{
                         intake.rightIntakeOn();
                         sorter.rightAutoTurnOn();
                     }
-
-                    motion.follower.followPath(secondLineEndPath, pickupPower*0.95, false);
+                    if(sorter.getBallCount() > 0)
+                        motion.follower.followPath(secondLineEndShortPath, pickupPower*0.95, false);
+                    else
+                        motion.follower.followPath(secondLineEndPath, pickupPower*0.95, false);
                     incrementPathState();
                 }
                 break;
