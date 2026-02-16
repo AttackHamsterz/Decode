@@ -221,5 +221,9 @@ public class AutoOpMode extends StandardSetupOpMode {
 
         telemetry.addData("PathState", pathState);
         telemetry.addData("Pose", motion.follower.getPose().toString());
+
+        // Update telemetry
+        super.partList.forEach(part -> part.getTelemetry(telemetry));
+        telemetry.update();
     }
 }
