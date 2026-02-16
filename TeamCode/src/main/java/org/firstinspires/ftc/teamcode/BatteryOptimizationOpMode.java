@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-@TeleOp(name = "Battery Optimization", group = "Robot")
+@TeleOp(name = "Z: Battery Optimization", group = "Robot")
 public class BatteryOptimizationOpMode extends StandardSetupOpMode {
 
     // Configuration variables
