@@ -602,6 +602,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             telemetry.addData("ballPositions (Back)", ballPositions[backIndex]);
             telemetry.addData("ballPositions (Right)", ballPositions[rightIndex]);
             telemetry.addData("backIndex", backIndex);
+            telemetry.addData("ballCount", getBallCount());
         }
     }
 }
