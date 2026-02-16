@@ -78,4 +78,6 @@ lint/intermediates/
 lint/generated/
 lint/outputs/
 lint/tmp/
-# lint/reports/
+# lint/reports/.claude/
+/CLAUDE.md
+/.claude/settings.local.json
