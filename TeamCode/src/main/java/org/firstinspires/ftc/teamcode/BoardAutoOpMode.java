@@ -74,7 +74,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         parkPose = new Pose( (color == COLOR.BLUE) ? centerLineX-parkX :centerLineX+parkX, parkY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         secondLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-secondLineStartX :centerLineX+secondLineStartX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
         secondLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-secondlineEndX :centerLineX+secondlineEndX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
-        secondLineEndShort = new Pose((color == COLOR.BLUE) ? centerLineX-secondlineEndX :centerLineX+secondlineEndShortX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
+        secondLineEndShort = new Pose((color == COLOR.BLUE) ? centerLineX-secondlineEndShortX :centerLineX+secondlineEndShortX, secondLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
 
         // Setup and build paths
         super.init();
