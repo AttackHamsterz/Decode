@@ -61,13 +61,13 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double secondLineStartY = 61.5;
         final double firstlineEndX = 54;
         final double secondlineEndX = 52;
-        final double secondlineEndShortX = 48;
+        final double secondlineEndShortX = 45;
         final double parkX = 47.5;
         final double parkY = 69;
 
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX-startPoseX :centerLineX+startPoseX, startPoseY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-initialScorePoseX :centerLineX+initialScorePoseX, initialScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 132 : 48));
-        secondScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-secondScorePoseX :centerLineX+secondScorePoseX, secondScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 152 : 28));
+        secondScorePose = new Pose((color == COLOR.BLUE) ? centerLineX-secondScorePoseX :centerLineX+secondScorePoseX, secondScorePoseY, Math.toRadians((color == COLOR.BLUE) ? 153: 26));
         midLinePose = new Pose ((color == COLOR.BLUE) ? centerLineX-midLinePoseX :centerLineX+midLinePoseX, midLinePoseY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
         firstLineStart = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineStartX :centerLineX+firstlineStartX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
         firstLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX-firstlineEndX :centerLineX+firstlineEndX,firstLineStartY, Math.toRadians((color == COLOR.BLUE) ? 90 : 90));
@@ -306,7 +306,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 launcher.setVelocityRPM(SECOND_LAUNCH_RPM+100);
 
                 // Drive to pick up first line of balls
-                motion.follower.followPath(scoreToSecondLine, PATH_VELOCITY_PERCENTAGE, false);
+                motion.follower.followPath(scoreToSecondLine, 0.95, false);
                 incrementPathState();
 
                 try {
