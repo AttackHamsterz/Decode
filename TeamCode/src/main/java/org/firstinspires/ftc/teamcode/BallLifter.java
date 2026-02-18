@@ -18,7 +18,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     private final LED greenLED;
 
     private static final int INITIAL_WAIT_MS = 150;    // Delay so the magnet moves from the switch (ms)
-    private static final int LIFT_COMPLETE_MS = 800;   // Lift completes and snaps back (ms)
+    private static final int LIFT_COMPLETE_MS = 850;   // Lift completes and snaps back (ms)
     private static final int TOTAL_WAIT_MS = 1500;     // Max time to wait for reset (ms)
     private static final double TRIGGER_THRESH = 0.02; // How much trigger triggers action
     private static final double LIFT_POWER = 1.0;
