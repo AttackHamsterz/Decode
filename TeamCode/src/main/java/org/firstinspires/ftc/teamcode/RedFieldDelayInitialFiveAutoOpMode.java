@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Auto: Red Five Second Initial Delay", group= "Robot")
+@Autonomous(name = "Auto: Red Field 5s Delay", group= "Robot")
 public class RedFieldDelayInitialFiveAutoOpMode extends RedFieldAutoOpMode {
     private static final int PARTNER_INITIAL_DELAY_MS = 5000; // Partner ball settle time
 
