@@ -116,10 +116,11 @@ public class FieldAutoOpMode extends AutoOpMode {
                 // Loaded purple left and back and green right when looking at robot
                 sorter.rotateClockwise(launchPattern.get(launchIndex++));
 
+                initialFieldAutoDelay();
+
                 // Spin up launcher
                 launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
                 incrementPathState();
-                initialFieldAutoDelay();
                 break;
 
             // First 3 balls
