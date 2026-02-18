@@ -103,6 +103,10 @@ public class FieldAutoOpMode extends AutoOpMode {
         scheduler.schedule(task, msDelay, TimeUnit.MILLISECONDS);
     }
 
+    public void initialFieldAutoDelay() {
+        // No delay for base class
+    }
+
         public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
@@ -115,6 +119,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 // Spin up launcher
                 launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
                 incrementPathState();
+                initialFieldAutoDelay();
                 break;
 
             // First 3 balls
