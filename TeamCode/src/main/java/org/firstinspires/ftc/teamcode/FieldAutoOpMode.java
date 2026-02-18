@@ -154,7 +154,7 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 2:
             case 4:
                 // Are we done lifting?
-                if(!ballLifter.isLifting()){
+                if(ballLifter.isNotLifting()){
                     sorter.rotateClockwise(launchPattern.get(launchIndex++));
                     incrementPathState();
                 }
@@ -162,7 +162,7 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 11:
             case 13:
                 // Are we done lifting?
-                if(!ballLifter.isLifting()){
+                if(ballLifter.isNotLifting()){
                     if(colorPattern.get(launchIndex++) == Sorter.BallColor.Green) {
                         if(!sorter.rotateGreenToLaunch())
                             sorter.rotatePurpleToLaunch();
@@ -176,7 +176,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 break;
             case 6:
                 // Are we done lifting?
-                if(!ballLifter.isLifting()){
+                if(ballLifter.isNotLifting()){
                     // Slow down the launcher
                     launcher.setVelocityRPM(1500);
 
@@ -237,7 +237,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 break;
             case 15:
                 // Park
-                if(!ballLifter.isLifting()){
+                if(ballLifter.isNotLifting()){
                     // Stop the launcher
                     launcher.setVelocityRPM(0);
 

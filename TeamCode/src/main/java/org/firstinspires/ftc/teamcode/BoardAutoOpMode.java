@@ -186,7 +186,7 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 2:
             case 4:
                 // Are we done lifting?
-                if(!ballLifter.isLifting()){
+                if(ballLifter.isNotLifting()){
                     sorter.rotateClockwise(launchPattern.get(launchIndex++));
                     incrementPathState();
                 }
@@ -196,7 +196,7 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 20:
             case 22:
                 // Are we done lifting?
-                if(!ballLifter.isLifting()){
+                if(ballLifter.isNotLifting()){
                     if(colorPattern.get(launchIndex++) == Sorter.BallColor.Green) {
                         if(!sorter.rotateGreenToLaunch())
                             sorter.rotatePurpleToLaunch();
@@ -351,7 +351,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 break;
             case 24:
                 // Park
-                if(!ballLifter.isLifting()){
+                if(ballLifter.isNotLifting()){
                     // Stop the launcher
                     launcher.setVelocityRPM(0);
 

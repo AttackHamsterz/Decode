@@ -18,7 +18,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
     private final LED greenLED;
 
     private static final int INITIAL_WAIT_MS = 150;    // Delay so the magnet moves from the switch (ms)
-    private static final int LIFT_COMPLETE_MS = 1500;   // Lift completes and snaps back (ms)
+    private static final int LIFT_COMPLETE_MS = 800;   // Lift completes and snaps back (ms)
     private static final int TOTAL_WAIT_MS = 1500;     // Max time to wait for reset (ms)
     private static final double TRIGGER_THRESH = 0.02; // How much trigger triggers action
     private static final double LIFT_POWER = 1.0;
@@ -107,7 +107,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
                     switch (autoShootState){
                         case 0:
                             // Lift complete?  Queue up the next ball
-                            if(!ssom.ballLifter.isLifting()){
+                            if(ssom.ballLifter.isNotLifting()){
                                 // Queue up the next correct color in the order
                                 boolean purple = ssom.colorOrder.isPurple(colorIndex);
 
@@ -151,7 +151,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
             }
 
             // Color indication
-            if(ssom.launcher.launchReady() && ssom.sorter.isNotSpinning() && isReset()){
+            if(ssom.launcher.launchReady() && ssom.sorter.isNotSpinning()){
                 redLED.off();
                 greenLED.on();
             }
@@ -186,8 +186,8 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
         }
     }
 
-    public boolean isLifting(){
-        return lifting;
+    public boolean isNotLifting(){
+        return !lifting;
     }
 
     public boolean isReset(){

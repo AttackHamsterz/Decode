@@ -54,7 +54,6 @@ public class Sorter extends RobotPart<SorterMetric>{
         private final String color;
         private double distance;
         private final float[] hsv;
-        private long time;
 
         private static final float PURPLE_HUE_MIN = 190;
         private static final float VALUE_MIN = 0.09f;
@@ -64,7 +63,6 @@ public class Sorter extends RobotPart<SorterMetric>{
             this.color = (id == 1) ? "Green" : (id == 2) ? "Purple" : "None";
             this.hsv = new float[3];
             this.distance = 0;
-            this.time = 0;
         }
 
         public void setHSV(float[] newHsv){
@@ -79,10 +77,6 @@ public class Sorter extends RobotPart<SorterMetric>{
             this.distance = distance;
         }
 
-        public void setTime(long time){
-            this.time = time;
-        }
-
         @NonNull
         public String toString() {
             return color;
@@ -91,7 +85,6 @@ public class Sorter extends RobotPart<SorterMetric>{
         public static BallColor fromSensor(RevColorSensorV3 sensor) {
             BallColor ballColor = BallColor.None;
             float[] hsv = new float[3];
-            long time = System.currentTimeMillis();
             double distance = 0;
 
             // Sanity
@@ -123,10 +116,9 @@ public class Sorter extends RobotPart<SorterMetric>{
                 }
             }
 
-            // Set hsv and time and return
+            // Set hsv and distance and return
             ballColor.setDistance(distance);
             ballColor.setHSV(hsv);
-            ballColor.setTime(time);
             return ballColor;
         }
     }
@@ -365,7 +357,7 @@ public class Sorter extends RobotPart<SorterMetric>{
                 spinStartTime = 0;
             }
             // Spin to target position if not lifting
-            else if (!ssom.ballLifter.isLifting()){
+            else if (ssom.ballLifter.isNotLifting()){
                 if(spinStartTime == 0)
                     spinStartTime = System.currentTimeMillis();
                 isSpinning = true;
