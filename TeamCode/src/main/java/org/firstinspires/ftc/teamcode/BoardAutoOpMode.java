@@ -105,6 +105,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         scoreToSecondLine = motion.follower.pathBuilder()
                 .addPath(new BezierLine(initialScorePose, secondLineStart))
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), secondLineStart.getHeading())
+                .setBrakingStart(12) // Start braking earlier to avoid popping front up
                 .build();
         secondLineEndPath = motion.follower.pathBuilder()
                 .addPath(new BezierLine(motion.follower::getPose, secondLineEnd))
@@ -306,7 +307,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 launcher.setVelocityRPM(SECOND_LAUNCH_RPM+100);
 
                 // Drive to pick up first line of balls
-                motion.follower.followPath(scoreToSecondLine, 0.95, false);
+                motion.follower.followPath(scoreToSecondLine, PATH_VELOCITY_PERCENTAGE, false);
                 incrementPathState();
 
                 try {

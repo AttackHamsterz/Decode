@@ -16,9 +16,9 @@ public class Launcher extends RobotPart<LauncherMetric>{
     private static final double TPS_TO_RPM = 60.0 / TPR;
     private static final double RPM_TO_TPS = TPR / 60.0;
 
-    private static final double kP = 50.0;
-    private static final double kI = 1.0;
-    private static final double kD = 0.0;
+    private static final double kP = 40.0;//50.0;
+    private static final double kI = 0.5;//1.0;
+    private static final double kD = 2.0;//0.0;
     private static final double kF = 32767.0 / (MAX_RPM * RPM_TO_TPS);
 
     // Slew rate: max RPM change per loop tick (~100ms).
