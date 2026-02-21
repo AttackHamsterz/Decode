@@ -75,15 +75,15 @@ public class Launcher extends RobotPart<LauncherMetric>{
         // Table of distances in meters to RPM
         distanceRPM = new ArrayList<>(List.of(
                 new RPMEntry(0.0, 0.0),
-                new RPMEntry(0.5, 2657.0),
-                new RPMEntry(1.07, 2657.0),
-                new RPMEntry(1.87, 3110.0),
-                new RPMEntry(2.07, 3342.0),
-                new RPMEntry(3.07, 4050.0),
-                new RPMEntry(3.07, 4050.0),
-                new RPMEntry(3.2, 4242.0),
-                new RPMEntry(4.0, 4628.0),
-                new RPMEntry(5.0, 4628.0)
+                new RPMEntry(0.5, 2577.0),
+                new RPMEntry(1.07, 2577.0),
+                new RPMEntry(1.87, 3030.0),
+                new RPMEntry(2.07, 3262.0),
+                new RPMEntry(3.07, 3970.0),
+                new RPMEntry(3.07, 3970.0),
+                new RPMEntry(3.2, 3985.0),
+                new RPMEntry(4.0, 4408.0),
+                new RPMEntry(5.0, 4408.0)
         ));
     }
 

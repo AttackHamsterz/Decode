@@ -16,8 +16,8 @@ import java.util.concurrent.TimeUnit;
 @Disabled
 public class BoardAutoOpMode extends AutoOpMode{
     protected final double PICKUP_VELOCITY_PERCENTAGE = 0.20;
-    private static final double FIRST_LAUNCH_RPM = 2500.00; // Launcher speed
-    private static final double SECOND_LAUNCH_RPM = 2600.00; // Launcher speed
+    private static final double FIRST_LAUNCH_RPM = 2480.00; // Launcher speed
+    private static final double SECOND_LAUNCH_RPM = 2530.00; // Launcher speed
     private static final int SHOT_DELAY_MS = 70;            // Ball settle time
     private static final int LINE_END_DELAY_MS = 250;      // Wait after line to rotate to color
     private static final int BOARD_DELAY_MS = 0;      // Coming to the board to intake to shoot
@@ -52,13 +52,13 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double initialScorePoseX = 44.22;
         final double initialScorePoseY = 113.0;
         final double secondScorePoseX = 35;
-        final double secondScorePoseY = 123;
+        final double secondScorePoseY = 121;
         final double midLinePoseX = 25.0;
         final double midLinePoseY = 100.0;
         final double firstlineStartX = 28.5;
-        final double secondLineStartX = 30;
+        final double secondLineStartX = 31;
         final double firstLineStartY = 84.5;
-        final double secondLineStartY = 61.5;
+        final double secondLineStartY = 60;
         final double firstlineEndX = 54;
         final double secondlineEndX = 52;
         final double secondlineEndShortX = 45;
@@ -105,7 +105,7 @@ public class BoardAutoOpMode extends AutoOpMode{
         scoreToSecondLine = motion.follower.pathBuilder()
                 .addPath(new BezierLine(initialScorePose, secondLineStart))
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), secondLineStart.getHeading())
-                .setBrakingStart(12) // Start braking earlier to avoid popping front up
+                //.setBrakingStart(36) // Start braking earlier to avoid popping front up
                 .build();
         secondLineEndPath = motion.follower.pathBuilder()
                 .addPath(new BezierLine(motion.follower::getPose, secondLineEnd))
@@ -353,11 +353,11 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 24:
                 // Park
                 if(ballLifter.isNotLifting()){
-                    // Stop the launcher
-                    launcher.setVelocityRPM(0);
+                // Up RPM to account for movement
+                    launcher.setVelocityRPM(SECOND_LAUNCH_RPM+100);
 
                     if (opmodeTimer.getElapsedTimeSeconds() >28) {
-                        setPathState(-1);
+                        setPathState(26);
                         break;
                     }
 
@@ -368,9 +368,17 @@ public class BoardAutoOpMode extends AutoOpMode{
                 break;
             case 25:
                 // Need to actually wait for park
+
                 if(!motion.follower.isBusy()) {
-                    setPathState(-1);
+                    setPathState(26);
                 }
-        }
+                break;
+            case 26:
+                // Stop the launcher
+                launcher.setVelocityRPM(0);
+                setPathState(-1);
+                break;
+
+        };
     }
 }
