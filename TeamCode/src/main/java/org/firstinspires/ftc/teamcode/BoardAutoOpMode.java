@@ -56,11 +56,11 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double midLinePoseX = 25.0;
         final double midLinePoseY = 100.0;
         final double firstlineStartX = 28.5;
-        final double secondLineStartX = 31;
+        final double secondLineStartX = 32;
         final double firstLineStartY = 84.5;
         final double secondLineStartY = 60;
         final double firstlineEndX = 52;
-        final double secondlineEndX = 51;
+        final double secondlineEndX = 49;
         final double secondlineEndShortX = 45;
         final double parkX = 47.5;
         final double parkY = 69;
@@ -103,8 +103,8 @@ public class BoardAutoOpMode extends AutoOpMode{
                 .setLinearHeadingInterpolation(firstLineEnd.getHeading(), initialScorePose.getHeading())
                 .build();
         scoreToSecondLine = motion.follower.pathBuilder()
-                .addPath(new BezierLine(initialScorePose, secondLineStart))
-                .setLinearHeadingInterpolation(initialScorePose.getHeading(), secondLineStart.getHeading())
+                .addPath(new BezierCurve(initialScorePose, firstLineStart, secondLineStart))
+                .setLinearHeadingInterpolation(initialScorePose.getHeading(), firstLineStart.getHeading(), secondLineStart.getHeading())
                 //.setBrakingStart(36) // Start braking earlier to avoid popping front up
                 .build();
         secondLineEndPath = motion.follower.pathBuilder()
@@ -215,7 +215,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 //if(!ballLifter.isLifting()){
 
                 // Up RPM to account for movement
-                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM+100);
+                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM+50);
 
                     // Drive to pick up first line of balls
                     motion.follower.followPath(scoreToFirstLinePath, PATH_VELOCITY_PERCENTAGE, false);
@@ -337,9 +337,9 @@ public class BoardAutoOpMode extends AutoOpMode{
                         sorter.rightAutoTurnOn();
                     }
                     if(sorter.getBallCount() > 0)
-                        motion.follower.followPath(secondLineEndShortPath, pickupPower*0.95, false);
+                        motion.follower.followPath(secondLineEndShortPath, pickupPower, false);
                     else
-                        motion.follower.followPath(secondLineEndPath, pickupPower*0.95, false);
+                        motion.follower.followPath(secondLineEndPath, pickupPower, false);
                     incrementPathState();
                 }
                 break;
@@ -359,7 +359,7 @@ public class BoardAutoOpMode extends AutoOpMode{
                 // Park
                 if(ballLifter.isNotLifting()){
                 // Up RPM to account for movement
-                    launcher.setVelocityRPM(SECOND_LAUNCH_RPM+100);
+                    launcher.setVelocityRPM(SECOND_LAUNCH_RPM+50);
 
                     //if (opmodeTimer.getElapsedTimeSeconds() >28) {
                         setPathState(26);
