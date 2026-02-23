@@ -18,7 +18,7 @@ public class BoardAutoOpMode extends AutoOpMode{
     protected final double PICKUP_VELOCITY_PERCENTAGE = 0.20;
     private static final double FIRST_LAUNCH_RPM = 2480.00; // Launcher speed
     private static final double SECOND_LAUNCH_RPM = 2530.00; // Launcher speed
-    private static final int SHOT_DELAY_MS = 70;            // Ball settle time
+    private static final int SHOT_DELAY_MS = 150;            // Ball settle time
     private static final int LINE_END_DELAY_MS = 250;      // Wait after line to rotate to color
     private static final int BOARD_DELAY_MS = 0;      // Coming to the board to intake to shoot
     private static final int STOP_LAST_SHOT_DELAY_MS = 250;      // Wait after line to rotate to color
@@ -59,8 +59,8 @@ public class BoardAutoOpMode extends AutoOpMode{
         final double secondLineStartX = 31;
         final double firstLineStartY = 84.5;
         final double secondLineStartY = 60;
-        final double firstlineEndX = 54;
-        final double secondlineEndX = 52;
+        final double firstlineEndX = 52;
+        final double secondlineEndX = 51;
         final double secondlineEndShortX = 45;
         final double parkX = 47.5;
         final double parkY = 69;
@@ -116,12 +116,12 @@ public class BoardAutoOpMode extends AutoOpMode{
                 .setLinearHeadingInterpolation(secondLineStart.getHeading(), secondLineEndShort.getHeading())
                 .build();
         secondLineEndToScore = motion.follower.pathBuilder()
-                .addPath(new BezierCurve(secondLineEnd, midLinePose, secondScorePose))
-                .setLinearHeadingInterpolation(secondLineEnd.getHeading(), secondScorePose.getHeading())
+                .addPath(new BezierCurve(secondLineEnd, midLinePose, initialScorePose))
+                .setLinearHeadingInterpolation(secondLineEnd.getHeading(), initialScorePose.getHeading())
                 .build();
         scoreToPark = motion.follower.pathBuilder()
-                .addPath(new BezierLine(secondScorePose, parkPose))
-                .setLinearHeadingInterpolation(secondScorePose.getHeading(), parkPose.getHeading())
+                .addPath(new BezierLine(initialScorePose, parkPose))
+                .setLinearHeadingInterpolation(initialScorePose.getHeading(), parkPose.getHeading())
                 .build();
         setPathState(0);
 
@@ -356,10 +356,10 @@ public class BoardAutoOpMode extends AutoOpMode{
                 // Up RPM to account for movement
                     launcher.setVelocityRPM(SECOND_LAUNCH_RPM+100);
 
-                    if (opmodeTimer.getElapsedTimeSeconds() >28) {
+                    //if (opmodeTimer.getElapsedTimeSeconds() >28) {
                         setPathState(26);
-                        break;
-                    }
+                        //break;
+                    //}
 
                     // Drive to park
                     motion.follower.followPath(scoreToPark, PATH_VELOCITY_PERCENTAGE, true);

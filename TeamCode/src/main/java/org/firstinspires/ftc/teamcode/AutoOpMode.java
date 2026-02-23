@@ -18,9 +18,9 @@ import java.util.List;
 @Disabled
 public class AutoOpMode extends StandardSetupOpMode {
     protected final double MAX_PICKUP_VOLTAGE = 12.9;
-    protected final double MIN_PICKUP_POWER = 0.32;
+    protected final double MIN_PICKUP_POWER = 0.30;
     protected final double MIN_PICKUP_VOLTAGE = 12.75;
-    protected final double MAX_PICKUP_POWER = 0.32;
+    protected final double MAX_PICKUP_POWER = 0.30;
     protected final double PATH_VELOCITY_PERCENTAGE = 1.0;
 
     protected double pickupPower = 0.2;
