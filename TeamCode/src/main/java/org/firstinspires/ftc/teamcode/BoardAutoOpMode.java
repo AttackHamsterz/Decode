@@ -192,11 +192,32 @@ public class BoardAutoOpMode extends AutoOpMode{
                     incrementPathState();
                 }
                 break;
+            // Group 2 rotations: skip to next pickup if desired color is missing
+            // to retain the PGP pattern instead of launching the wrong color
             case 11:
             case 13:
+                if(ballLifter.isNotLifting()){
+                    if(sorter.getBallCount() >= 1) {
+                        boolean rotated;
+                        if (colorPattern.get(launchIndex) == Sorter.BallColor.Green) {
+                            rotated = sorter.rotateGreenToLaunch();
+                        } else {
+                            rotated = sorter.rotatePurpleToLaunch();
+                        }
+                        if (rotated) {
+                            launchIndex++;
+                            incrementPathState();
+                        } else {
+                            setPathState(15); // skip to next pickup
+                        }
+                    } else {
+                        incrementPathState();
+                    }
+                }
+                break;
+            // Group 3 rotations: fall back to other color (no group 4 to recover with)
             case 20:
             case 22:
-                // Are we done lifting?
                 if(ballLifter.isNotLifting()){
                     if(sorter.getBallCount() >= 1) {
                         if (colorPattern.get(launchIndex++) == Sorter.BallColor.Green) {
