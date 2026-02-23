@@ -169,13 +169,14 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 13:
                 // Are we done lifting?
                 if(ballLifter.isNotLifting()){
-                    if(colorPattern.get(launchIndex++) == Sorter.BallColor.Green) {
-                        if(!sorter.rotateGreenToLaunch())
-                            sorter.rotatePurpleToLaunch();
-                    }
-                    else {
-                        if(!sorter.rotatePurpleToLaunch())
-                            sorter.rotateGreenToLaunch();
+                    if(sorter.getBallCount() >= 1) {
+                        if (colorPattern.get(launchIndex++) == Sorter.BallColor.Green) {
+                            if (!sorter.rotateGreenToLaunch())
+                                sorter.rotatePurpleToLaunch();
+                        } else {
+                            if (!sorter.rotatePurpleToLaunch())
+                                sorter.rotateGreenToLaunch();
+                        }
                     }
                     incrementPathState();
                 }
@@ -212,7 +213,9 @@ public class FieldAutoOpMode extends AutoOpMode {
                 // Drive to launch again
                 if(!motion.follower.isBusy()){
                     // After end of line delay spinning to color for 1 second (finish intake)
-                    delayedColorQueue(colorPattern.get(launchIndex++), 500);
+                    if(sorter.getBallCount() >= 1) {
+                        delayedColorQueue(colorPattern.get(launchIndex++), 500);
+                    }
 
                     // Spin up launcher
                     launcher.setVelocityRPM(SECOND_LAUNCH_RPM);
@@ -237,7 +240,9 @@ public class FieldAutoOpMode extends AutoOpMode {
                     }
 
                     // After end of line delay spinning to color for 1 second (finish intake)
-                    delayedColorQueue(colorPattern.get(launchIndex++), 0);
+                    if(sorter.getBallCount() >= 1) {
+                        delayedColorQueue(colorPattern.get(launchIndex++), 0);
+                    }
                     incrementPathState();
                 }
                 break;
