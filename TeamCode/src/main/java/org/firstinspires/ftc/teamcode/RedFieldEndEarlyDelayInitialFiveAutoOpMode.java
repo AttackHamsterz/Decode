@@ -2,14 +2,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Auto: Red Field End Early 5s Delay", group= "Robot")
+@Autonomous(name = "Auto: Red Field End Early 5s Delay", group= "Auto: Red")
 public class RedFieldEndEarlyDelayInitialFiveAutoOpMode extends RedFieldAutoOpModeEndEarly {
-    private static final int PARTNER_INITIAL_DELAY_MS = 5000; // Partner ball settle time
-
-    @Override final public void initialFieldAutoDelay() {
-        try {
-            Thread.sleep(PARTNER_INITIAL_DELAY_MS);
-        } catch (InterruptedException ignore) {
-        }
+    @Override public void init() {
+        setInitialDelaySeconds(5.0);
+        super.init();
     }
 }

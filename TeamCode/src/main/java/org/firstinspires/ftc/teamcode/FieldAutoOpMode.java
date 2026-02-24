@@ -18,6 +18,7 @@ public class FieldAutoOpMode extends AutoOpMode {
     private static final double SECOND_LAUNCH_RPM = 4100.00;
     private static final int SHOT_DELAY_MS = 50; // Ball settle time
     private static final int LINE_END_DELAY_MS = 1000;
+    private double initialDelaySeconds = 0;
     private Pose startPose;
     private Pose initialScorePose;
     private Pose thirdLineStart;
@@ -37,6 +38,9 @@ public class FieldAutoOpMode extends AutoOpMode {
         endEarly = true;
     }
 
+    public void setInitialDelaySeconds(double delay_ms){
+        initialDelaySeconds = (delay_ms > 0) ? delay_ms : 0;
+    }
 
     @Override
     public void init() {
@@ -103,24 +107,28 @@ public class FieldAutoOpMode extends AutoOpMode {
         scheduler.schedule(task, msDelay, TimeUnit.MILLISECONDS);
     }
 
-    public void initialFieldAutoDelay() {
-        // No delay for base class
-    }
+    private boolean firstTime = true;
 
-        public void autonomousPathUpdate() {
+    public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                // Follow first path for initial shots
-                motion.follower.followPath(startToScorePath, 0.7, true);
+                if(firstTime) {
+                    // Follow first path for initial shots
+                    motion.follower.followPath(startToScorePath, 0.7, true);
 
-                // Loaded purple left and back and green right when looking at robot
-                sorter.rotateClockwise(launchPattern.get(launchIndex++));
+                    // Loaded purple left and back and green right when looking at robot
+                    sorter.rotateClockwise(launchPattern.get(launchIndex++));
 
-                initialFieldAutoDelay();
+                    // Spin up launcher
+                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
 
-                // Spin up launcher
-                launcher.setVelocityRPM(FIRST_LAUNCH_RPM);
-                incrementPathState();
+                    // Done setting everything the first time
+                    firstTime = false;
+                }
+
+                // Can we go to the next state?
+                if (opmodeTimer.getElapsedTimeSeconds() > initialDelaySeconds)
+                    incrementPathState();
                 break;
 
             // First 3 balls

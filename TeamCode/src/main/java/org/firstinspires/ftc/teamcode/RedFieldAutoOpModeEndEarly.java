@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "Auto: Red Field End Early", group = "Robot")
+@Autonomous(name = "Auto: Red Field End Early", group = "Auto: Red")
 public class RedFieldAutoOpModeEndEarly extends FieldAutoOpMode {
-    @Override final public void init() {
+    @Override public void init() {
         setup(COLOR.RED, POSITION.FIELD, true);
         super.init();
         setEndEarly();
