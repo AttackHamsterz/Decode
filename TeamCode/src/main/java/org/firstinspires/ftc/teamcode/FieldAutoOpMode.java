@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -23,6 +24,7 @@ public class FieldAutoOpMode extends AutoOpMode {
     private Pose initialScorePose;
     private Pose thirdLineStart;
     private Pose thirdLineEnd;
+    private Pose jamStart;
     private Pose parkPose;
 
 
@@ -30,12 +32,28 @@ public class FieldAutoOpMode extends AutoOpMode {
     private PathChain scoreToThirdLinePath;
     private PathChain thirdLineEndPath;
     private PathChain thirdLineEndToScore;
+    private PathChain scoreToCornerJam;
+    private PathChain cornerJam;
+    private PathChain jamToScore;
     private PathChain scoreToPark;
 
-    private boolean endEarly = false;
+    private boolean skipLine = false;
 
-    public void setEndEarly() {
-        endEarly = true;
+    private final double centerLineX = 72.0;
+    private final double startPoseX = 10.5;
+    private final double startPoseY = 8.5;
+    private final double scorePoseX = 13.5;
+    private final double scorePoseY = 20.5;
+    private final double lineStartX = 30.0;
+    private final double lineEndX = 52.0;
+    private final double lineStartY = 32.0;
+    private final double jamStartX = 72.0-13.0;
+    private final double jamStartY = 20.0;
+    private final double parkPoseX = 35.0;
+    private final double parkPoseY = 12.5;
+
+    public void setSkipLine() {
+        skipLine = true;
     }
 
     public void setInitialDelaySeconds(double delay_ms){
@@ -44,19 +62,12 @@ public class FieldAutoOpMode extends AutoOpMode {
 
     @Override
     public void init() {
-
-        final double centerLineX = 72.0;
-        final double startPoseX = 10.5;
-        final double scorePoseX = 13.5;
-        final double lineStartX = 30.0;
-        final double lineEndX = 60.0;
-        final double parkPoseX = 35.0;
-
-        startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, 8.5, Math.toRadians(90));
-        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, 20.5, Math.toRadians((color == COLOR.BLUE) ? 113 : 67));
-        thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, 33, Math.toRadians(90));
-        thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX :centerLineX + lineEndX, 33, Math.toRadians(90));
-        parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, 12.5, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
+        startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, startPoseY, Math.toRadians(90));
+        initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, scorePoseY, Math.toRadians((color == COLOR.BLUE) ? 113 : 67));
+        thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, lineStartY, Math.toRadians(90));
+        thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX : centerLineX + lineEndX, lineStartY, Math.toRadians(90));
+        jamStart = new Pose((color == COLOR.BLUE) ? centerLineX - jamStartX : centerLineX + jamStartX, jamStartY, Math.toRadians((color == COLOR.BLUE) ? 135.0 : 45.0));
+        parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, parkPoseY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         super.init();
 
         motion.follower.setStartingPose(startPose);
@@ -84,10 +95,32 @@ public class FieldAutoOpMode extends AutoOpMode {
                 .addPath(new BezierLine(thirdLineEnd, initialScorePose))
                 .setLinearHeadingInterpolation(thirdLineEnd.getHeading(), initialScorePose.getHeading())
                 .build();
+        scoreToCornerJam = motion.follower.pathBuilder()
+                .addPath(new BezierLine(initialScorePose, jamStart))
+                .setLinearHeadingInterpolation(initialScorePose.getHeading(), jamStart.getHeading())
+                .build();
         scoreToPark = motion.follower.pathBuilder()
                 .addPath(new BezierLine(initialScorePose, parkPose))
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), parkPose.getHeading())
                 .build();
+
+        // Corner jam!
+        cornerJam = motion.follower.pathBuilder()
+                .addPath(new BezierLine(jamStart, jamStart.withY(jamStartY-2.0)))
+                .addPath(new BezierLine(jamStart.withY(jamStartY-2.0), jamStart.withY(jamStartY-1.0)))
+                .addPath(new BezierLine(jamStart.withY(jamStartY-1.0), jamStart.withY(jamStartY-4.0)))
+                .addPath(new BezierLine(jamStart.withY(jamStartY-4.0), jamStart.withY(jamStartY-3.0)))
+                .addPath(new BezierLine(jamStart.withY(jamStartY-3.0), jamStart.withY(jamStartY-6.0)))
+                .addPath(new BezierLine(jamStart.withY(jamStartY-6.0), jamStart.withY(jamStartY-5.0)))
+                .addPath(new BezierLine(jamStart.withY(jamStartY-5.0), jamStart.withY(jamStartY-8.0)))
+                .addPath(new BezierLine(jamStart.withY(jamStartY-8.0), jamStart.withY(jamStartY-7.0)))
+                .setLinearHeadingInterpolation(jamStart.getHeading(), jamStart.getHeading())
+                .build();
+        jamToScore = motion.follower.pathBuilder()
+                .addPath(new BezierLine(motion.follower::getPose, initialScorePose))
+                .setLinearHeadingInterpolation(jamStart.getHeading(), initialScorePose.getHeading())
+                .build();
+
         setPathState(0);
     }
 
@@ -157,7 +190,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     if (!(pathState>5 && sorter.getBallCount()<1)){
                         ballLifter.lift();
                     }
-                    if(pathState == 5 && endEarly) {
+                    if(pathState == 5 && skipLine) {
                         pathState = 15;
                     }
                     else {
@@ -255,8 +288,41 @@ public class FieldAutoOpMode extends AutoOpMode {
                 }
                 break;
             case 15:
-                // Park
                 if(ballLifter.isNotLifting()){
+                    // Stop the launcher
+                    launcher.setVelocityRPM(0);
+
+                    // Drive to jam
+                    motion.follower.followPath(scoreToCornerJam, PATH_VELOCITY_PERCENTAGE, false);
+                    incrementPathState();
+                }
+                break;
+            case 16:
+                if(!motion.follower.isBusy()){
+                    // Intake!
+                    if(color == COLOR.BLUE) {
+                        intake.leftIntakeOn();
+                        sorter.leftAutoTurnOn();
+                    }else {
+                        intake.rightIntakeOn();
+                        sorter.rightAutoTurnOn();
+                    }
+
+                    // Jam
+                    motion.follower.followPath(cornerJam, PATH_VELOCITY_PERCENTAGE, false);
+                    incrementPathState();
+                }
+                break;
+            case 17:
+                if(!motion.follower.isBusy()) {
+                    // Drive to score
+                    motion.follower.followPath(jamToScore, 0.8, true);
+                    incrementPathState();
+                }
+                break;
+            case 18:
+                // Park
+                if(!motion.follower.isBusy() && ballLifter.isNotLifting()){
                     // Stop the launcher
                     launcher.setVelocityRPM(0);
 
@@ -265,7 +331,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     incrementPathState();
                 }
                 break;
-            case 16:
+            case 19:
                 if(!motion.follower.isBusy()) {
                     setPathState(-1);
                 }

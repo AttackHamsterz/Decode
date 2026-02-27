@@ -23,7 +23,7 @@ public class AutoOpMode extends StandardSetupOpMode {
     protected final double MAX_PICKUP_POWER = 0.30;
     protected final double PATH_VELOCITY_PERCENTAGE = 1.0;
 
-    protected double pickupPower = 0.2;
+    protected double pickupPower = MIN_PICKUP_POWER;
     protected Timer pathTimer;
 
     // Finite state machine state

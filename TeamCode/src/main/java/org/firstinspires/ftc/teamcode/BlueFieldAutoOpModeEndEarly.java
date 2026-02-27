@@ -7,6 +7,6 @@ public class BlueFieldAutoOpModeEndEarly extends FieldAutoOpMode {
     @Override public void init() {
         setup(COLOR.BLUE, POSITION.FIELD, true);
         super.init();
-        setEndEarly();
+        setSkipLine();
     }
 }
