@@ -184,6 +184,10 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 10:
             case 12:
             case 14:
+            // Final 3 balls
+            case 18:
+            case 20:
+            case 22:
                 boolean ready = !motion.follower.isBusy() && sorter.isNotSpinning() && ballLifter.isReset();
                 //if(pathState == 1 || pathState == 10 )
                     ready  = ready && launcher.launchReady();
@@ -220,6 +224,8 @@ public class FieldAutoOpMode extends AutoOpMode {
                 break;
             case 11:
             case 13:
+            case 19:
+            case 21:
                 // Are we done lifting?
                 if(ballLifter.isNotLifting()){
                     if(sorter.getBallCount() >= 1) {
@@ -321,18 +327,25 @@ public class FieldAutoOpMode extends AutoOpMode {
                     }
 
                     // Jam
+
                     motion.follower.followPath(cornerJam, PATH_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
                 }
                 break;
             case 17:
-                if(!motion.follower.isBusy()) {
+                if (opmodeTimer.getElapsedTimeSeconds() >28) {
+                    motion.follower.breakFollowing();
+                    setPathState(23);
+                }
+                else if(!motion.follower.isBusy()) {
+
                     // Drive to score
                     motion.follower.followPath(jamToScore, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
+
                 }
                 break;
-            case 18:
+            case 23:
                 // Park
                 if(!motion.follower.isBusy() && ballLifter.isNotLifting()){
                     // Stop the launcher
@@ -353,7 +366,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     incrementPathState();
                 }
                 break;
-            case 19:
+            case 24:
                 if(!motion.follower.isBusy()) {
                     setPathState(-1);
                 }
