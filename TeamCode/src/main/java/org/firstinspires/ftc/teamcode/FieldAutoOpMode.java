@@ -44,10 +44,10 @@ public class FieldAutoOpMode extends AutoOpMode {
     private final double startPoseY = 8.5;
     private final double scorePoseX = 13.5;
     private final double scorePoseY = 20.5;
-    private final double lineStartX = 30.0;
+    private final double lineStartX = 31.0;
     private final double lineEndX = 52.0;
-    private final double lineStartY = 32.0;
-    private final double jamStartX = 72.0-13.0;
+    private final double lineStartY = 33.5;
+    private final double jamStartX = 72.0-10.0;
     private final double jamStartY = 20.0;
     private final double parkPoseX = 35.0;
     private final double parkPoseY = 12.5;
@@ -105,16 +105,28 @@ public class FieldAutoOpMode extends AutoOpMode {
                 .build();
 
         // Corner jam!
+        double jamAngle = Math.toRadians((color == COLOR.BLUE) ? 180 : 0);
         cornerJam = motion.follower.pathBuilder()
                 .addPath(new BezierLine(jamStart, jamStart.withY(jamStartY-2.0)))
+                .setConstantHeadingInterpolation(jamStart.getHeading())
                 .addPath(new BezierLine(jamStart.withY(jamStartY-2.0), jamStart.withY(jamStartY-1.0)))
+                .setConstantHeadingInterpolation(jamStart.getHeading())
                 .addPath(new BezierLine(jamStart.withY(jamStartY-1.0), jamStart.withY(jamStartY-4.0)))
+                .setConstantHeadingInterpolation(jamStart.getHeading())
                 .addPath(new BezierLine(jamStart.withY(jamStartY-4.0), jamStart.withY(jamStartY-3.0)))
+                .setConstantHeadingInterpolation(jamStart.getHeading())
                 .addPath(new BezierLine(jamStart.withY(jamStartY-3.0), jamStart.withY(jamStartY-6.0)))
+                .setConstantHeadingInterpolation(jamAngle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-6.0), jamStart.withY(jamStartY-5.0)))
+                .setConstantHeadingInterpolation(jamStart.getHeading())
                 .addPath(new BezierLine(jamStart.withY(jamStartY-5.0), jamStart.withY(jamStartY-8.0)))
+                .setConstantHeadingInterpolation(jamAngle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-8.0), jamStart.withY(jamStartY-7.0)))
-                .setLinearHeadingInterpolation(jamStart.getHeading(), jamStart.getHeading())
+                .setConstantHeadingInterpolation(jamAngle)
+                .addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-10.0)))
+                .setConstantHeadingInterpolation(jamAngle)
+                .addPath(new BezierLine(jamStart.withY(jamStartY-10.0), jamStart.withY(jamStartY-9.0)))
+                .setConstantHeadingInterpolation(jamStart.getHeading())
                 .build();
         jamToScore = motion.follower.pathBuilder()
                 .addPath(new BezierLine(motion.follower::getPose, initialScorePose))
@@ -262,7 +274,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     launcher.setVelocityRPM(SECOND_LAUNCH_RPM);
 
                     // Drive to score
-                    motion.follower.followPath(thirdLineEndToScore, 0.7, true);
+                    motion.follower.followPath(thirdLineEndToScore, 0.8, true);
                     incrementPathState();
                 }
                 break;
@@ -316,7 +328,7 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 17:
                 if(!motion.follower.isBusy()) {
                     // Drive to score
-                    motion.follower.followPath(jamToScore, 0.8, true);
+                    motion.follower.followPath(jamToScore, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
                 }
                 break;
@@ -326,8 +338,18 @@ public class FieldAutoOpMode extends AutoOpMode {
                     // Stop the launcher
                     launcher.setVelocityRPM(0);
 
+                    // Stop intake
+                    if(color == COLOR.BLUE) {
+                        intake.leftIntakeStop();
+                        sorter.leftAutoTurnOff();
+                    }
+                    else{
+                        intake.rightIntakeStop();
+                        sorter.rightAutoTurnOff();
+                    }
+
                     // Drive to park
-                    motion.follower.followPath(scoreToPark, 0.8, true);
+                    motion.follower.followPath(scoreToPark, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
                 }
                 break;
