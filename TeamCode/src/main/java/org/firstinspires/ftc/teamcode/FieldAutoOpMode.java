@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
     protected final double PICKUP_VELOCITY_PERCENTAGE = 0.18;
-    private static final double FIRST_LAUNCH_RPM = 4050.00;
-    private static final double SECOND_LAUNCH_RPM = 4100.00;
+    private static final double FIRST_LAUNCH_RPM = 4000.00;
+    private static final double SECOND_LAUNCH_RPM = 4050.00;
     private static final int SHOT_DELAY_MS = 50; // Ball settle time
     private static final int LINE_END_DELAY_MS = 1000;
     private double initialDelaySeconds = 0;
@@ -43,7 +43,7 @@ public class FieldAutoOpMode extends AutoOpMode {
     private final double startPoseX = 10.5;
     private final double startPoseY = 8.5;
     private final double scorePoseX = 13.5;
-    private final double scorePoseY = 20.5;
+    private final double scorePoseY = 21.5;
     private final double lineStartX = 31.0;
     private final double lineEndX = 52.0;
     private final double lineStartY = 33.5;
@@ -65,7 +65,7 @@ public class FieldAutoOpMode extends AutoOpMode {
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, startPoseY, Math.toRadians(90));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, scorePoseY, Math.toRadians((color == COLOR.BLUE) ? 113 : 67));
         thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, lineStartY, Math.toRadians(90));
-        thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX : centerLineX + lineEndX, lineStartY, Math.toRadians(90));
+        thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX : centerLineX + lineEndX, lineStartY+1.5, Math.toRadians(90));
         jamStart = new Pose((color == COLOR.BLUE) ? centerLineX - jamStartX : centerLineX + jamStartX, jamStartY, Math.toRadians((color == COLOR.BLUE) ? 135.0 : 45.0));
         parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, parkPoseY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         super.init();
