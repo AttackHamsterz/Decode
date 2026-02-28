@@ -334,11 +334,19 @@ public class Sorter extends RobotPart<SorterMetric>{
                     pressed = true;
                     rotatePurpleToLaunch();
                 }
+                if(!pressed && ssom.gamepadBuffer.g2Start){
+                    ballPositions[0] = BallColor.None;
+                    ballPositions[1] = BallColor.None;
+                    ballPositions[2] = BallColor.None;
+                    ballPositions[3] = BallColor.None;
+
+                }
                 if (!ssom.gamepadBuffer.g2x && !ssom.gamepadBuffer.g2y && !ssom.gamepadBuffer.g2a && !ssom.gamepadBuffer.g2b &&
                         !ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight &&
                         !ssom.gamepadBuffer.g2LeftBumper && !ssom.gamepadBuffer.g2RightBumper) {
                     pressed = false;
                 }
+
             }
 
             // Are we close enough

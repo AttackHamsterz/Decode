@@ -28,6 +28,7 @@ public class GamepadBuffer {
     public float g2LeftStickX;     // Intake left/right
     public float g2LeftStickY;     // Intake forward/all
     public float g2RightStickX;    // Outtake left/right
+    public boolean g2Start;         // For resetting limelight
     public float g2RightStickY;    // Outtake forward/all
     public float g2LeftTrigger;    // Get correct launch motor speed
     public float g2RightTrigger;   // Launches ball
@@ -61,6 +62,7 @@ public class GamepadBuffer {
         g2LeftStickX = 0;
         g2LeftStickY = 0;
         g2RightStickX = 0;
+        g2Start = false;
         g2RightStickY = 0;
         g2LeftTrigger = 0;
         g2RightTrigger = 0;
@@ -102,6 +104,7 @@ public class GamepadBuffer {
             g2LeftStickY = gamepad2.left_stick_y;
             g2RightStickX = gamepad2.right_stick_x;
             g2RightStickY = gamepad2.right_stick_y;
+            g2Start = gamepad2.start;
             g2LeftTrigger = gamepad2.left_trigger;
             g2RightTrigger = gamepad2.right_trigger;
             g2LeftBumper = gamepad2.left_bumper;
