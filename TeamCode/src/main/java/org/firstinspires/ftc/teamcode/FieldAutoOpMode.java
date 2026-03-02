@@ -14,11 +14,9 @@ import java.util.concurrent.TimeUnit;
 @Autonomous(name = "Auto: Field", group = "Robot")
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
-    protected final double PICKUP_VELOCITY_PERCENTAGE = 0.18;
-    private static final double FIRST_LAUNCH_RPM = 4000.00;
-    private static final double SECOND_LAUNCH_RPM = 4050.00;
+    private static final double FIRST_LAUNCH_RPM = 3890.00;
+    private static final double SECOND_LAUNCH_RPM = 3950.00;
     private static final int SHOT_DELAY_MS = 50; // Ball settle time
-    private static final int LINE_END_DELAY_MS = 1000;
     private double initialDelaySeconds = 0;
     private Pose startPose;
     private Pose initialScorePose;
@@ -43,7 +41,7 @@ public class FieldAutoOpMode extends AutoOpMode {
     private final double startPoseX = 10.5;
     private final double startPoseY = 8.5;
     private final double scorePoseX = 13.5;
-    private final double scorePoseY = 21.5;
+    private final double scorePoseY = 22.5;
     private final double lineStartX = 31.0;
     private final double lineEndX = 52.0;
     private final double lineStartY = 33.5;
@@ -241,8 +239,12 @@ public class FieldAutoOpMode extends AutoOpMode {
                 }
                 break;
             case 6:
+                if (opmodeTimer.getElapsedTimeSeconds() >28) {
+                    motion.follower.breakFollowing();
+                    setPathState(23);
+                }
                 // Are we done lifting?
-                if(ballLifter.isNotLifting()){
+                else if(ballLifter.isNotLifting()){
                     // Slow down the launcher
                     launcher.setVelocityRPM(1500);
 

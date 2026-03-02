@@ -102,7 +102,7 @@ public class Intake extends RobotPart<IntakeMetric> {
                     frontUpperServoPower = -UPPER_SERVO_POWER;
                     ssom.sorter.frontAutoTurnOff();
                 } else if (ssom.gamepadBuffer.g2LeftStickY < -ENOUGH_JOYSTICK) {
-                    frontIntakeServoPower = 1;
+                    frontIntakeServoPower = UPPER_SERVO_POWER;
                     frontUpperServoPower = UPPER_SERVO_POWER;
                     if(!emptyFront) {
                         emptyFront = true;
@@ -110,7 +110,7 @@ public class Intake extends RobotPart<IntakeMetric> {
                     }
                     ssom.sorter.frontAutoTurnOn();
                 } else if (ssom.gamepadBuffer.g2LeftStickY > ENOUGH_JOYSTICK) {
-                    frontIntakeServoPower = 1;
+                    frontIntakeServoPower = UPPER_SERVO_POWER;
                     frontUpperServoPower = UPPER_SERVO_POWER;
                     ssom.sorter.frontAutoTurnOn();
                 } else {
