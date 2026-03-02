@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 @Autonomous(name = "Auto: Field", group = "Robot")
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
-    private static final double FIRST_LAUNCH_RPM = 3890.00;
-    private static final double SECOND_LAUNCH_RPM = 3950.00;
+    private static final double FIRST_LAUNCH_RPM = 3800.00;
+    private static final double SECOND_LAUNCH_RPM = 3850.00;
     private static final int SHOT_DELAY_MS = 50; // Ball settle time
     private double initialDelaySeconds = 0;
     private Pose startPose;
@@ -120,10 +120,10 @@ public class FieldAutoOpMode extends AutoOpMode {
                 .addPath(new BezierLine(jamStart.withY(jamStartY-5.0), jamStart.withY(jamStartY-8.0)))
                 .setConstantHeadingInterpolation(jamAngle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-8.0), jamStart.withY(jamStartY-7.0)))
-                .setConstantHeadingInterpolation(jamAngle)
-                .addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-10.0)))
-                .setConstantHeadingInterpolation(jamAngle)
-                .addPath(new BezierLine(jamStart.withY(jamStartY-10.0), jamStart.withY(jamStartY-9.0)))
+                //.setConstantHeadingInterpolation(jamAngle)
+                //.addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-10.0)))
+                //.setConstantHeadingInterpolation(jamAngle)
+                //.addPath(new BezierLine(jamStart.withY(jamStartY-10.0), jamStart.withY(jamStartY-9.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
                 .build();
         jamToScore = motion.follower.pathBuilder()
@@ -186,15 +186,19 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 18:
             case 20:
             case 22:
+                if (opmodeTimer.getElapsedTimeSeconds() >28.5) {
+                    motion.follower.breakFollowing();
+                    setPathState(23);
+                } else {
                 boolean ready = !motion.follower.isBusy() && sorter.isNotSpinning() && ballLifter.isReset();
                 //if(pathState == 1 || pathState == 10 )
                     ready  = ready && launcher.launchReady();
                 if(ready) {
-                    // Stop the front intake (needed for 9 and 17)
-                    if(pathState==9) {
-                        intake.frontIntakeStop();
-                        sorter.frontAutoTurnOff();
-                    }
+                    // Stop the intake
+                    intake.leftIntakeStop();
+                    sorter.leftAutoTurnOff();
+                    intake.rightIntakeStop();
+                    sorter.rightAutoTurnOff();
 
                     // Launch (delay lets ball settle from rotation)
                     try {
@@ -210,7 +214,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     else {
                         incrementPathState();
                     }
-                }
+                } }
                 break;
             case 2:
             case 4:
@@ -299,11 +303,10 @@ public class FieldAutoOpMode extends AutoOpMode {
                         intake.rightIntakeStop();
                         sorter.rightAutoTurnOff();
                     }
-
                     // After end of line delay spinning to color for 1 second (finish intake)
-                    if(sorter.getBallCount() >= 1) {
-                        delayedColorQueue(colorPattern.get(launchIndex++), 0);
-                    }
+                    //if(sorter.getBallCount() >= 1) {
+                        //delayedColorQueue(colorPattern.get(launchIndex++), 0);
+                    //}
                     incrementPathState();
                 }
                 break;
@@ -335,7 +338,8 @@ public class FieldAutoOpMode extends AutoOpMode {
                 }
                 break;
             case 17:
-                if (opmodeTimer.getElapsedTimeSeconds() >28) {
+
+                if (opmodeTimer.getElapsedTimeSeconds() >26) {
                     motion.follower.breakFollowing();
                     setPathState(23);
                 }

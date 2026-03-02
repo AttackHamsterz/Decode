@@ -84,6 +84,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
         boolean pressed = false;
         int colorIndex = 0;
         int autoShootState = 0;
+        boolean leftTriggerPressed = false;
         setRunning();
         while (running) {
             if (!ssom.gamepadBuffer.ignoreGamepad) {
@@ -98,6 +99,7 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
                 // Auto fire state machine
                 if(ssom.gamepadBuffer.g2LeftTrigger > TRIGGER_THRESH)
                 {
+                    leftTriggerPressed = true;
                     // Queue to green if green pressed
                     if(ssom.gamepadBuffer.g2LeftBumper) {
                         colorIndex = ssom.colorOrder.greenIndex();
@@ -143,6 +145,9 @@ public class BallLifter extends RobotPart<BallLifterMetric>{
                             }
                             break;
                     }
+                } else if (leftTriggerPressed) {
+                    leftTriggerPressed = false;
+                    ssom.sorter.resetBallColors();
                 }
 
                 // We've released the left button so we're done auto shooting

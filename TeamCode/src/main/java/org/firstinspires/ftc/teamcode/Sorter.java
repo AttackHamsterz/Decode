@@ -122,6 +122,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             return ballColor;
         }
     }
+
     private final DcMotor sortMotor;
     private final RevColorSensorV3 leftSensor;
     private final RevColorSensorV3 rightSensor;
@@ -280,6 +281,13 @@ public class Sorter extends RobotPart<SorterMetric>{
         return spot;
     }
 
+    public void resetBallColors(){
+        ballPositions[0] = BallColor.None;
+        ballPositions[1] = BallColor.None;
+        ballPositions[2] = BallColor.None;
+        ballPositions[3] = BallColor.None;
+    }
+
     @Override
     public void run() {
         boolean pressed = false;
@@ -335,12 +343,9 @@ public class Sorter extends RobotPart<SorterMetric>{
                     rotatePurpleToLaunch();
                 }
                 if(!pressed && ssom.gamepadBuffer.g2Start){
-                    ballPositions[0] = BallColor.None;
-                    ballPositions[1] = BallColor.None;
-                    ballPositions[2] = BallColor.None;
-                    ballPositions[3] = BallColor.None;
-
+                    resetBallColors();
                 }
+
                 if (!ssom.gamepadBuffer.g2x && !ssom.gamepadBuffer.g2y && !ssom.gamepadBuffer.g2a && !ssom.gamepadBuffer.g2b &&
                         !ssom.gamepadBuffer.g2DpadLeft && !ssom.gamepadBuffer.g2DpadRight &&
                         !ssom.gamepadBuffer.g2LeftBumper && !ssom.gamepadBuffer.g2RightBumper) {
