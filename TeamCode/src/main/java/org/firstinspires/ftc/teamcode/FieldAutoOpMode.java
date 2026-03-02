@@ -105,23 +105,37 @@ public class FieldAutoOpMode extends AutoOpMode {
         // Corner jam!
         double jamAngle = Math.toRadians((color == COLOR.BLUE) ? 180 : 0);
         cornerJam = motion.follower.pathBuilder()
+                //go in to get ball
                 .addPath(new BezierLine(jamStart, jamStart.withY(jamStartY-2.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
+                //back up
                 .addPath(new BezierLine(jamStart.withY(jamStartY-2.0), jamStart.withY(jamStartY-1.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
+                //go in to get ball
                 .addPath(new BezierLine(jamStart.withY(jamStartY-1.0), jamStart.withY(jamStartY-4.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
+                //back up
                 .addPath(new BezierLine(jamStart.withY(jamStartY-4.0), jamStart.withY(jamStartY-3.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
-                .addPath(new BezierLine(jamStart.withY(jamStartY-3.0), jamStart.withY(jamStartY-6.0)))
+                //go in to get ball
+                .addPath(new BezierLine(jamStart.withY(jamStartY-3.0), jamStart.withY(jamStartY-2.0)))
                 .setConstantHeadingInterpolation(jamAngle)
-                .addPath(new BezierLine(jamStart.withY(jamStartY-6.0), jamStart.withY(jamStartY-5.0)))
-                .setConstantHeadingInterpolation(jamStart.getHeading())
-                .addPath(new BezierLine(jamStart.withY(jamStartY-5.0), jamStart.withY(jamStartY-8.0)))
+                .addPath(new BezierLine(jamStart.withY(jamStartY-2.0), jamStart.withY(jamStartY-2.1)))
+                .setConstantHeadingInterpolation(jamStart.getHeading()+Math.toRadians(5))
+                //back up
+                //.addPath(new BezierLine(jamStart.withY(jamStartY-2.0), jamStart.withY(jamStartY-5.0)))
+                //.setConstantHeadingInterpolation(jamStart.getHeading())
+                //go in to get ball
+                .addPath(new BezierLine(jamStart.withY(jamStartY-2.1), jamStart.withY(jamStartY-7.0)))
+                //set flat angle
                 .setConstantHeadingInterpolation(jamAngle)
-                .addPath(new BezierLine(jamStart.withY(jamStartY-8.0), jamStart.withY(jamStartY-7.0)))
-                //.setConstantHeadingInterpolation(jamAngle)
-                //.addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-10.0)))
+                //back up
+                .addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-7.1)))
+                .setConstantHeadingInterpolation(jamAngle)
+                .addPath(new BezierLine(jamStart.withY(jamStartY-7.1), jamStart.withY(jamStartY-7.0)))
+                .setConstantHeadingInterpolation(jamStart.getHeading()+Math.toRadians(5))
+                //go in to get ball
+                .addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-9.0)))
                 //.setConstantHeadingInterpolation(jamAngle)
                 //.addPath(new BezierLine(jamStart.withY(jamStartY-10.0), jamStart.withY(jamStartY-9.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
@@ -344,6 +358,13 @@ public class FieldAutoOpMode extends AutoOpMode {
                     setPathState(23);
                 }
                 else if(!motion.follower.isBusy()) {
+                    // After end of line delay spinning to color for 1 second (finish intake)
+                    if(sorter.getBallCount() >= 1) {
+                        delayedColorQueue(colorPattern.get(launchIndex++), 500);
+                    }
+
+                    // Spin up launcher
+                    launcher.setVelocityRPM(SECOND_LAUNCH_RPM);
 
                     // Drive to score
                     motion.follower.followPath(jamToScore, PATH_VELOCITY_PERCENTAGE, true);
