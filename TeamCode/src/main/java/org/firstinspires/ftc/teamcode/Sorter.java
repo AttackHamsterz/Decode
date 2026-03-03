@@ -24,10 +24,10 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double HOLD_POWER = 0.08;
     private static final double TURN_POWER = 1.0;
     private static final long STUCK_TIME_MS = 2000;
-    private static final long FRONT_AUTO_TURN_DELAY_MS = 300;
-    private static final long LEFT_AUTO_TURN_DELAY_MS = 300;
-    private static final long RIGHT_AUTO_TURN_DELAY_MS = 300;
-    private static final long TELE_TURN_DELAY_MS = 350;
+    private static final long FRONT_AUTO_TURN_DELAY_MS = 280;
+    private static final long LEFT_AUTO_TURN_DELAY_MS = 280;
+    private static final long RIGHT_AUTO_TURN_DELAY_MS = 280;
+    private static final long TELE_TURN_DELAY_MS = 280;
     private static final double MIN_DIST_CM = 3.0;
 
     // Start trusting sensors when within 25 degrees of target (converted to ticks)
