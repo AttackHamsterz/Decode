@@ -104,40 +104,35 @@ public class FieldAutoOpMode extends AutoOpMode {
 
         // Corner jam!
         double jamAngle = Math.toRadians((color == COLOR.BLUE) ? 180 : 0);
+        double jamNudgeAngle = Math.toRadians((color == COLOR.BLUE) ? 185 : -5);
+
         cornerJam = motion.follower.pathBuilder()
-                //go in to get ball
+                //go in to get ball (45 deg angle)
                 .addPath(new BezierLine(jamStart, jamStart.withY(jamStartY-2.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
-                //back up
+                //back up (45 deg angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-2.0), jamStart.withY(jamStartY-1.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
-                //go in to get ball
+                //go in to get ball (45 deg angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-1.0), jamStart.withY(jamStartY-4.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
-                //back up
+                //back up (45 deg angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-4.0), jamStart.withY(jamStartY-3.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
-                //go in to get ball
+                //go in to get ball (flat angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-3.0), jamStart.withY(jamStartY-2.0)))
                 .setConstantHeadingInterpolation(jamAngle)
+                // Nudge if stuck on ball) (flat+5 angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-2.0), jamStart.withY(jamStartY-2.1)))
-                .setConstantHeadingInterpolation(jamStart.getHeading()+Math.toRadians(5))
-                //back up
-                //.addPath(new BezierLine(jamStart.withY(jamStartY-2.0), jamStart.withY(jamStartY-5.0)))
-                //.setConstantHeadingInterpolation(jamStart.getHeading())
-                //go in to get ball
+                .setConstantHeadingInterpolation(jamNudgeAngle)
+                //go in to get ball (flat angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-2.1), jamStart.withY(jamStartY-7.0)))
-                //set flat angle
                 .setConstantHeadingInterpolation(jamAngle)
-                //back up
+                // Nudge if stuck on ball) (flat+5 angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-7.1)))
-                .setConstantHeadingInterpolation(jamAngle)
-                .addPath(new BezierLine(jamStart.withY(jamStartY-7.1), jamStart.withY(jamStartY-7.0)))
-                .setConstantHeadingInterpolation(jamStart.getHeading()+Math.toRadians(5))
-                //go in to get ball
+                .setConstantHeadingInterpolation(jamNudgeAngle)
+                //go in to get ball (45 deg angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-9.0)))
-                //.setConstantHeadingInterpolation(jamAngle)
-                //.addPath(new BezierLine(jamStart.withY(jamStartY-10.0), jamStart.withY(jamStartY-9.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
                 .build();
         jamToScore = motion.follower.pathBuilder()
