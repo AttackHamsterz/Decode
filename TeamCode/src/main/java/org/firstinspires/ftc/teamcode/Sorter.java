@@ -34,6 +34,7 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final int SENSOR_TRUST_TICKS = (int)Math.ceil(25.0 * ONE_DEGREE_TURN);
 
     private long spinStartTime = 0;
+    private boolean favorClockwise = false;   // Favor clockwise for auto turns
     private boolean frontAutoTurn = false;
     private boolean leftAutoTurn = false;
     private boolean rightAutoTurn = false;
@@ -187,6 +188,10 @@ public class Sorter extends RobotPart<SorterMetric>{
         }
     }
 
+    public void favorClockwise(boolean favorClockwise) {
+        this.favorClockwise = favorClockwise;
+    }
+
     public void frontAutoTurnOn(){
         frontAutoTurn = true;
     }
@@ -203,7 +208,7 @@ public class Sorter extends RobotPart<SorterMetric>{
         Runnable task = () -> {
             // Only do the auto rotation if we're not intaking on the sides
             if(ssom.intake.isLeftOff() && ssom.intake.isRightOff())
-                rotateClockwise(-1);
+                emptyFront();
             autoTurnTrigger = false;
         };
         long turnDelay = ssom.gamepadBuffer.ignoreGamepad? FRONT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
@@ -226,7 +231,7 @@ public class Sorter extends RobotPart<SorterMetric>{
         Runnable task = () -> {
             // Only do the auto rotation if we're not intaking on the sides
             if(ssom.intake.isFrontOff() && ssom.intake.isRightOff())
-                rotateClockwise(-1);
+                emptyLeft();
             autoTurnTrigger = false;
         };
         long turnDelay = ssom.gamepadBuffer.ignoreGamepad? LEFT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
@@ -249,7 +254,7 @@ public class Sorter extends RobotPart<SorterMetric>{
         Runnable task = () -> {
             // Only do the auto rotation if we're not intaking on the sides
             if(ssom.intake.isLeftOff() && ssom.intake.isFrontOff())
-                rotateClockwise(-1);
+                emptyRight();
             autoTurnTrigger = false;
         };
         long turnDelay = ssom.gamepadBuffer.ignoreGamepad? RIGHT_AUTO_TURN_DELAY_MS: TELE_TURN_DELAY_MS;
@@ -538,34 +543,64 @@ public class Sorter extends RobotPart<SorterMetric>{
 
     public void emptyFront(){
         if(frontOccupied()){
-            if(!rightOccupied())
-                rotateClockwise(-1);
-            else if(!leftOccupied())
-                rotateClockwise(1);
-            else if(!backOccupied())
-                rotateClockwise(-2);
+            if(favorClockwise){
+                if (!leftOccupied())
+                    rotateClockwise(1);
+                else if (!rightOccupied())
+                    rotateClockwise(-1);
+                else if (!backOccupied())
+                    rotateClockwise(2);
+            }
+            else {
+                if (!rightOccupied())
+                    rotateClockwise(-1);
+                else if (!leftOccupied())
+                    rotateClockwise(1);
+                else if (!backOccupied())
+                    rotateClockwise(-2);
+            }
         }
     }
 
     public void emptyLeft(){
         if(leftOccupied()){
-            if(!frontOccupied())
-                rotateClockwise(-1);
-            else if(!backOccupied())
-                rotateClockwise(1);
-            else if(!rightOccupied())
-                rotateClockwise(-2);
+            if(favorClockwise) {
+                if (!backOccupied())
+                    rotateClockwise(1);
+                else if (!frontOccupied())
+                    rotateClockwise(-1);
+                else if (!rightOccupied())
+                    rotateClockwise(2);
+            }
+            else{
+                if(!frontOccupied())
+                    rotateClockwise(-1);
+                else if(!backOccupied())
+                    rotateClockwise(1);
+                else if(!rightOccupied())
+                    rotateClockwise(-2);
+            }
         }
     }
 
     public void emptyRight(){
         if(rightOccupied()){
-            if(!backOccupied())
-                rotateClockwise(-1);
-            else if(!frontOccupied())
-                rotateClockwise(1);
-            else if(!leftOccupied())
-                rotateClockwise(-2);
+            if(favorClockwise) {
+                if (!frontOccupied())
+                    rotateClockwise(1);
+                else if (!backOccupied())
+                    rotateClockwise(-1);
+                else if (!leftOccupied())
+                    rotateClockwise(2);
+            }
+            else{
+                if(!backOccupied())
+                    rotateClockwise(-1);
+                else if(!frontOccupied())
+                    rotateClockwise(1);
+                else if(!leftOccupied())
+                    rotateClockwise(-2);
+            }
         }
     }
 

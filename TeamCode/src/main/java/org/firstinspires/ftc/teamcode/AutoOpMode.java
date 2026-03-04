@@ -74,6 +74,12 @@ public class AutoOpMode extends StandardSetupOpMode {
 
         // Start the eye to look for the obelisk
         eye.start();
+
+        // If we're blue team we intake on the left side so we favor counter clockwise
+        // turns to keep balls moving toward the launcher
+        // If we're red team we intake more on the right side so we favor clockwise turns
+        // to keep balls moving toward the launcher
+        sorter.favorClockwise(color == StandardSetupOpMode.COLOR.RED);
     }
 
 
