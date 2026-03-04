@@ -104,7 +104,7 @@ public class FieldAutoOpMode extends AutoOpMode {
 
         // Corner jam!
         double jamAngle = Math.toRadians((color == COLOR.BLUE) ? 180 : 0);
-        double jamNudgeAngle = Math.toRadians((color == COLOR.BLUE) ? 185 : -5);
+        double jamNudgeAngle = Math.toRadians((color == COLOR.BLUE) ? 5 : -5);
 
         cornerJam = motion.follower.pathBuilder()
                 //go in to get ball (45 deg angle)
@@ -124,13 +124,16 @@ public class FieldAutoOpMode extends AutoOpMode {
                 .setConstantHeadingInterpolation(jamAngle)
                 // Nudge if stuck on ball) (flat+5 angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-2.0), jamStart.withY(jamStartY-2.1)))
-                .setConstantHeadingInterpolation(jamNudgeAngle)
+                .setConstantHeadingInterpolation(jamStart.getHeading()+jamNudgeAngle)
                 //go in to get ball (flat angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-2.1), jamStart.withY(jamStartY-7.0)))
                 .setConstantHeadingInterpolation(jamAngle)
-                // Nudge if stuck on ball) (flat+5 angle)
+                // Nudge if stuck on ball) (flat angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-7.1)))
-                .setConstantHeadingInterpolation(jamNudgeAngle)
+                .setConstantHeadingInterpolation(jamAngle)
+                // Back to jam angle (45 degrees)
+                .addPath(new BezierLine(jamStart.withY(jamStartY-7.1), jamStart.withY(jamStartY-7.0)))
+                .setConstantHeadingInterpolation(jamStart.getHeading()+jamNudgeAngle)
                 //go in to get ball (45 deg angle)
                 .addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-9.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
