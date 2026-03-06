@@ -60,6 +60,7 @@ public class Intake extends RobotPart<IntakeMetric> {
                 if (ssom.gamepadBuffer.g2RightStickX < -ENOUGH_JOYSTICK || ssom.gamepadBuffer.g2RightStickY > ENOUGH_JOYSTICK) {
                     leftIntakeServoPower = -1;
                     leftUpperServoPower = -UPPER_SERVO_POWER;
+                    ssom.sorter.leftAutoTurnOff();
                 } else if (ssom.gamepadBuffer.g2LeftStickX < -ENOUGH_JOYSTICK) {
                     leftIntakeServoPower = 1;
                     leftUpperServoPower = UPPER_SERVO_POWER;
@@ -67,19 +68,23 @@ public class Intake extends RobotPart<IntakeMetric> {
                         emptyLeft = true;
                         ssom.sorter.emptyLeft();
                     }
+                    ssom.sorter.leftAutoTurnOn();
                 } else if (ssom.gamepadBuffer.g2LeftStickY > ENOUGH_JOYSTICK) {
                     leftIntakeServoPower = 1;
                     leftUpperServoPower = UPPER_SERVO_POWER;
+                    ssom.sorter.leftAutoTurnOn();
                 } else {
                     leftIntakeServoPower = 0;
                     leftUpperServoPower = 0;
                     emptyLeft = false;
+                    ssom.sorter.leftAutoTurnOff();
                 }
 
                 // Right intake (outtake wins)
                 if (ssom.gamepadBuffer.g2RightStickX > ENOUGH_JOYSTICK || ssom.gamepadBuffer.g2RightStickY > ENOUGH_JOYSTICK) {
                     rightIntakeServoPower = -LOWER_SERVO_POWER;
                     rightUpperServoPower = -UPPER_SERVO_POWER;
+                    ssom.sorter.rightAutoTurnOff();
                 } else if (ssom.gamepadBuffer.g2LeftStickX > ENOUGH_JOYSTICK) {
                     rightIntakeServoPower = LOWER_SERVO_POWER;
                     rightUpperServoPower = UPPER_SERVO_POWER;
@@ -87,13 +92,16 @@ public class Intake extends RobotPart<IntakeMetric> {
                         emptyRight = true;
                         ssom.sorter.emptyRight();
                     }
+                    ssom.sorter.rightAutoTurnOn();
                 }  else if (ssom.gamepadBuffer.g2LeftStickY > ENOUGH_JOYSTICK) {
                     rightIntakeServoPower = LOWER_SERVO_POWER;
                     rightUpperServoPower = UPPER_SERVO_POWER;
+                    ssom.sorter.rightAutoTurnOn();
                 } else {
                     rightIntakeServoPower = 0;
                     rightUpperServoPower = 0;
                     emptyRight = false;
+                    ssom.sorter.rightAutoTurnOff();
                 }
 
                 // Forward intake (outtake wins)
