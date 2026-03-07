@@ -142,7 +142,9 @@ public class Eye extends RobotPart<EyeMetric>{
 
             if (mode == Mode.AIM_POINT) {
                 resultInUse = limelight.getLatestResult();
+                if (resultInUse == null) continue;
                 List<LLResultTypes.FiducialResult> fiducials = resultInUse.getFiducialResults();
+                if (fiducials == null) continue;
                 for(LLResultTypes.FiducialResult fiducial : fiducials)
                 {
                     if(fiducial.getFiducialId() == 20 && ssom.color == StandardSetupOpMode.COLOR.BLUE){
@@ -214,6 +216,7 @@ public class Eye extends RobotPart<EyeMetric>{
             if (mode == Mode.AUTO_START) {
                 /*
                 resultInUse = limelight.getLatestResult();
+                if (resultInUse == null) continue;
                 List<LLResultTypes.FiducialResult> fiducials = resultInUse.getFiducialResults();
                 for (LLResultTypes.FiducialResult fiducial : fiducials) {
                     int obeliskColorId = fiducial.getFiducialId();
@@ -330,7 +333,9 @@ public class Eye extends RobotPart<EyeMetric>{
 
     public int getFiducialID() {
         resultInUse = limelight.getLatestResult();
+        if (resultInUse == null) return -1;
         List<LLResultTypes.FiducialResult> fiducials = resultInUse.getFiducialResults();
+        if (fiducials == null) return -1;
         for (LLResultTypes.FiducialResult fiducial : fiducials) {
 
             int obeliskColorId = fiducial.getFiducialId();
