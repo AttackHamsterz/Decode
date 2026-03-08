@@ -18,9 +18,9 @@ import java.util.List;
 @Disabled
 public class AutoOpMode extends StandardSetupOpMode {
     protected final double MAX_PICKUP_VOLTAGE = 12.9;
-    protected final double MIN_PICKUP_POWER = 0.30;
+    protected final double MIN_PICKUP_POWER = 0.32;
     protected final double MIN_PICKUP_VOLTAGE = 12.75;
-    protected final double MAX_PICKUP_POWER = 0.30;
+    protected final double MAX_PICKUP_POWER = 0.32;
     protected final double PATH_VELOCITY_PERCENTAGE = 1.0;
 
     protected double pickupPower = MIN_PICKUP_POWER;
@@ -203,7 +203,6 @@ public class AutoOpMode extends StandardSetupOpMode {
             pickupPower = MAX_PICKUP_POWER-(myFraction * deltaPower);
         }
 
-
         // Start all body parts (except the eye, which has already started)
         for( Thread part : partList)
             if(!part.equals(eye))
@@ -227,6 +226,6 @@ public class AutoOpMode extends StandardSetupOpMode {
 
         // Update telemetry
         super.partList.forEach(part -> part.getTelemetry(telemetry));
-        if(super.partList.size()>0) telemetry.update();
+        if(!super.partList.isEmpty()) telemetry.update();
     }
 }

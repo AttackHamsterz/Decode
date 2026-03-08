@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 @Autonomous(name = "Auto: Board", group = "Robot")
 @Disabled
 public class BoardAutoOpMode extends AutoOpMode{
-    protected final double PICKUP_VELOCITY_PERCENTAGE = 0.20;
     private static final double FIRST_LAUNCH_RPM = 2480.00; // Launcher speed
     private static final double SECOND_LAUNCH_RPM = 2530.00; // Launcher speed
     private static final int SHOT_DELAY_MS = 150;            // Ball settle time
@@ -124,7 +123,6 @@ public class BoardAutoOpMode extends AutoOpMode{
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), parkPose.getHeading())
                 .build();
         setPathState(0);
-
     }
 
     private void delayedColorQueue(Sorter.BallColor color, int msDelay){
@@ -170,8 +168,14 @@ public class BoardAutoOpMode extends AutoOpMode{
             case 19:
             case 21:
             case 23:
+                // Are we out of time?
+                if (opmodeTimer.getElapsedTimeSeconds() > 28.5) {
+                    // Skip to park
+                    motion.follower.breakFollowing();
+                    setPathState(24);
+                }
                 // Done driving, sorter ready, launcher ready, lifter reset?
-                if(!motion.follower.isBusy() && sorter.isNotSpinning() && launcher.launchReady() && ballLifter.isReset()) {
+                else if(!motion.follower.isBusy() && sorter.isNotSpinning() && launcher.launchReady() && ballLifter.isReset()) {
 
                     // Launch (delay let's ball settle from rotation)
                     try {
@@ -232,24 +236,19 @@ public class BoardAutoOpMode extends AutoOpMode{
                 }
                 break;
             case 6:
-                // Are we done lifting?
-                //if(!ballLifter.isLifting()){
-
                 // Up RPM to account for movement
-                    launcher.setVelocityRPM(FIRST_LAUNCH_RPM+50);
+                launcher.setVelocityRPM(FIRST_LAUNCH_RPM+50);
 
-                    // Drive to pick up first line of balls
-                    motion.follower.followPath(scoreToFirstLinePath, PATH_VELOCITY_PERCENTAGE, false);
-                    incrementPathState();
+                // Drive to pick up first line of balls
+                motion.follower.followPath(scoreToFirstLinePath, PATH_VELOCITY_PERCENTAGE, false);
+                incrementPathState();
 
-                    try {
-                        Thread.sleep(STOP_LAST_SHOT_DELAY_MS);
-                    } catch (InterruptedException ignore) {}
+                // Slow down the launcher after a delay
+                try {
+                    Thread.sleep(STOP_LAST_SHOT_DELAY_MS);
+                } catch (InterruptedException ignore) {}
+                launcher.setVelocityRPM(0);
 
-                    // Slow down the launcher
-                    launcher.setVelocityRPM(0);
-
-                //}
                 break;
             case 7:
                 // Pick up balls
@@ -326,24 +325,18 @@ public class BoardAutoOpMode extends AutoOpMode{
                 }
                 break;
             case 15:
-                // Are we done lifting?
-                //if(!ballLifter.isLifting()){
-
                 // Up RPM to account for movement
-                launcher.setVelocityRPM(SECOND_LAUNCH_RPM+100);
+                launcher.setVelocityRPM(SECOND_LAUNCH_RPM+50);
 
                 // Drive to pick up first line of balls
                 motion.follower.followPath(scoreToSecondLine, PATH_VELOCITY_PERCENTAGE, false);
                 incrementPathState();
 
+                // Slow down the launcher after a delay
                 try {
                     Thread.sleep(STOP_LAST_SHOT_DELAY_MS);
                 } catch (InterruptedException ignore) {}
-
-                // Slow down the launcher
                 launcher.setVelocityRPM(0);
-
-                //}
                 break;
             case 16:
                 //Pick up balls
@@ -377,34 +370,25 @@ public class BoardAutoOpMode extends AutoOpMode{
                 }
                 break;
             case 24:
-                // Park
-                if(ballLifter.isNotLifting()){
                 // Up RPM to account for movement
-                    launcher.setVelocityRPM(SECOND_LAUNCH_RPM+50);
+                launcher.setVelocityRPM(SECOND_LAUNCH_RPM+50);
 
-                    //if (opmodeTimer.getElapsedTimeSeconds() >28) {
-                        setPathState(26);
-                        //break;
-                    //}
+                // Drive to park
+                motion.follower.followPath(scoreToPark, PATH_VELOCITY_PERCENTAGE, true);
+                incrementPathState();
 
-                    // Drive to park
-                    motion.follower.followPath(scoreToPark, PATH_VELOCITY_PERCENTAGE, true);
-                    incrementPathState();
-                }
+                // Slow down the launcher (after a short delay)
+                try {
+                    Thread.sleep(STOP_LAST_SHOT_DELAY_MS);
+                } catch (InterruptedException ignore) {}
+                launcher.setVelocityRPM(0);
                 break;
             case 25:
-                // Need to actually wait for park
-
+                // Wait for park
                 if(!motion.follower.isBusy()) {
-                    setPathState(26);
+                    setPathState(-1);
                 }
                 break;
-            case 26:
-                // Stop the launcher
-                launcher.setVelocityRPM(0);
-                setPathState(-1);
-                break;
-
         };
     }
 }

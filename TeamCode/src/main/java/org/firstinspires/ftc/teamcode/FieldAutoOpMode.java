@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -163,6 +162,8 @@ public class FieldAutoOpMode extends AutoOpMode {
     }
 
     private boolean firstTime = true;
+    private double jamStartTime_s;
+    private static final double MAX_JAM_TIME_S = 5.0;
 
     public void autonomousPathUpdate() {
         switch (pathState) {
@@ -202,31 +203,36 @@ public class FieldAutoOpMode extends AutoOpMode {
                     motion.follower.breakFollowing();
                     setPathState(23);
                 } else {
-                boolean ready = !motion.follower.isBusy() && sorter.isNotSpinning() && ballLifter.isReset();
-                //if(pathState == 1 || pathState == 10 )
-                    ready  = ready && launcher.launchReady();
-                if(ready) {
-                    // Stop the intake
-                    intake.leftIntakeStop();
-                    sorter.leftAutoTurnOff();
-                    intake.rightIntakeStop();
-                    sorter.rightAutoTurnOff();
+                    boolean ready = !motion.follower.isBusy() && sorter.isNotSpinning() && ballLifter.isReset();
+                    //if(pathState == 1 || pathState == 10 )
+                        ready  = ready && launcher.launchReady();
+                    if(ready) {
+                        // Stop the intakes
+                        intake.leftIntakeStop();
+                        intake.rightIntakeStop();
+                        intake.frontIntakeStop();
+                        sorter.leftAutoTurnOff();
+                        sorter.rightAutoTurnOff();
+                        sorter.frontAutoTurnOff();
 
-                    // Launch (delay lets ball settle from rotation)
-                    try {
-                        Thread.sleep(SHOT_DELAY_MS);
-                    } catch (InterruptedException ignore) {
+                        // Launch (delay lets ball settle from rotation or driving)
+                        if(pathState != 1) {
+                            try {
+                                Thread.sleep(SHOT_DELAY_MS);
+                            } catch (InterruptedException ignore) {
+                            }
+                        }
+                        if (!(pathState>5 && sorter.getBallCount()<1)){
+                            ballLifter.lift();
+                        }
+                        if(pathState == 5 && skipLine) {
+                            pathState = 15;
+                        }
+                        else {
+                            incrementPathState();
+                        }
                     }
-                    if (!(pathState>5 && sorter.getBallCount()<1)){
-                        ballLifter.lift();
-                    }
-                    if(pathState == 5 && skipLine) {
-                        pathState = 15;
-                    }
-                    else {
-                        incrementPathState();
-                    }
-                } }
+                }
                 break;
             case 2:
             case 4:
@@ -304,10 +310,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 break;
             case 9:
                 if(!motion.follower.isBusy()){
-                    try {
-                        Thread.sleep(250);
-                    } catch (InterruptedException ignore) {}
-
+                    // Intake off
                     if(color == COLOR.BLUE) {
                         intake.leftIntakeStop();
                         sorter.leftAutoTurnOff();
@@ -315,17 +318,13 @@ public class FieldAutoOpMode extends AutoOpMode {
                         intake.rightIntakeStop();
                         sorter.rightAutoTurnOff();
                     }
-                    // After end of line delay spinning to color for 1 second (finish intake)
-                    //if(sorter.getBallCount() >= 1) {
-                        //delayedColorQueue(colorPattern.get(launchIndex++), 0);
-                    //}
                     incrementPathState();
                 }
                 break;
             case 15:
                 if(ballLifter.isNotLifting()){
-                    // Stop the launcher
-                    launcher.setVelocityRPM(0);
+                    // Slow down the launcher
+                    launcher.setVelocityRPM(1500);
 
                     // Drive to jam
                     motion.follower.followPath(scoreToCornerJam, PATH_VELOCITY_PERCENTAGE, false);
@@ -344,18 +343,23 @@ public class FieldAutoOpMode extends AutoOpMode {
                     }
 
                     // Jam
-
+                    jamStartTime_s = opmodeTimer.getElapsedTimeSeconds();
                     motion.follower.followPath(cornerJam, PATH_VELOCITY_PERCENTAGE, false);
                     incrementPathState();
                 }
                 break;
             case 17:
-
-                if (opmodeTimer.getElapsedTimeSeconds() >26) {
+                // Not enough time to launch, go park
+                if (opmodeTimer.getElapsedTimeSeconds() > 26) {
                     motion.follower.breakFollowing();
                     setPathState(23);
                 }
-                else if(!motion.follower.isBusy()) {
+                // Done jamming or jamming took to long (likely stuck), continue on
+                else if(!motion.follower.isBusy() || opmodeTimer.getElapsedTimeSeconds() - jamStartTime_s > MAX_JAM_TIME_S){
+                    // Jam stuck, stop following
+                    if(motion.follower.isBusy())
+                        motion.follower.breakFollowing();
+
                     // After end of line delay spinning to color for 1 second (finish intake)
                     if(sorter.getBallCount() >= 1) {
                         delayedColorQueue(colorPattern.get(launchIndex++), 500);
@@ -367,7 +371,6 @@ public class FieldAutoOpMode extends AutoOpMode {
                     // Drive to score
                     motion.follower.followPath(jamToScore, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
-
                 }
                 break;
             case 23:
