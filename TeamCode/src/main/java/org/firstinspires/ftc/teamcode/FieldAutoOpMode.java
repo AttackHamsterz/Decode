@@ -134,7 +134,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 .addPath(new BezierLine(jamStart.withY(jamStartY-7.1), jamStart.withY(jamStartY-7.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading()+jamNudgeAngle)
                 //go in to get ball (45 deg angle)
-                .addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-9.0)))
+                .addPath(new BezierLine(jamStart.withY(jamStartY-7.0), jamStart.withY(jamStartY-8.0)))
                 .setConstantHeadingInterpolation(jamStart.getHeading())
                 .build();
         jamToScore = motion.follower.pathBuilder()
@@ -199,7 +199,7 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 18:
             case 20:
             case 22:
-                if (opmodeTimer.getElapsedTimeSeconds() >28.5) {
+                if (opmodeTimer.getElapsedTimeSeconds() > 28.5) {
                     motion.follower.breakFollowing();
                     setPathState(23);
                 } else {
@@ -222,7 +222,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                             } catch (InterruptedException ignore) {
                             }
                         }
-                        if (!(pathState>5 && sorter.getBallCount()<1)){
+                        if (pathState <= 5 || sorter.getBallCount()>0){
                             ballLifter.lift();
                         }
                         if(pathState == 5 && skipLine) {
