@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
@@ -14,11 +15,12 @@ import java.util.concurrent.TimeUnit;
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
     private static final double FIRST_LAUNCH_RPM = 3800.00;
-    private static final double SECOND_LAUNCH_RPM = 3900.00;
+    private static final double SECOND_LAUNCH_RPM = 3850.00;
     private static final int SHOT_DELAY_MS = 50; // Ball settle time
     private double initialDelaySeconds = 0;
     private Pose startPose;
     private Pose initialScorePose;
+    private Pose thirdLineCurve;
     private Pose thirdLineStart;
     private Pose thirdLineEnd;
     private Pose jamStart;
@@ -41,13 +43,18 @@ public class FieldAutoOpMode extends AutoOpMode {
     private final double startPoseY = 8.5;
     private final double scorePoseX = 13.5;
     private final double scorePoseY = 22.5;
+    private final double lineCurveX = 15.0;
     private final double lineStartX = 31.0;
     private final double lineEndX = 52.0;
-    private final double lineStartY = 33.5;
-    private final double jamStartX = 72.0-10.0;
+    private final double lineStartY = 35;
+    private final double jamStartX = 72.0-10.5;
     private final double jamStartY = 20.0;
     private final double parkPoseX = 35.0;
     private final double parkPoseY = 12.5;
+
+    private boolean firstTime = true;
+    private double jamStartTime_s;
+    private static final double MAX_JAM_TIME_S = 4.5;
 
     public void setSkipLine() {
         skipLine = true;
@@ -61,8 +68,9 @@ public class FieldAutoOpMode extends AutoOpMode {
     public void init() {
         startPose = new Pose((color == COLOR.BLUE) ? centerLineX - startPoseX : centerLineX + startPoseX, startPoseY, Math.toRadians(90));
         initialScorePose = new Pose((color == COLOR.BLUE) ? centerLineX - scorePoseX : centerLineX + scorePoseX, scorePoseY, Math.toRadians((color == COLOR.BLUE) ? 113 : 67));
+        thirdLineCurve = new Pose((color == COLOR.BLUE) ? centerLineX - lineCurveX : centerLineX + lineCurveX, lineStartY, Math.toRadians(90));
         thirdLineStart = new Pose((color == COLOR.BLUE) ? centerLineX - lineStartX : centerLineX + lineStartX, lineStartY, Math.toRadians(90));
-        thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX : centerLineX + lineEndX, lineStartY+1.5, Math.toRadians(90));
+        thirdLineEnd = new Pose((color == COLOR.BLUE) ? centerLineX - lineEndX : centerLineX + lineEndX, lineStartY, Math.toRadians(90));
         jamStart = new Pose((color == COLOR.BLUE) ? centerLineX - jamStartX : centerLineX + jamStartX, jamStartY, Math.toRadians((color == COLOR.BLUE) ? 135.0 : 45.0));
         parkPose = new Pose ((color == COLOR.BLUE) ? centerLineX - parkPoseX : centerLineX + parkPoseX, parkPoseY, Math.toRadians((color == COLOR.BLUE) ? 0 : 180));
         super.init();
@@ -81,7 +89,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                 .build();
                 setPathState(0);
         scoreToThirdLinePath = motion.follower.pathBuilder()
-                .addPath(new BezierLine(initialScorePose, thirdLineStart))
+                .addPath(new BezierCurve(initialScorePose, thirdLineCurve, thirdLineStart))
                 .setLinearHeadingInterpolation(initialScorePose.getHeading(), thirdLineStart.getHeading())
                 .build();
         thirdLineEndPath = motion.follower.pathBuilder()
@@ -160,10 +168,6 @@ public class FieldAutoOpMode extends AutoOpMode {
         };
         scheduler.schedule(task, msDelay, TimeUnit.MILLISECONDS);
     }
-
-    private boolean firstTime = true;
-    private double jamStartTime_s;
-    private static final double MAX_JAM_TIME_S = 5.0;
 
     public void autonomousPathUpdate() {
         switch (pathState) {
@@ -273,12 +277,8 @@ public class FieldAutoOpMode extends AutoOpMode {
                     // Drive to pick up first line of balls
                     motion.follower.followPath(scoreToThirdLinePath, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
-                }
-                break;
-            case 7:
-                // Pick up balls
-                if(!motion.follower.isBusy()){
-                    // Start front intake
+
+                    // Start intake
                     if(color == COLOR.BLUE) {
                         intake.leftIntakeOn();
                         sorter.leftAutoTurnOn();
@@ -287,7 +287,11 @@ public class FieldAutoOpMode extends AutoOpMode {
                         intake.rightIntakeOn();
                         sorter.rightAutoTurnOn();
                     }
-
+                }
+                break;
+            case 7:
+                // Pick up balls
+                if(!motion.follower.isBusy()){
                     motion.follower.followPath(thirdLineEndPath, pickupPower, false);
                     incrementPathState();
                 }
@@ -297,14 +301,14 @@ public class FieldAutoOpMode extends AutoOpMode {
                 if(!motion.follower.isBusy()){
                     // After end of line delay spinning to color for 1 second (finish intake)
                     if(sorter.getBallCount() >= 1) {
-                        delayedColorQueue(colorPattern.get(launchIndex++), 500);
+                        delayedColorQueue(colorPattern.get(launchIndex++), 1250);
                     }
 
                     // Spin up launcher
                     launcher.setVelocityRPM(SECOND_LAUNCH_RPM);
 
                     // Drive to score
-                    motion.follower.followPath(thirdLineEndToScore, 0.8, true);
+                    motion.follower.followPath(thirdLineEndToScore, 0.75, true);
                     incrementPathState();
                 }
                 break;
