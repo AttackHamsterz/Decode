@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 @Disabled
 public class FieldAutoOpMode extends AutoOpMode {
     private static final double FIRST_LAUNCH_RPM = 3800.00;
-    private static final double SECOND_LAUNCH_RPM = 3850.00;
+    private static final double SECOND_LAUNCH_RPM = 3900.00;
     private static final int SHOT_DELAY_MS = 50; // Ball settle time
     private double initialDelaySeconds = 0;
     private Pose startPose;
