@@ -8,6 +8,7 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -24,11 +25,16 @@ public class Sorter extends RobotPart<SorterMetric>{
     private static final double HOLD_POWER = 0.08;
     private static final double TURN_POWER = 1.0;
     private static final long STUCK_TIME_MS = 2000;
-    private static final long FRONT_AUTO_TURN_DELAY_MS = 280;
-    private static final long LEFT_AUTO_TURN_DELAY_MS = 280;
-    private static final long RIGHT_AUTO_TURN_DELAY_MS = 280;
-    private static final long TELE_TURN_DELAY_MS = 280;
+    private static long FRONT_AUTO_TURN_DELAY_MS = 280;
+    private static long LEFT_AUTO_TURN_DELAY_MS = 280;
+    private static long RIGHT_AUTO_TURN_DELAY_MS = 280;
+    private static long TELE_TURN_DELAY_MS = 280;
     private static final double MIN_DIST_CM = 3.0;
+
+    private static final double MIN_VOLTAGE = 12.2;
+    private static final double MAX_VOLTAGE = 12.5;
+    private static final long MIN_VOLTAGE_TURN_DELAY = 320;
+    private static final long MAX_VOLTAGE_TURN_DELAY = 280;
 
     // Start trusting sensors when within 25 degrees of target (converted to ticks)
     private static final int SENSOR_TRUST_TICKS = (int)Math.ceil(25.0 * ONE_DEGREE_TURN);
@@ -164,6 +170,9 @@ public class Sorter extends RobotPart<SorterMetric>{
         ballPositions[2] = BallColor.None; // right
         ballPositions[3] = BallColor.None; // back
 
+        // Set turn delays from battery voltage
+        setTurnDelays();
+
         // Debug
         boolean error = false;
         if(!leftSensor.isLightOn()) {
@@ -185,6 +194,38 @@ public class Sorter extends RobotPart<SorterMetric>{
         if(error)
         {
             ssom.telemetry.update();
+        }
+    }
+
+    public void setTurnDelays(){
+        // Voltage sets min power for pickup speed
+        double currentVoltage = MAX_VOLTAGE;
+        for (VoltageSensor sensor : ssom.hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) {           // Ignore sensors that return 0
+                currentVoltage = Math.min(currentVoltage, voltage);
+            }
+        }
+
+        if (currentVoltage < MIN_VOLTAGE) {
+            FRONT_AUTO_TURN_DELAY_MS = MIN_VOLTAGE_TURN_DELAY;
+            LEFT_AUTO_TURN_DELAY_MS = MIN_VOLTAGE_TURN_DELAY;
+            RIGHT_AUTO_TURN_DELAY_MS = MIN_VOLTAGE_TURN_DELAY;
+            TELE_TURN_DELAY_MS = MIN_VOLTAGE_TURN_DELAY;
+        } else if (currentVoltage > MAX_VOLTAGE) {
+            FRONT_AUTO_TURN_DELAY_MS = MAX_VOLTAGE_TURN_DELAY;
+            LEFT_AUTO_TURN_DELAY_MS = MAX_VOLTAGE_TURN_DELAY;
+            RIGHT_AUTO_TURN_DELAY_MS = MAX_VOLTAGE_TURN_DELAY;
+            TELE_TURN_DELAY_MS = MAX_VOLTAGE_TURN_DELAY;
+        } else {
+            double deltaVoltage = MAX_VOLTAGE-MIN_VOLTAGE;
+            double myFraction = (currentVoltage-MIN_VOLTAGE)/deltaVoltage;
+            long deltaDelay = (MAX_VOLTAGE_TURN_DELAY-MIN_VOLTAGE_TURN_DELAY);
+            long turnDelay = MIN_VOLTAGE_TURN_DELAY + (long)Math.round((double)deltaDelay* myFraction);
+            FRONT_AUTO_TURN_DELAY_MS = turnDelay;
+            LEFT_AUTO_TURN_DELAY_MS = turnDelay;
+            RIGHT_AUTO_TURN_DELAY_MS = turnDelay;
+            TELE_TURN_DELAY_MS = turnDelay;
         }
     }
 
@@ -643,6 +684,7 @@ public class Sorter extends RobotPart<SorterMetric>{
             telemetry.addData("ballPositions (Right)", ballPositions[rightIndex]);
             telemetry.addData("backIndex", backIndex);
             telemetry.addData("ballCount", getBallCount());
+            telemetry.addData("turnDelay", TELE_TURN_DELAY_MS);
         }
     }
 }
