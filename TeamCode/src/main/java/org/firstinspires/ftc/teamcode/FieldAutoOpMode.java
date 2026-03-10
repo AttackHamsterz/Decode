@@ -278,6 +278,9 @@ public class FieldAutoOpMode extends AutoOpMode {
                     motion.follower.followPath(scoreToThirdLinePath, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
 
+                    // Clear colors just in case (if anything remains it should be re-detected)
+                    sorter.resetBallColors();
+
                     // Start intake
                     if(color == COLOR.BLUE) {
                         intake.leftIntakeOn();

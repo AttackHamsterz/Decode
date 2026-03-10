@@ -249,6 +249,9 @@ public class BoardAutoOpMode extends AutoOpMode{
                 } catch (InterruptedException ignore) {}
                 launcher.setVelocityRPM(0);
 
+                // Clear colors just in case (if anything remains it should be re-detected)
+                sorter.resetBallColors();
+
                 break;
             case 7:
                 // Pick up balls
