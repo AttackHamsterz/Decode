@@ -200,12 +200,12 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 12:
             case 14:
             // Final 3 balls
-            case 18:
-            case 20:
-            case 22:
+            case 19:
+            case 21:
+            case 23:
                 if (opmodeTimer.getElapsedTimeSeconds() > 28.5) {
                     motion.follower.breakFollowing();
-                    setPathState(23);
+                    setPathState(24);
                 } else {
                     boolean ready = !motion.follower.isBusy() && sorter.isNotSpinning() && ballLifter.isReset();
                     //if(pathState == 1 || pathState == 10 )
@@ -248,8 +248,8 @@ public class FieldAutoOpMode extends AutoOpMode {
                 break;
             case 11:
             case 13:
-            case 19:
-            case 21:
+            case 20:
+            case 22:
                 // Are we done lifting?
                 if(ballLifter.isNotLifting()){
                     if(sorter.getBallCount() >= 1) {
@@ -267,7 +267,7 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 6:
                 if (opmodeTimer.getElapsedTimeSeconds() >28) {
                     motion.follower.breakFollowing();
-                    setPathState(23);
+                    setPathState(24);
                 }
                 // Are we done lifting?
                 else if(ballLifter.isNotLifting()){
@@ -302,20 +302,16 @@ public class FieldAutoOpMode extends AutoOpMode {
             case 8:
                 // Drive to launch again
                 if(!motion.follower.isBusy()){
-                    // After end of line delay spinning to color for 1 second (finish intake)
-                    if(sorter.getBallCount() >= 1) {
-                        delayedColorQueue(colorPattern.get(launchIndex++), 1250);
-                    }
-
                     // Spin up launcher
                     launcher.setVelocityRPM(SECOND_LAUNCH_RPM);
 
                     // Drive to score
-                    motion.follower.followPath(thirdLineEndToScore, 0.75, true);
+                    motion.follower.followPath(thirdLineEndToScore, PATH_VELOCITY_PERCENTAGE, true);
                     incrementPathState();
                 }
                 break;
             case 9:
+            case 18:
                 if(!motion.follower.isBusy()){
                     // Intake off
                     if(color == COLOR.BLUE) {
@@ -324,6 +320,11 @@ public class FieldAutoOpMode extends AutoOpMode {
                     }else {
                         intake.rightIntakeStop();
                         sorter.rightAutoTurnOff();
+                    }
+
+                    // Safe to get next color with auto turns off
+                    if(sorter.getBallCount() >= 1) {
+                        delayedColorQueue(colorPattern.get(launchIndex++), 0);
                     }
                     incrementPathState();
                 }
@@ -359,18 +360,13 @@ public class FieldAutoOpMode extends AutoOpMode {
                 // Not enough time to launch, go park
                 if (opmodeTimer.getElapsedTimeSeconds() > 26) {
                     motion.follower.breakFollowing();
-                    setPathState(23);
+                    setPathState(24);
                 }
                 // Done jamming or jamming took to long (likely stuck), continue on
                 else if(!motion.follower.isBusy() || opmodeTimer.getElapsedTimeSeconds() - jamStartTime_s > MAX_JAM_TIME_S){
                     // Jam stuck, stop following
                     if(motion.follower.isBusy())
                         motion.follower.breakFollowing();
-
-                    // After end of line delay spinning to color for 1 second (finish intake)
-                    if(sorter.getBallCount() >= 1) {
-                        delayedColorQueue(colorPattern.get(launchIndex++), 500);
-                    }
 
                     // Spin up launcher
                     launcher.setVelocityRPM(SECOND_LAUNCH_RPM);
@@ -380,13 +376,13 @@ public class FieldAutoOpMode extends AutoOpMode {
                     incrementPathState();
                 }
                 break;
-            case 23:
+            case 24:
                 // Park
                 if(!motion.follower.isBusy() && ballLifter.isNotLifting()){
                     // Stop the launcher
                     launcher.setVelocityRPM(0);
 
-                    // Stop intake
+                    // Stop intakes (happens with interrupted paths)
                     if(color == COLOR.BLUE) {
                         intake.leftIntakeStop();
                         sorter.leftAutoTurnOff();
@@ -401,7 +397,7 @@ public class FieldAutoOpMode extends AutoOpMode {
                     incrementPathState();
                 }
                 break;
-            case 24:
+            case 25:
                 if(!motion.follower.isBusy()) {
                     setPathState(-1);
                 }
